@@ -221,5 +221,56 @@ def historic_survey_monthly_stats(folderin, dataout):
                 '%_did_activity_after':activity_after}, ignore_index=True)   
         
     results.to_csv(dataout) 
+    
+def lite_monthly_stats(TFTin, year, month, dataout)     
+    """
+    A function which takes TFT lite data and extracts monthly data and produces stats
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with monthly TFT data
+             
+    year: string
+             year of data to be used
+             
+    month: string
+             month of data to be used             
+            
+    dataout: string
+           path to save results
+    """
+    
+    df=pd.read_csv(TFTin)
+    
+    #get data for month and year in question
+    new=df.loc[df['year']==year]
+    data=new.loc[new['month']==month]
+    
+    #remove rows with no data in the postcode
+    clean = data[data['Trail Postcode'].notna()]
+    
+    #now look at how to extract TRUE data for stats and look at average items
+    
+    
+
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
 
     

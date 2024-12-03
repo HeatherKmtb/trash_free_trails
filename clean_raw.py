@@ -239,6 +239,41 @@ def count_clean_data(TFTin, newin, monthout, TFTout):
             path to save new file
     """
     
-    #awaiting answers to questions to understand purpose and where wqe want to go with this.
+    #awaiting answers to questions to understand purpose and where we want to go with this.
     
-#same for citizen science stuff, should probably collate all first?
+    #same for citizen science stuff, should probably collate all first?
+    
+def lite_clean_data(TFTin, TFTout):
+    """
+    A function which takes raw TFT lite data and prepares it for analyses
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+            path to input csv file with original TFT data
+             
+    TFTout: string
+            path to save new file
+    """
+    
+    df = pd.read_csv(TFTin)
+    
+    #change date to year and month data to be able to extract monthly data 
+    m = []
+    y = []
+    dates = df['Created Date'].values
+    for d in dates:
+        split = d.split('-')
+        month = split[1]
+        year = split[0]
+        m.append(month)
+        y.append(year)
+        
+    df['month'] = m
+    df['year'] = y
+    
+    df.to_csv(TFTout)
+
+
+    

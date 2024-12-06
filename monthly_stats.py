@@ -252,6 +252,39 @@ def lite_monthly_stats(TFTin, year, month, dataout)
     clean = data[data['Trail Postcode'].notna()]
     
     #now look at how to extract TRUE data for stats and look at average items
+    tot_items = []
+
+    #handful * ?            
+    df2 = data[data['Quantity - Pocketful'] == True]
+    count = len(df2.index)
+    #NEED TO ADD SOMETHING HERE FOR NUMBER OF BAGS
+    items = count * 5
+    tot_items.append(items) 
+
+    #pocketful * ?
+    df2 = data[data['Quantity - Handful'] == True]
+    count = len(df2.index)
+    items = count * 5
+    tot_items.append(items) 
+    
+    #bread bag * 25
+    df2 = data[data['Quantity - Bread Bag'] == True]
+    count = len(df2.index)
+    items = count * 25
+    tot_items.append(items)    
+    
+    #carrier bag * 35
+    df2 = data[data['Quantity - Carrier Bag'] == True]
+    count = len(df2.index)
+    items = count * 35
+    tot_items.append(items)    
+    
+    #standard bin bag * 143
+    df2 = data[data['Quantity - Generic Bin Bag'] == True]
+    count = len(df2.index)
+    items = count * 143
+    tot_items.append(items)        
+    
     
     
 

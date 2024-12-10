@@ -8,25 +8,22 @@ Created on Mon Nov 18 14:37:41 2024
 
 import pandas as pd
 
-def survey_clean_data(TFTin, newin, monthout, TFTout):
+def survey_clean_data(newin, rawout, cleanout):
     """
     A function which takes raw TFT survey data and prepares it for joining with
     existing data
     
     Parameters
     ----------
-    
-    TFTin: string
-            path to input csv file with original TFT data
              
     newin: string
             path to input csv file with new data  
              
-    monthout: string
-            path to save the clean data just for the month you are processing
+    rawout:  string        
+            path to save file with raw data
             
     TFTout: string
-            path to save new file
+            path to save file with clean data
     """
     #read csv file and remove unneeded columns
     df = pd.read_csv(newin)
@@ -143,6 +140,10 @@ def survey_clean_data(TFTin, newin, monthout, TFTout):
     #Add ATI column to df in correct location
     df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
 
+    #Save file to add to raw dataset
+    df_clean.to_csv(rawout)
+
+
     #filtering data
     #remove any rows with TotItems = 0
     df2 = df_clean[df_clean['TotItems']>0]
@@ -184,8 +185,6 @@ def survey_clean_data(TFTin, newin, monthout, TFTout):
     for col in change_cols:
         df3.loc[df3[col] == col, col] = 'TRUE'
         
-    #exporting the monthly data 
-    df3.to_csv(monthout)
     
     #removing unexplained columns
     df3 = df3.drop('DL?', axis=1)
@@ -193,12 +192,38 @@ def survey_clean_data(TFTin, newin, monthout, TFTout):
     df3 = df3.drop('DN?', axis=1)
     df3 = df3.drop('GR?', axis=1)
     df3 = df3.drop('GS?', axis=1)
-    df_toconcat = df3.drop('GT?', axis=1)        
+    df3 = df3.drop('GT?', axis=1)        
         
+    #exporting the monthly data 
+    df3.to_csv(cleanout)
     
+def join_survey_clean_data(oldin, newin, cleanout):
+    """
+    A function which takes raw TFT survey data and prepares it for joining with
+    existing data
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+            path to input csv file with original TFT data
+             
+    newin: string
+            path to input csv file with new data  
+             
+    monthout: string
+            path to save the clean data just for the month you are processing
+            
+    rawout:  string        
+            path to save file with raw data
+            
+    TFTout: string
+            path to save file with clean data
+    """    
 
-    #read in 'old' data and add this cleaned data to top of that df
-    orig_data = pd.read_csv(TFTin)   
+    #read in 'old' data and 
+    orig_data = pd.read_csv(oldin)   
+    new_data = pd.read_csv(newin)
     #cols2 = list(orig_data) # only needed if using column names from 'old' data or to check columns
 
     #check column headers - not needed unless df_final has more columns than orig_data
@@ -210,13 +235,15 @@ def survey_clean_data(TFTin, newin, monthout, TFTout):
     #d = []
     #for val in cols2:
     #    if val not in cols:
-    #        d.append(val)        
-    
-    dfs = (df_toconcat, orig_data)
+    #        d.append(val)  
+
+      
+    #add new cleaned data to top of original data
+    dfs = (new_data, orig_data)
     
     df_final = pd.concat(dfs, ignore_index = True)
     
-    df_final.to_csv(TFTout)
+    df_final.to_csv(cleanout)
     
 def count_clean_data(TFTin, newin, monthout, TFTout):
     """

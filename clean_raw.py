@@ -140,13 +140,20 @@ def survey_clean_data(newin, rawout, cleanout):
     #Add ATI column to df in correct location
     df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
 
+    #removing unexplained columns
+    df3 = df_clean.drop('DL?', axis=1)
+    df3 = df3.drop('DM?', axis=1)
+    df3 = df3.drop('DN?', axis=1)
+    df3 = df3.drop('GR?', axis=1)
+    df3 = df3.drop('GS?', axis=1)
+    df3 = df3.drop('GT?', axis=1)   
     #Save file to add to raw dataset
-    df_clean.to_csv(rawout)
+    df3.to_csv(rawout)
 
 
     #filtering data
     #remove any rows with TotItems = 0
-    df2 = df_clean[df_clean['TotItems']>0]
+    df2 = df3[df3['TotItems']>0]
     #need distance = 0 change to ? here
     df2.loc[df2['Distance_km'] == 0, 'Distance_km'] = 1
     
@@ -185,14 +192,6 @@ def survey_clean_data(newin, rawout, cleanout):
     for col in change_cols:
         df3.loc[df3[col] == col, col] = 'TRUE'
         
-    
-    #removing unexplained columns
-    df3 = df3.drop('DL?', axis=1)
-    df3 = df3.drop('DM?', axis=1)
-    df3 = df3.drop('DN?', axis=1)
-    df3 = df3.drop('GR?', axis=1)
-    df3 = df3.drop('GS?', axis=1)
-    df3 = df3.drop('GT?', axis=1)        
         
     #exporting the monthly data 
     df3.to_csv(cleanout)

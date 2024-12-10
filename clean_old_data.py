@@ -177,7 +177,7 @@ def clean_old_data(TFTin, folderout):
             del data
             
             
-def get_some_graphics(TFTin, folderout)
+def get_some_graphics(TFTin, folderout):
     """
     A function which takes full clean TFT survey data and produces some graphs
     to analyse benefit of keeping or losing data columns in surveys

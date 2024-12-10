@@ -222,9 +222,9 @@ def historic_survey_monthly_stats(folderin, dataout):
         
     results.to_csv(dataout) 
     
-def lite_monthly_stats(TFTin, year, month, dataout)     
+def lite_monthly_stats(TFTin, year, month, folderout):     
     """
-    A function which takes TFT lite data and extracts monthly data and produces stats
+    A function which takes TFT lite data, extracts monthly data and produces stats
     
     Parameters
     ----------
@@ -238,8 +238,9 @@ def lite_monthly_stats(TFTin, year, month, dataout)
     month: string
              month of data to be used             
             
-    dataout: string
-           path to save results
+    folderout: string
+           path to folder to save results
+           
     """
     
     df=pd.read_csv(TFTin)
@@ -251,48 +252,193 @@ def lite_monthly_stats(TFTin, year, month, dataout)
     #remove rows with no data in the postcode
     clean = data[data['Trail Postcode'].notna()]
     
-    #now look at how to extract TRUE data for stats and look at average items
-    tot_items = []
+    #now extract TRUE data for each bafg size and calcualte total items per bag type
+    results = pd.DataFrame(columns = ['bag', 'items', 'no. of bags'])
 
     #handful * ?            
-    df2 = data[data['Quantity - Pocketful'] == True]
-    count = len(df2.index)
-    #NEED TO ADD SOMETHING HERE FOR NUMBER OF BAGS
-    items = count * 5
-    tot_items.append(items) 
-
+    df2 = clean[clean['Quantity - Pocketful'] == True]
+    bag_total = []
+    nobags = []
+    bag = 'pocketful'
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 2
+        bag_total.append(items) 
+        nobags.append(bags)
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+  
     #pocketful * ?
-    df2 = data[data['Quantity - Handful'] == True]
-    count = len(df2.index)
-    items = count * 5
-    tot_items.append(items) 
-    
+    df2 = clean[clean['Quantity - Handful'] == True]
+    bag = 'handful'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 5
+        bag_total.append(items) 
+        nobags.append(bags)
+ 
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+     
     #bread bag * 25
-    df2 = data[data['Quantity - Bread Bag'] == True]
-    count = len(df2.index)
-    items = count * 25
-    tot_items.append(items)    
-    
+    df2 = clean[clean['Quantity - Bread Bag'] == True]
+    bag = 'breadbag'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 25
+        bag_total.append(items) 
+        nobags.append(bags)
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+     
     #carrier bag * 35
-    df2 = data[data['Quantity - Carrier Bag'] == True]
-    count = len(df2.index)
-    items = count * 35
-    tot_items.append(items)    
-    
+    df2 = clean[clean['Quantity - Carrier Bag'] == True]
+    bag = 'carrierbag'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 35
+        bag_total.append(items) 
+        nobags.append(bags)
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+
     #standard bin bag * 143
-    df2 = data[data['Quantity - Generic Bin Bag'] == True]
+    df2 = clean[clean['Quantity - Generic Bin Bag'] == True]
+    bag = 'binbag'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 143
+        bag_total.append(items) 
+        nobags.append(bags)
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+    results.to_csv(folderout + 'bag_res_lite.csv')
+    del results
+
+
+    #Now do the same for each litter category
+    results = pd.DataFrame(columns = ['category', 'occurences'])
+    df2 = clean[clean['Categories - Pet Stuff'] == True]   
     count = len(df2.index)
-    items = count * 143
-    tot_items.append(items)        
+    category = 'Pet Stuff'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
     
-    
-    
+    df2 = clean[clean['Categories - Drinks Containers'] == True]   
+    count = len(df2.index)
+    category = 'Drinks Containers'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+       
+    df2 = clean[clean['Categories - Sweets / Snacks / Food'] == True]   
+    count = len(df2.index)
+    category = 'Sweets / Snacks / Food'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+       
+    df2 = clean[clean['Categories - Smoking / Vaping / Drugs'] == True]   
+    count = len(df2.index)
+    category = 'Smoking / Vaping / Drugs'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+      
+    df2 = clean[clean['Categories - Farming / Foresty / Industry'] == True]   
+    count = len(df2.index)
+    category = 'Farming / Foresty / Industry'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+      
+    df2 = clean[clean['Categories - Hygiene / Sanitary'] == True]   
+    count = len(df2.index)
+    category = 'Hygiene / Sanitary'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+      
+    df2 = clean[clean['Categories - Outdoor Sports & Recreation'] == True]   
+    count = len(df2.index)
+    category = 'Outdoor Sports & Recreation'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+            
+    df2 = clean[clean['Categories - Textiles'] == True]   
+    count = len(df2.index)
+    category = 'Textiles'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+      
+    df2 = clean[clean['Categories - Household / Domestic'] == True]   
+    count = len(df2.index)
+    category = 'Household / Domestic'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+      
+    df2 = clean[clean['Categories - Other'] == True]   
+    count = len(df2.index)
+    category = 'Other'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+          
+    results.to_csv(folderout + 'litter_res_lite.csv')
+    del results
 
-    
-    
-    
+
+    #Now do the same for animal interactions
+    results = pd.DataFrame(columns = ['category', 'occurences'])
+    df2 = clean[clean["Animal Interaction - Didn't Check"] == True]   
+    count = len(df2.index)
+    category = 'Not checked'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+        
+    df2 = clean[clean['Animal Interaction - No'] == True]   
+    count = len(df2.index)
+    category = 'No'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+        
+    df2 = clean[clean['Animal Interaction - Chew Marks'] == True]   
+    count = len(df2.index)
+    category = 'Chew Marks'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+        
+    df2 = clean[clean['Animal Interaction - Death'] == True]   
+    count = len(df2.index)
+    category = 'Death'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+            
+    results.to_csv(folderout + 'animal_res_lite.csv')
+    del results
 
 
+    #and again for nature connection
+    results = pd.DataFrame(columns = ['category', 'occurences'])
+    df2 = clean[clean['Increased Nature Connection - No'] == True]   
+    count = len(df2.index)
+    category = 'No'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+        
+    df2 = clean[clean['Increased Nature Connection - No Change'] == True]   
+    count = len(df2.index)
+    category = 'No Change'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+        
+    df2 = clean[clean['Increased Nature Connection - Yes'] == True]   
+    count = len(df2.index)
+    category = 'Yes'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+        
+    df2 = clean[clean['Increased Nature Connection - Not Sure'] == True]   
+    count = len(df2.index)
+    category = 'Not Sure'
+    results = results.append({'category':category, 'occurences':count}, ignore_index=True)
+            
+    results.to_csv(folderout + 'nat_con_res_lite.csv')
+    del results
 
 
 

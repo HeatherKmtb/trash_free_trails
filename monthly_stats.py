@@ -523,6 +523,16 @@ def lite_monthly_stats(TFTin, year, month, folderout):
             
     results.to_csv(folderout + 'nat_con_res_lite.csv')
     del results
+    
+    name_res = pd.DataFrame(columns = ['name','count'])
+    names = clean['Title'].unique()
+    for n in names:
+        df4 = df[df['Title']==n]
+        count = len(df4.index)
+        name_res = name_res.append({'name':n, 'count':count}, ignore_index=True)
+        
+    name_res.to_csv(folderout + 'participants.csv')
+        
 
 
 

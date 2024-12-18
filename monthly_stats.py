@@ -9,7 +9,7 @@ import pandas as pd
 import glob
 from os import path
 
-def survey_monthly_stats(TFTin, dataout):
+def survey_monthly_stats(TFTin, ,brandsout, dataout):
     """
     A function which takes clean monthly TFT survey data and produces monthly stats
     
@@ -69,15 +69,18 @@ def survey_monthly_stats(TFTin, dataout):
     tot_percSUP = tot_SUP/tot_items *100
     
     #obtain total and % DRS
-    #depends how you want to calculate it
+    re = []
+    recyc = df[df['RecyclePerc'].notna()]
+    for index,i in recyc.iterrows():
+        perRecyc = i['RecyclePerc']
+        percRecyc = float(perRecyc)
+        totitems = i['TotItems']
+        result = percRecyc/100 * totitems
+        re.append(result) 
     
-    #calculate brands
-    #depends how you want to calculate it
-    
-    #item of the month
-    #probs need to make new df for this, subset columns and calculate totals
-    #then new df with col and total    
-    
+    tot_Recycle = sum(re)
+    tot_percRecycled = tot_Recycle/tot_items *100
+ 
     #animal interaction
     count_AI = df['AnimalsY'].value_counts().get('Yes', 0)
     perc_AI = count_AI/count_total *100
@@ -110,6 +113,87 @@ def survey_monthly_stats(TFTin, dataout):
             '%_did_activity_after':activity_after}, ignore_index=True)   
     
     results.to_csv(dataout)
+    
+    
+    #calculate brands
+    brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
+              'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway','Other']
+    
+    brand_res = pd.DataFrame(columns = ['brand','count'])
+                             
+    for b in brands:
+        b1 = df[df['B1_' + b].notna()]
+        b2 = df[df['B2_' + b].notna()]
+        b3 = df[df['B3_' + b].notna()]
+        dfs = (b1, b2, b3)
+        brand = pd.concat(dfs, ignore_index = True)
+        count = len(brand.index)
+        brand_res = brand_res.append({'brand':b, 'count':count}, ignore_index=True)
+    
+    brand_res.to_csv(brandsout)    
+        
+    #item of the month
+    items = ['Full Dog Poo Bags','Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+          'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
+          'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
+          'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
+          'Aluminium alcoholic drink cans','Glass alcoholic bottles','Glass bottle tops',
+          'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
+          'Drinks tops (eg., McDonalds drinks)','Cartons','Plastic straws','Paper straws',
+          'Plastic carrier bags','Plastic bin bags','Confectionary/sweet wrappers',
+          'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
+          'Crisps Packets','Used Chewing Gum',
+          'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+          'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+          'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',
+          'Food on the go (eg.salad boxes)','Homemade lunch (eg., aluminium foil, cling film)',
+          'Fruit peel & cores','Cigarette Butts','Smoking related','Disposable vapes',
+          'Vaping / E-Cigarette Paraphernalia','Drugs related','Farming',
+          'Salt/mineral lick buckets','Silage wrap','Forestry','Tree guards','Industrial',
+          'Cable ties','Industrial plastic wrap','Toilet tissue','Face/ baby wipes',
+          'Nappies','Single-Use Period products','Single-Use Covid Masks','Rubber/nitrile gloves',
+          'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
+          'Normal balloons','Helium balloons','MTB related (e.g. inner tubes, water bottles etc)',
+          'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
+          'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
+          'Plastic milk bottles','Plastic food containers','Cardboard food containers',
+          'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
+          'Weird/Retro']
+    
+    item_res = pd.DataFrame(columns = ['item','count'])
+    for i in items:
+        df3 = df[df['Value ' + i].notna()]  
+        if df3.empty:
+            continue
+        item = df3['Value ' + i].astype(int)     
+        total = item.sum()
+        item_res = item_res.append({'item':i, 'count':total}, ignore_index=True)
+        
+    item_res.to_csv(itemsout)    
+    
+    #ateamer and community hubs
+    name_res = pd.DataFrame(columns = ['name','count','time','distance'])
+    df['full_name'] = df.Name.map(str) + " " + df.Surname
+    names = df['full_name'].unique()
+    for n in names:
+        df4 = df[df['full_name']==n]
+        count = len(df4.index)
+        tot_mins = df4['Time_min'].sum()
+        tot_km = df4['Distance_km'].sum()
+        name_res = name_res.append({'name':n, 'count':count, 'time':tot_mins, 'distance':tot_km}, ignore_index=True)
+        
+    CHs = df['Community Hub '].unique()
+    for hub in CHs:
+        df5 = df[df['Community Hub ']==hub]
+        count = len(df5.index)
+        tot_mins = df5['Time_min'].sum()
+        tot_km = df5['Distance_km'].sum()
+        name_res = name_res.append({'name':hub, 'count':count, 'time':tot_mins, 'distance':tot_km}, ignore_index=True)
+             
+        
+    name_res.to_csv(namesout)
+    
+
     
 def historic_survey_monthly_stats(folderin, dataout):
     """

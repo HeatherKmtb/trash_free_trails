@@ -9,7 +9,7 @@ import pandas as pd
 import glob
 from os import path
 
-def survey_monthly_stats(TFTin, ,brandsout, dataout):
+def survey_monthly_stats(TFTin, folderout):
     """
     A function which takes clean monthly TFT survey data and produces monthly stats
     
@@ -27,7 +27,7 @@ def survey_monthly_stats(TFTin, ,brandsout, dataout):
     #create df for results - or could read in and append to existing with each row as a new month...
     results = pd.DataFrame(columns = ['total_submisssions', 'bike', 'run', 'walk',
             'combo', 'other','no_people', 'duration_mins', 'duration_hm', 'distance_km', 'items_removed',
-            'no_bags', '%_SUP', 'no_animal_int', '%_animal_int',
+            'no_bags', '%_SUP', '%_recycled','no_animal_int', '%_animal_int',
             'no_1st_time', 'no_volunteers', ' no_A_TEAM', 'no_CHs', '%_more_connected',
             '%_met_new_people', '%_did_activity_after'])
     
@@ -106,13 +106,13 @@ def survey_monthly_stats(TFTin, ,brandsout, dataout):
     results = results.append({'total_submisssions':count_total, 'bike':count_bike,
             'run':count_run, 'walk':count_walk, 'combo':count_combo, 'other':count_other,
             'no_people':tot_people, 'duration_mins':tot_mins, 'duration_hm':duration, 'distance_km':tot_km,
-            'items_removed':tot_items, 'no_bags':tot_bags, '%_SUP':tot_percSUP,
+            'items_removed':tot_items, 'no_bags':tot_bags, '%_SUP':tot_percSUP, '%_recycled':tot_percRecycled,
             'no_animal_int':count_AI, '%_animal_int':perc_AI, 'no_1st_time':count_1sttime,
             'no_volunteers':count_vol, ' no_A_TEAM':count_AT, 'no_CHs':count_CH,
             '%_more_connected':more_connected, '%_met_new_people':new_people,
             '%_did_activity_after':activity_after}, ignore_index=True)   
     
-    results.to_csv(dataout)
+    results.to_csv(folderout + 'averages.csv')
     
     
     #calculate brands
@@ -130,7 +130,7 @@ def survey_monthly_stats(TFTin, ,brandsout, dataout):
         count = len(brand.index)
         brand_res = brand_res.append({'brand':b, 'count':count}, ignore_index=True)
     
-    brand_res.to_csv(brandsout)    
+    brand_res.to_csv(folderout + 'brands.csv')    
         
     #item of the month
     items = ['Full Dog Poo Bags','Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
@@ -169,7 +169,7 @@ def survey_monthly_stats(TFTin, ,brandsout, dataout):
         total = item.sum()
         item_res = item_res.append({'item':i, 'count':total}, ignore_index=True)
         
-    item_res.to_csv(itemsout)    
+    item_res.to_csv(folderout + 'items.csv')    
     
     #ateamer and community hubs
     name_res = pd.DataFrame(columns = ['name','count','time','distance'])
@@ -191,7 +191,7 @@ def survey_monthly_stats(TFTin, ,brandsout, dataout):
         name_res = name_res.append({'name':hub, 'count':count, 'time':tot_mins, 'distance':tot_km}, ignore_index=True)
              
         
-    name_res.to_csv(namesout)
+    name_res.to_csv(folderout + 'participants.csv')
     
 
     
@@ -346,7 +346,7 @@ def lite_monthly_stats(TFTin, year, month, folderout):
     bag = 'pocketful'
     for index, i in df2.iterrows():
         bags = i['How many bags?']
-        items = bags * 2
+        items = bags * 4
         bag_total.append(items) 
         nobags.append(bags)
         
@@ -361,7 +361,7 @@ def lite_monthly_stats(TFTin, year, month, folderout):
     bag_total = []
     for index, i in df2.iterrows():
         bags = i['How many bags?']
-        items = bags * 5
+        items = bags * 10
         bag_total.append(items) 
         nobags.append(bags)
  

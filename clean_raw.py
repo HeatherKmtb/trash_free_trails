@@ -10,7 +10,7 @@ import pandas as pd
 
 def survey_clean_data(newin, rawout, cleanout):
     """
-    A function which takes raw TFT survey data and prepares it for joining with
+    A function which takes new raw TFT survey data and prepares it for joining with
     existing data
     
     Parameters
@@ -36,6 +36,12 @@ def survey_clean_data(newin, rawout, cleanout):
     df = df.drop('First Name', axis=1)
     df = df.drop('Last Name', axis=1)
     df = df.drop('Custom Data 1', axis=1)
+    df = df.drop('DL?', axis=1)
+    df = df.drop('DM?', axis=1)
+    df = df.drop('DN?', axis=1)
+    df = df.drop('GR?', axis=1)
+    df = df.drop('GS?', axis=1)
+    df = df.drop('GT?', axis=1)
 
     #provide correct column names - could read from existing once wierd columns are sorted
     cols = ['Date_TrailClean','People','postcode','TrailName','ActivityBike',
@@ -126,6 +132,9 @@ def survey_clean_data(newin, rawout, cleanout):
     df.columns=cols
     #remove row with extra column names that aren't now needed
     df_clean = df.drop(index=0)
+    
+    #need distance = 0 changed to ? here
+    df_clean.loc[df_clean['Distance_km'] == 0, 'Distance_km'] = 1
 
     #calculate AdjTotItems
     #start by converting data to floats (numbers) and defining for calcs
@@ -139,23 +148,15 @@ def survey_clean_data(newin, rawout, cleanout):
     AdjTotItems = TotItems/denominator 
     #Add ATI column to df in correct location
     df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
-
-    #removing unexplained columns
-    df3 = df_clean.drop('DL?', axis=1)
-    df3 = df3.drop('DM?', axis=1)
-    df3 = df3.drop('DN?', axis=1)
-    df3 = df3.drop('GR?', axis=1)
-    df3 = df3.drop('GS?', axis=1)
-    df3 = df3.drop('GT?', axis=1)   
+   
     #Save file to add to raw dataset
-    df3.to_csv(rawout)
+    df_clean.to_csv(rawout)
+
 
 
     #filtering data
     #remove any rows with TotItems = 0
-    df2 = df3[df3['TotItems']>0]
-    #need distance = 0 change to ? here
-    df2.loc[df2['Distance_km'] == 0, 'Distance_km'] = 1
+    df2 = df_clean[df_clean['TotItems']>0]
     
     #remove any rows with error in AdjTotItems
     df3 = df2[df2['AdjTotItems'].notna()]
@@ -193,12 +194,12 @@ def survey_clean_data(newin, rawout, cleanout):
         df3.loc[df3[col] == col, col] = 'TRUE'
         
         
-    #exporting the monthly data 
+    #exporting the cleand monthly data 
     df3.to_csv(cleanout)
     
 def join_survey_clean_data(oldin, newin, cleanout):
     """
-    A function which takes raw TFT survey data and prepares it for joining with
+    A function which takes new cleaned monthly TFT survey data and joins it with
     existing data
     
     Parameters

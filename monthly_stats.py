@@ -6,8 +6,7 @@ Created on Sun Nov 24 11:35:25 2024
 @author: heatherkay
 """
 import pandas as pd
-import glob
-from os import path
+
 
 def survey_monthly_stats(TFTin, folderout):
     """
@@ -100,7 +99,7 @@ def survey_monthly_stats(TFTin, folderout):
     CHs = df['Community Hub '].value_counts(dropna=True)
     count_CH = len(CHs)
     print(CHs) #not sure what to do with this
-    name = df['Name '] + ' ' + df['Surname']
+    name = df['Name'] + ' ' + df['Surname']
     print(name) #not sure what to do with this
     
     results = results.append({'total_submisssions':count_total, 'bike':count_bike,

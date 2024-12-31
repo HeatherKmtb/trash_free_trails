@@ -110,7 +110,7 @@ def clean_old_data(TFTin, folderout):
         'Connection_NewPeopleUnsure','Connection_ActivityAfterY','Connection_ActivityAfterN',
         'Connection_ActivityAfterUnsure','Connection_TakePartAgainY','Connection_TakePartAgainN',
         'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team',
-        'Community Hub','Name','Surname','Email ','Phone','Receive email','Receive SMS ']
+        'Community Hub','Name','Surname','Email','Phone','Receive email','Receive SMS']
 
     df2.columns=cols 
     #getting all the dates into the same format
@@ -270,14 +270,14 @@ def historic_survey_monthly_stats(folderin, dataout):
         activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0) / count_total * 100
         
         #participant data
-        count_1sttime = df['First time '].value_counts().get('This is my first time!', 0)
+        count_1sttime = df['First time'].value_counts().get('This is my first time!', 0)
         count_vol = df['Volunteer'].value_counts().get('I am a volunteer', 0)
-        count_AT = df['A-Team '].value_counts().get('I am an A-TEAMer', 0)
+        count_AT = df['A-Team'].value_counts().get('I am an A-TEAMer', 0)
         #Community Hubs
-        CHs = df['Community Hub '].value_counts(dropna=True)
+        CHs = df['Community Hub'].value_counts(dropna=True)
         count_CH = len(CHs)
         print(CHs) #not sure what to do with this
-        name = df['Name '] + ' ' + df['Surname']
+        name = df['Name'] + ' ' + df['Surname']
         print(name) #not sure what to do with this
         
         results = results.append({'month':month, 'year':year,'total_submisssions':count_total, 'bike':count_bike,

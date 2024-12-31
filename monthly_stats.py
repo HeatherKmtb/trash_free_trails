@@ -92,11 +92,11 @@ def survey_monthly_stats(TFTin, folderout):
     activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0) / count_total * 100
     
     #participant data
-    count_1sttime = df['First time '].value_counts().get('This is my first time!', 0)
+    count_1sttime = df['First time'].value_counts().get('This is my first time!', 0)
     count_vol = df['Volunteer'].value_counts().get('I am a volunteer', 0)
-    count_AT = df['A-Team '].value_counts().get('I am an A-TEAMer', 0)
+    count_AT = df['A-Team'].value_counts().get('I am an A-TEAMer', 0)
     #Community Hubs
-    CHs = df['Community Hub '].value_counts(dropna=True)
+    CHs = df['Community Hub'].value_counts(dropna=True)
     count_CH = len(CHs)
     print(CHs) #not sure what to do with this
     name = df['Name'] + ' ' + df['Surname']
@@ -181,9 +181,9 @@ def survey_monthly_stats(TFTin, folderout):
         tot_km = df4['Distance_km'].sum()
         name_res = name_res.append({'name':n, 'count':count, 'time':tot_mins, 'distance':tot_km}, ignore_index=True)
         
-    CHs = df['Community Hub '].unique()
+    CHs = df['Community Hub'].unique()
     for hub in CHs:
-        df5 = df[df['Community Hub ']==hub]
+        df5 = df[df['Community Hub']==hub]
         count = len(df5.index)
         tot_mins = df5['Time_min'].sum()
         tot_km = df5['Distance_km'].sum()

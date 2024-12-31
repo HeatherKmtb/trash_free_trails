@@ -124,8 +124,8 @@ def survey_clean_data(newin, rawout, cleanout):
         'Connection_Unsure','Connection_NewPeopleY','Connection_NewPeopleN',
         'Connection_NewPeopleUnsure','Connection_ActivityAfterY','Connection_ActivityAfterN',
         'Connection_ActivityAfterUnsure','Connection_TakePartAgainY','Connection_TakePartAgainN',
-        'Connection_TakePartAgainUnsure','First time ','Volunteer','A-Team ',
-        'Community Hub ','Name ','Surname','Email ','Phone','Receive email','Receive SMS ']
+        'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team ',
+        'Community Hub','Name','Surname','Email','Phone','Receive email','Receive SMS']
 
 
     #rename columns

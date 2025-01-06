@@ -25,8 +25,10 @@ def survey_clean_data(newin, rawout, cleanout):
     TFTout: string
             path to save file with clean data
     """
-    #read csv file and remove unneeded columns
+    #read csv file
     df = pd.read_csv(newin)
+    
+    #remove unneeded columns
     df = df.drop('Respondent ID', axis=1)
     df = df.drop('Collector ID', axis=1)
     df = df.drop('Start Date', axis=1)
@@ -36,12 +38,7 @@ def survey_clean_data(newin, rawout, cleanout):
     df = df.drop('First Name', axis=1)
     df = df.drop('Last Name', axis=1)
     df = df.drop('Custom Data 1', axis=1)
-    df = df.drop('DL?', axis=1)
-    df = df.drop('DM?', axis=1)
-    df = df.drop('DN?', axis=1)
-    df = df.drop('GR?', axis=1)
-    df = df.drop('GS?', axis=1)
-    df = df.drop('GT?', axis=1)
+
 
     #provide correct column names - could read from existing once wierd columns are sorted
     cols = ['Date_TrailClean','People','postcode','TrailName','ActivityBike',
@@ -133,6 +130,17 @@ def survey_clean_data(newin, rawout, cleanout):
     #remove row with extra column names that aren't now needed
     df_clean = df.drop(index=0)
     
+    #remove other uneeded columns
+    df_clean = df_clean.drop('DL?', axis=1)
+    df_clean = df_clean.drop('DM?', axis=1)
+    df_clean = df_clean.drop('DN?', axis=1)
+    df_clean = df_clean.drop('GR?', axis=1)
+    df_clean = df_clean.drop('GS?', axis=1)
+    df_clean = df_clean.drop('GT?', axis=1)
+    
+    #Save file to add to raw dataset
+    df_clean.to_csv(rawout)
+    
     #need distance = 0 changed to ? here
     df_clean.loc[df_clean['Distance_km'] == 0, 'Distance_km'] = 1
 
@@ -149,10 +157,6 @@ def survey_clean_data(newin, rawout, cleanout):
     #Add ATI column to df in correct location
     df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
    
-    #Save file to add to raw dataset
-    df_clean.to_csv(rawout)
-
-
 
     #filtering data
     #remove any rows with TotItems = 0
@@ -221,7 +225,7 @@ def join_survey_clean_data(oldin, newin, cleanout):
             path to save file with clean data
     """    
 
-    #read in 'old' data and 
+    #read in 'old' data and 'new' data
     orig_data = pd.read_csv(oldin)   
     new_data = pd.read_csv(newin)
     #cols2 = list(orig_data) # only needed if using column names from 'old' data or to check columns
@@ -240,6 +244,8 @@ def join_survey_clean_data(oldin, newin, cleanout):
       
     #add new cleaned data to top of original data
     dfs = (new_data, orig_data)
+    
+    #stage above may be changed so data is added to the appropriate yearly/monhtly dataset
     
     df_final = pd.concat(dfs, ignore_index = True)
     

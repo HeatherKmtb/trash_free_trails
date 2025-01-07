@@ -235,14 +235,14 @@ def lite_monthly_stats(TFTin, year, month, folderout):
     #now extract TRUE data for each bafg size and calcualte total items per bag type
     results = pd.DataFrame(columns = ['bag', 'items', 'no. of bags'])
 
-    #handful * ?            
+    #handful * 6.2            
     df2 = clean[clean['Quantity - Pocketful'] == True]
     bag_total = []
     nobags = []
     bag = 'pocketful'
     for index, i in df2.iterrows():
         bags = i['How many bags?']
-        items = bags * 4
+        items = bags * 6
         bag_total.append(items) 
         nobags.append(bags)
         
@@ -250,7 +250,7 @@ def lite_monthly_stats(TFTin, year, month, folderout):
     tot_bags = sum(nobags)
     results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
   
-    #pocketful * ?
+    #pocketful * 10
     df2 = clean[clean['Quantity - Handful'] == True]
     bag = 'handful'
     nobags = []

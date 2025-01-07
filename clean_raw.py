@@ -197,8 +197,27 @@ def survey_clean_data(newin, rawout, cleanout):
     for col in change_cols:
         df3.loc[df3[col] == col, col] = 'TRUE'
         
+    
+    #prepare columns with year and month data to be able to extract monthly or yearly data 
+    m = []
+    y = []
+    dates = df3['Date_TrailClean'].values
+    for d in dates:
+        split = d.split('/')
+        month = split[1]
+        year = split[2]
+        if len(month) == 1:
+            new = '0' + month
+            m.append(new)
+            y.append(year)
+        else:
+            m.append(month)
+            y.append(year)
         
-    #exporting the cleand monthly data 
+    df3['month'] = m
+    df3['year'] = y
+                  
+    #exporting the cleaned monthly data 
     df3.to_csv(cleanout)
     
 def join_survey_clean_data(oldin, newin, cleanout):
@@ -247,7 +266,7 @@ def join_survey_clean_data(oldin, newin, cleanout):
     
     #stage above may be changed so data is added to the appropriate yearly/monhtly dataset
     
-    df_final = pd.concat(dfs, ignore_index = True)
+    df_final = pd.concat(dfs, ignore_index = True) 
     
     df_final.to_csv(cleanout)
     

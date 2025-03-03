@@ -66,8 +66,31 @@ def get_data_quantity_per_month(datain, dataout):
         
         results.to_csv(dataout)
         
-        
+def average_hours_per_person(datain):
+    """
+    A function which takes full survey data and gets average volunteer hours per person
     
+    Parameters
+    ----------
+    
+    datain: string
+             path to input csv file with all TFT survey data
+
+    """
+    df2 = pd.read_csv(datain)
+    
+    total = []
+    for index, i in df2.iterrows():
+        mins = i['Time_min']
+        people = i['People']
+        hours = mins/60
+        tot = people * hours
+        total.append(tot)
+        
+    total_hours = sum(total)
+    people = df2['People']
+    total_people = sum(people)
+    average = total_hours / total_people
             
 
             

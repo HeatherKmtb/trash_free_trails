@@ -80,7 +80,7 @@ def survey_monthly_stats(TFTin, folderout):
     tot_Recycle = sum(re)
     tot_percRecycled = tot_Recycle/tot_items *100
  
-    #animal interaction
+    #animal interaction - how many (%) answered the question
     count_AI = df['AnimalsY'].value_counts().get('Yes', 0)
     perc_AI = count_AI/count_total *100
     type_AI = df['AnimalsInfo'].value_counts(dropna=True)
@@ -233,13 +233,13 @@ def lite_monthly_stats(TFTin, year, month, folderout):
     clean = data[data['Trail Postcode'].notna()]
     
     #now extract TRUE data for each bafg size and calcualte total items per bag type
-    results = pd.DataFrame(columns = ['bag', 'items', 'no. of bags'])
+    results = pd.DataFrame(columns = ['bag', 'TotItems', 'no. of bags'])
 
     #handful * 6.2            
-    df2 = clean[clean['Quantity - Pocketful'] == True]
+    df2 = clean[clean['Quantity - Handful'] == True]
     bag_total = []
     nobags = []
-    bag = 'pocketful'
+    bag = 'handful'
     for index, i in df2.iterrows():
         bags = i['How many bags?']
         items = bags * 6
@@ -248,11 +248,11 @@ def lite_monthly_stats(TFTin, year, month, folderout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
   
     #pocketful * 10
-    df2 = clean[clean['Quantity - Handful'] == True]
-    bag = 'handful'
+    df2 = clean[clean['Quantity - Pocketful'] == True]
+    bag = 'pocketful'
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
@@ -263,7 +263,7 @@ def lite_monthly_stats(TFTin, year, month, folderout):
  
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
      
     #bread bag * 25
     df2 = clean[clean['Quantity - Bread Bag'] == True]
@@ -278,7 +278,7 @@ def lite_monthly_stats(TFTin, year, month, folderout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
      
     #carrier bag * 35
     df2 = clean[clean['Quantity - Carrier Bag'] == True]
@@ -293,7 +293,7 @@ def lite_monthly_stats(TFTin, year, month, folderout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
 
     #standard bin bag * 143
     df2 = clean[clean['Quantity - Generic Bin Bag'] == True]
@@ -308,7 +308,23 @@ def lite_monthly_stats(TFTin, year, month, folderout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'items': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+        
+        
+    #multiple standard bin bags * 143
+    df2 = clean[clean['Quantity - Multiple Bin Bags'] == True]
+    bag = 'multiplebinbags'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 143
+        bag_total.append(items) 
+        nobags.append(bags)        
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
     results.to_csv(folderout + 'bag_res_lite.csv')
     del results
 
@@ -430,6 +446,27 @@ def lite_monthly_stats(TFTin, year, month, folderout):
     name_res.to_csv(folderout + 'participants.csv')
         
 
+
+def count_monthly_stats(TFTin, year, month, folderout):     
+    """
+    A function which takes TFT lite data, extracts monthly data and produces stats
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with monthly TFT data
+             
+    year: string
+             year of data to be used
+             
+    month: string
+             month of data to be used             
+            
+    folderout: string
+           path to folder to save results
+           
+    """
 
 
 

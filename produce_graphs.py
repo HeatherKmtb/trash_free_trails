@@ -59,7 +59,7 @@ def get_some_graphics(TFTin, folderout):
     ax.set_ylabel('Feelings about litter')
     ax.set_xlabel('Amount of litter per person, per km')
     ax.set_xlim([0, 600])
-    ax.set_ylim([0,5])  
+    ax.set_ylim([0,6])  
     #obtain m (slope) and b(intercept) of linear regression line
     m, b = np.polyfit(items, feel, 1)
     #add linear regression line to scatterplot 

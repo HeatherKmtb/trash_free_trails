@@ -7,6 +7,7 @@ Created on Mon Nov 18 14:37:41 2024
 """
 
 import pandas as pd
+import numpy as np
 
 def survey_clean_data(newin, rawout, cleanout):
     """
@@ -43,10 +44,10 @@ def survey_clean_data(newin, rawout, cleanout):
     #provide correct column names - could read from existing once wierd columns are sorted
     cols = ['Date_TrailClean','People','postcode','TrailName','ActivityBike',
         'ActivityRun','ActivityWalk','ActivityCombo','ActivityOther',
-        'ZonesTrails','ZonesFootpaths','ZonesUnofficial','ZonesPump','ZonesUrban',
-        'ZonesOtherTrails','ZonesAccess','ZonesCar','ZonesOther','MostZonesTrails',
-        'MostZonesFootpaths','MostZonesUnofficial','MostZonesPump','MostZonesUrban',
-        'MostZonesOtherTrails','MostZonesAccess','MostZonesCar','MostZonesOther',
+        'TypeMrkdTrails','TypeRoW','TypeUnofficial','TypePump','TypeUrban',
+        'TypeOtherTrails','TypeAccess','TypeCar','TypeOther','MostTypeTrails',
+        'MostTypeFootpaths','MostTypeUnofficial','MostTypePump','MostTypeUrban',
+        'MostTypeOtherTrails','MostTypeAccess','MostTypeCar','MostTypeOther',
         'Time_min','Distance_km','TotItems',
         #'AdjTotItems',
         'BinBags','Full Dog Poo Bags',
@@ -121,7 +122,7 @@ def survey_clean_data(newin, rawout, cleanout):
         'Connection_Unsure','Connection_NewPeopleY','Connection_NewPeopleN',
         'Connection_NewPeopleUnsure','Connection_ActivityAfterY','Connection_ActivityAfterN',
         'Connection_ActivityAfterUnsure','Connection_TakePartAgainY','Connection_TakePartAgainN',
-        'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team ',
+        'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team',
         'Community Hub','Name','Surname','Email','Phone','Receive email','Receive SMS']
 
 
@@ -139,10 +140,10 @@ def survey_clean_data(newin, rawout, cleanout):
     df_clean = df_clean.drop('GT?', axis=1)
     
     #Save file to add to raw dataset
-    df_clean.to_csv(rawout)
+    #df_clean.to_csv(rawout)
     
-    #need distance = 0 changed to ? here
-    df_clean.loc[df_clean['Distance_km'] == 0, 'Distance_km'] = 1
+    #need distance = 0 changed to ? here - use an average here!!!!
+    df_clean.loc[df_clean['Distance_km'] == 0, 'Distance_km'] = 4.83
 
     #calculate AdjTotItems
     #start by converting data to floats (numbers) and defining for calcs
@@ -160,10 +161,10 @@ def survey_clean_data(newin, rawout, cleanout):
 
     #filtering data
     #remove any rows with TotItems = 0
-    df2 = df_clean[df_clean['TotItems']>0]
+    #df2 = df_clean[df_clean['TotItems']>0]
     
     #remove any rows with error in AdjTotItems
-    df3 = df2[df2['AdjTotItems'].notna()]
+    #df3 = df2[df2['AdjTotItems'].notna()]
     
     #change data in presence(composition) data to TRUE
     change_cols = ['BinBags','Full Dog Poo Bags',
@@ -194,6 +195,8 @@ def survey_clean_data(newin, rawout, cleanout):
             'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
             'Weird/Retro']
 
+    df3 = df_clean
+    
     for col in change_cols:
         df3.loc[df3[col] == col, col] = 'TRUE'
         
@@ -270,7 +273,7 @@ def join_survey_clean_data(oldin, newin, cleanout):
     
     df_final.to_csv(cleanout)
     
-def count_clean_data(TFTin, newin, monthout, TFTout):
+def count_clean_data(TFTin, TFTout):
     """
     A function which takes raw TFT survey data and prepares it for joining with
     existing data
@@ -295,7 +298,72 @@ def count_clean_data(TFTin, newin, monthout, TFTout):
     
     #same for citizen science stuff, should probably collate all first?
     
-def lite_clean_data(TFTin, TFTout):
+    df = pd.read_csv(TFTin)
+    
+    #remove unneeded columns
+    df = df.drop('Respondent ID', axis=1)
+    df = df.drop('Collector ID', axis=1)
+    df = df.drop('Start Date', axis=1)
+    df = df.drop('End Date', axis=1)
+    df = df.drop('IP Address', axis=1)
+    df = df.drop('Email Address', axis=1)
+    df = df.drop('First Name', axis=1)
+    df = df.drop('Last Name', axis=1)
+    df = df.drop('Custom Data 1', axis=1)
+    
+    #provide correct column names - could read from existing once wierd columns are sorted
+    cols = ['Date_Count','People','postcode', 'Komoot_link','TrailName','ActivityBike',
+        'ActivityRun','ActivityWalk','ActivityCombo','ActivityOther','TFTmethods_Y',
+        'TFTmethods_N','TFTmethods_NotSure','Total_distance(m)','100m_transect',
+        '1km_transect','other_transect','TypeMrkdTrails','TypeRoW','TypeUnofficial',
+        'TypePump','TypeUrban','TypeOtherTrails','TypeAccess','TypeCar','TypeBeach',
+        'TypeRiverbank','TypeOther','ZonesCarpark','ZonesVisitorInfrastructure',
+        'ZonesTrailMaps','ZonesTrailhead','ZonesDogPoo','ZonesShakedown',
+        'ZonesTopClimb','ZonesView','ZonesPicnic','ZonesRoadCrossing',
+        'ZonesSwimspot','ZonesBottomDescent','ZonesJumps','ZonesPause',
+        'ZonesAlmostHome','ZonesLake','ZonesRiver','ZonesBeach','ZonesSanddunes',
+        'MostZonesCarpark','MostZonesVisitorInfrastructure','MostZonesTrailMaps',
+        'MostZonesTrailhead','MostZonesDogPoo','MostZonesShakedown','MostZonesTopClimb',
+        'MostZonesView','MostZonesPicnic','MostZonesRoadCrossing','MostZonesSwimspot',
+        'MostZonesBottomDescent','MostZonesJumps','MostZonesPause','MostZonesAlmostHome',
+        'MostZonesLake','MostZonesRiver','MostZonesBeach','MostZonesSanddunes','TotItems',
+        'Transect1','Transect2','Transect3','Transect4','Transect5','Transect6',
+        'Transect7','Transect8','Transect9','Transect10','Connect_SUP_amount',
+        'Connect_Feel','Connect_ConnectY','Connect_ConnectN','Connect_ConnectSame',
+        'Connect_ConnectNotSure','Count_UnnaturalY','Count_UnnaturalN',
+        'Count_UnnaturalNotSure','Participate_CleanY','Participate_CleanN',
+        'Participate_CleanNotSure','First_time','Volunteer','A-Team','CH',
+        'FirstName','LastName','email','phone','email','SMS']
+    
+    #rename columns
+    df.columns=cols
+    #remove row with extra column names that aren't now needed
+    df3 = df.drop(index=0)
+    
+    #prepare columns with year and month data to be able to extract monthly or yearly data 
+    m = []
+    y = []
+    dates = df3['Date_Count'].values
+    for d in dates:
+        split = d.split('/')
+        month = split[1]
+        year = split[2]
+        if len(month) == 1:
+            new = '0' + month
+            m.append(new)
+            y.append(year)
+        else:
+            m.append(month)
+            y.append(year)
+        
+    df3['month'] = m
+    df3['year'] = y
+        
+    df3.to_csv(TFTout)
+    
+    
+    
+def lite_clean_data(TFTin, month, year, TFTout):
     """
     A function which takes raw TFT lite data and prepares it for analyses
     
@@ -304,6 +372,10 @@ def lite_clean_data(TFTin, TFTout):
     
     TFTin: string
             path to input csv file with original TFT data
+            
+    year: string
+
+    month: string       
              
     TFTout: string
             path to save new file
@@ -317,15 +389,233 @@ def lite_clean_data(TFTin, TFTout):
     dates = df['Created Date'].values
     for d in dates:
         split = d.split('-')
-        month = split[1]
-        year = split[0]
-        m.append(month)
-        y.append(year)
+        mth = split[1]
+        yr = split[0]
+        m.append(mth)
+        y.append(yr)
         
     df['month'] = m
     df['year'] = y
     
-    df.to_csv(TFTout)
+    new=df.loc[df['year']==year]
+    data=new.loc[new['month']==month]
+    
+    data.to_csv(TFTout)
+    
+    
+def citizen_science_survey_clean_data(TFTin, TFTout):
+    """
+    A function which takes raw TFT lite data and prepares it for analyses
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+            path to input csv file with original TFT data
+             
+    TFTout: string
+            path to save new file
+    """
 
+    #read csv file
+    df = pd.read_csv(TFTin)
+    
+    #remove unneeded columns
+    df = df.drop('Respondent ID', axis=1)
+    df = df.drop('Collector ID', axis=1)
+    df = df.drop('Start Date', axis=1)
+    df = df.drop('End Date', axis=1)
+    df = df.drop('IP Address', axis=1)
+    df = df.drop('Email Address', axis=1)
+    df = df.drop('First Name', axis=1)
+    df = df.drop('Last Name', axis=1)
+    df = df.drop('Custom Data 1', axis=1)   
+    
+    
+    #provide correct column names - could read from existing once wierd columns are sorted
+    cols = ['Date_TrailClean','People','postcode','TrailName','ActivityBike',
+        'ActivityRun','ActivityWalk','ActivityCombo','ActivityOther', 'FollowMethodologyY',
+        'FollowMethodologyN','FollowMethodologyNotSure','NavDevY','NavDevN','NavDevLink',
+        'Time_hours','TotItems','Area_km2', 'TypeMrkdTrails', 'TypeRoW', 'TypeMtnSummitTrail',
+        'TypeUpliftAccessed','TypeUnofficial','TypePump','TypeUrban',
+        'TypeOtherTrails','TypeAccess','TypeCar',
+        'TypeAquatic','TypeOther','MostTr_Marked', 'MostTr_PublicRoW', 'MostTr_MtnSummit',
+        'MostTr_UplistAccessed','MostTr_Unofficial','MostTr_PumpTracks','MostTr_UrbanGreen',
+        'MostTr_OtherTrailsandGreenSpaces','MostTr_AccessRoute','MostTr_Carpark',
+        'MostTr_Aquatic','MostTr_Other','Zone_Carpark','Zone_VisitorInfrastructure','Zone_TrailMaps','Zone_Trailhead',
+        'Zone_DogPoo','Zone_Rattly','Zone_TrailBottom','Zone_ClimbTop','Zone_Viewpoint',
+        'Zone_Jumps','Zone_Uplift(Un)Load','Zone_ViewPause','Zone_Picnic','Zone_Puncture',
+        'Zone_FinalFuelUp','Zone_Summit','Zone_RoadCrossing','Zone_Swim','Zone_Camp',
+        'Zone_Toilet','Zone_Skilift','Zone_Other', 'MostZone_Carpark','MostZone_Visitor','MostZone_Map',
+        'MostZone_Trailhead','MostZone_DogPoo','MostZone_Rattly','MostZone_TrailBottom',
+        'MostZone_ClimbTop','MostZone_Viewpoint','MostZone_Jumps','MostZone_Uplift',
+        'MostZone_ViewPausePoint','MostZone_Picnic','MostZone_Puncture',
+        'MostZone_FinalFuelUp','MostZone_Toilet','MostZone_Summit','MostZone_RoadCrossing','MostZone_Swim',
+        'MostZone_Camp','MostZone_Skilift','MostZone_OtherText','MostZone_Other',
+        'Perc_SU','RecycleY','RecycleN','RecyclePerc',
+        'Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
+        'Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
+        'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+        'Value Aluminium soft drink cans','Value Plastic bottle, top','Value Glass soft drink bottles',
+        'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+        'Value Plastic energy gel sachet','Value Plastic energy gel end','Value Aluminium alcoholic drink cans',
+        'Value Glass alcoholic bottles','Value Glass bottle tops','Value Hot drinks cups',
+        'Value Hot drinks tops and stirrers','Value Drinks cups (eg., McDonalds drinks)',
+        'Value Drinks tops (eg., McDonalds drinks)','Value Cartons','Value Plastic straws',
+        'Value Paper straws','Value Plastic carrier bags','Value Plastic bin bags',
+        'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
+        'Value Other confectionary (eg., Lollipop Sticks)','Value Crisps Packets',
+        'Value Used Chewing Gum','Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+        'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+        'Value Disposable BBQs and / or BBQ related items','Value BBQs and / or BBQ related items',
+        'Value Food on the go (eg.salad boxes)','Value Homemade lunch (eg., aluminium foil, cling film)',
+        'Value Fruit peel & cores','Value Cigarette Butts','Value Smoking related',
+        'Value Disposable vapes','Value Vaping / E-Cigarette Paraphernalia','Value Drugs related',
+        'Value Farming','Value Salt/mineral lick buckets','Value Silage wrap',
+        'Value Forestry','Value Tree guards','Value Industrial','Value Cable ties',
+        'Value Industrial plastic wrap','Value Toilet tissue','Value Face/ baby wipes',
+        'Value Nappies','Value Single-Use Period products','Value Rubber/nitrile gloves',
+        'Value Single-Use Covid Masks','Value Outdoor event (eg Festival)','Value Camping',
+        'Value Halloween & Fireworks','Value Seasonal (Christmas and/or Easter)',
+        'Value Normal balloons','Value Helium balloons','Value MTB related (e.g. inner tubes, water bottles etc)',
+        'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
+        'Value Outdoor sports event related (e.g.race)','Value Textiles','Value Clothes & Footwear',
+        'Value Plastic milk bottles','Value Glass milk bottles','Value Plastic food containers',
+        'Value Cardboard food containers',
+        'Value Cleaning products containers','Value Miscellaneous','Value Too small/dirty to ID',
+        'Value Weird/Retro','Other_Specify','B1_Lucozade','B1_Coke','B1_RedBull','B1_Monster','B1_Cadbury',
+        'B1_McDonalds','B1_Walkers','B1_Mars','B1_StellaArtois','B1_Strongbow','B1_Costa',
+        'B1_Budweiser','B1_Haribo','B1_SIS','B1_Carling','B1_Fosters','B1_Thatchers',
+        'B1_Pepsi','B1_Nestle','B1_Subway','B1_Other','B2_Lucozade','B2_Coke','B2_RedBull',
+        'B2_Monster','B2_Cadbury','B2_McDonalds','B2_Walkers','B2_Mars','B2_StellaArtois',
+        'B2_Strongbow','B2_Costa','B2_Budweiser','B2_Haribo','B2_SIS','B2_Carling',
+        'B2_Fosters','B2_Thatchers','B2_Pepsi','B2_Nestle','B2_Subway','B2_Other',
+        'B3_Lucozade','B3_Coke','B3_RedBull','B3_Monster','B3_Cadbury','B3_McDonalds',
+        'B3_Walkers','B3_Mars','B3_StellaArtois','B3_Strongbow','B3_Costa','B3_Budweiser',
+        'B3_Haribo','B3_SIS','B3_Carling','B3_Fosters','B3_Thatchers','B3_Pepsi',
+        'B3_Nestle','B3_Subway','B3_Other','AnimalsY','AnimalsN','AnimalsNotChecked','AnimalsInfo',
+        'Connection_LitterFeel','Connection_LitterAmount','Connection_Action',
+        'Connection_ConnectionY','Connection_ConnectionN','Connection_ConnectionSame',
+        'Connection_Unsure','Connection_NewPeopleY','Connection_NewPeopleN',
+        'Connection_NewPeopleAlone','Connection_NewPeopleKnewAlready','Connection_ActivityAfterY',
+        'Connection_ActivityAfterN','Connection_TakePartBeforeY','Connection_TakePartBeforeN',
+        'Connection_TakePartBeforeUnsure','Connection_TakePartBeforeHowMany']
 
+    #rename columns
+    df.columns=cols
+    #remove row with extra column names that aren't now needed
+    df3 = df.drop(index=0)
+    
+    #prepare columns with year and month data to be able to extract monthly or yearly data 
+    m = []
+    y = []
+    dates = df3['Date_TrailClean'].values
+    for d in dates:
+        split = d.split('/')
+        month = split[1]
+        year = split[2]
+        if len(month) == 1:
+            new = '0' + month
+            m.append(new)
+            y.append(year)
+        else:
+            m.append(month)
+            y.append(year)
+        
+    df3['month'] = m
+    df3['year'] = y
+                  
+    #exporting the cleaned monthly data 
+    df3.to_csv(TFTout)
+    
+   
+    
+def citizen_science_count_clean_data(TFTin, TFTout):
+    """
+    A function which takes raw TFT lite data and prepares it for analyses
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+            path to input csv file with original TFT data
+             
+    TFTout: string
+            path to save new file
+    """
+
+    #read csv file
+    df = pd.read_csv(TFTin)
+    
+    #remove unneeded columns
+    df = df.drop('Respondent ID', axis=1)
+    df = df.drop('Collector ID', axis=1)
+    df = df.drop('Start Date', axis=1)
+    df = df.drop('End Date', axis=1)
+    df = df.drop('IP Address', axis=1)
+    df = df.drop('Email Address', axis=1)
+    df = df.drop('First Name', axis=1)
+    df = df.drop('Last Name', axis=1)
+    df = df.drop('Custom Data 1', axis=1) 
+
+    #provide correct column names - could read from existing once wierd columns are sorted
+    cols = ['Date_Count','People','postcode', 'TrailName','ActivityBike',
+        'ActivityRun','ActivityWalk','ActivityCombo','ActivityOther','TFTmethods_Y',
+        'TFTmethods_N','TFTmethods_NotSure','Record_Y', 'Record_N','Komoot_link',
+        'Time(hours)','Total_distance(m)','100m_transect',
+        '1km_transect','other_transect','Transect100m','Transect200m','Transect300m',
+        'Transect400m','Transect500m','Transect600m','Transect700m','Transect800m',
+        'Transect900m','Transect1km','Transect1.1km','Transect1.2km','Transect1.3km',
+        'Transect1.4km','Transect1.5km','Transect1.6km','Transect1.7km',
+        'Transect1.8km','Transect1.9km','Transect2.0km','Transect2.1km',
+        'Transect2.1km','Transect2.2km','Transect2.3km','Transect2.4km','Transect2.5km',
+        '1kTransect1','1kTransect2','1kTransect3','1kTransect4','1kTransect5',
+        '1kTransect6','1kTransect7','1kTransect8','1kTransect9','1kTransect10',
+        '1kTransect11','1kTransect12','1kTransect13','1kTransect14','1kTransect15',
+        '1kTransect16','1kTransect17','1kTransect18','1kTransect19','1kTransect20',
+        'TotItems','TypeMrkdTrails','TypeRoW','TypeMtnSummitTrail','TypeUpliftAccessed',
+        'TypeUnofficial','TypePump','TypeUrban','TypeOtherTrails','TypeAccess','TypeCar',
+        'TypeAquatic','TypeOther','ZonesCarpark','ZonesVisitorInfrastructure',
+        'ZonesTrailMaps','ZonesTrailhead','ZonesDogPoo','ZonesShakedown',
+        'ZonesBottomDescent','ZonesTopClimb','ZonesView','ZonesJumps',
+        'ZonesUplift(Un)load','ZonesViewPause','ZonesPicnic','ZonesPuncture','ZonesAlmostHome',
+        'ZonesSummit','ZonesRoadCrossing','ZonesSwimspot','ZonesCamp','ZonesToilet',
+        'ZonesSkiLift','ZonesOther','MostZonesCarpark','MostZonesVisitorInfrastructure',
+        'MostZonesTrailMaps','MostZonesTrailhead','MostZonesDogPoo','MostZonesShakedown',
+        'MostZonesBottomDescent','MostZonesTopClimb','MostZonesView','MostZonesJumps',
+        'MostZonesUplift','MostZonesPause','MostZonesPicnic','MostZonesPuncture',
+        'MostZonesRoadCrossing','MostZonesAlmostHome','MostZonesSummit','MostZonesRoadCrossing','MostZonesSwimspot',
+        'MostZonesCamp','MostZonesToilet','MostZonesSkiLift','MostZonesOther',
+        'Amount_DRS','Amount_Vapes','AmountGels','MostSUPItem','MostBrand',
+        'Connect_SUP_amount','Connect_Impact-ve','Connect_Impact+ve',
+        'Connect_ImpactNone','Connect_ImpactNotSure','Connect_Feel','AIY','AIN',
+        'AIDidntLook','AINotSure','ThisTrailBeforeY','ThisTrailBeforeN',
+        'ThisTrailBeforeValue','UnnaturalY','UnnaturalN','UnnaturalNotSure'] 
+    
+    #rename columns
+    df.columns=cols
+    #remove row with extra column names that aren't now needed
+    df3 = df.drop(index=0)
+    
+    #prepare columns with year and month data to be able to extract monthly or yearly data 
+    m = []
+    y = []
+    dates = df3['Date_Count'].values
+    for d in dates:
+        split = d.split('/')
+        month = split[1]
+        year = split[2]
+        if len(month) == 1:
+            new = '0' + month
+            m.append(new)
+            y.append(year)
+        else:
+            m.append(month)
+            y.append(year)
+        
+    df3['month'] = m
+    df3['year'] = y
+                  
+    #exporting the cleaned monthly data 
+    df3.to_csv(TFTout)
     

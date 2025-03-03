@@ -145,7 +145,7 @@ def clean_old_data(TFTin, folderout):
     y = []
     dates = df2['New_TCdate'].values
     for d in dates:
-        split = d.split('-')
+        split = d.split('/')
         month = split[1]
         year = split[2]
         if len(month) == 1:
@@ -166,7 +166,10 @@ def clean_old_data(TFTin, folderout):
     
     for year in years:
         #extract data for one year
-        new=df2.loc[df2['year']==year]
+        new=df.loc[df['year']==year]
+        new.to_csv(folderout + '{}.csv'.format(year))
+        
+        
         #extract data for each month
         for month in months:
             data=new.loc[new['month']==month]
@@ -293,10 +296,6 @@ def historic_survey_monthly_stats(folderin, dataout):
     
     
         
-    
-    
-    
-    
-        
+          
     
     

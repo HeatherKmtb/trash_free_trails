@@ -100,7 +100,7 @@ def overview_stats(folderin, folderout):
     
     areas = [survey_area, count_area, CScount_area, CSsurvey_area]
 #area cleaned / surveyed - excludes Lite
-    area = areas.sum()
+    area = areas.sum()   
     
     CSsurvey_km = CSsurvey_area / 0.006
     kms = [survey_km, count_km, CSsurvey_km, CScount_km]
@@ -163,7 +163,7 @@ def overview_stats(folderin, folderout):
     
     
     #Count stats
-     
+    
     
     #this will only work once dfs are the same 
     #dfs = (count, CScount) 
@@ -177,8 +177,71 @@ def overview_stats(folderin, folderout):
 #how much is out there per km
     prevalence = items/distance
     
+#rest TBD
+
+
+
+
+    #Survey stats
     
+#first ones currently covered in overvies
     
+    kms_survey = [survey_km, CSsurvey_km] 
+#distance covered - doesn't include Lite    
+    km_survey = kms_survey.sum()
+    
+    areas_survey = [survey_area,  CSsurvey_area]
+#area directly protected - excludes Lite
+    area_survey = areas_survey.sum()   
+    
+    plastic = ['BinBags','Full Dog Poo Bags',
+            'Unused Dog Poo Bags', 'Plastic Water Bottles','Plastic Soft Drink Bottles',
+            'Plastic bottle, top','Plastic energy drink bottles',
+            'Plastic energy gel sachet','Plastic energy gel end', 'Plastic straws',
+            'Plastic carrier bags','Plastic bin bags',
+            'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+            'Confectionary/sweet wrappers',
+            'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
+            'Crisps Packets','Disposable vapes','Salt/mineral lick buckets','Silage wrap',
+            'Tree guards','Cable ties','Industrial plastic wrap','Rubber/nitrile gloves',
+            'Normal balloons','Helium balloons','Plastic milk bottles',
+            'Plastic food containers','Cleaning products containers']
+            
+            
+    potentially_plastic = ['Toys (eg., tennis balls)','Other Pet Related Stuff',
+             'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
+             'Drinks tops (eg., McDonalds drinks)','Food on the go (eg.salad boxes)']        
+            
+    metal = ['Aluminium soft drink cans','Aluminium energy drink can',
+             'Aluminium alcoholic drink cans','Glass bottle tops',
+             'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',]   
+
+    glass = ['Glass soft drink bottles','Glass alcoholic bottles',]     
+    
+    cardboard_paper_wood = ['Cartons','Paper straws',
+            'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+            'Vaping / E-Cigarette Paraphernalia','Toilet tissue','Cardboard food containers',]
+    
+    other = ['Used Chewing Gum','Fruit peel & cores','Cigarette Butts','Smoking related',
+             'Drugs related','Farming',
+             'Forestry','Industrial','Homemade lunch (eg., aluminium foil, cling film)',
+             'Face/ baby wipes',
+             'Nappies','Single-Use Period products','Single-Use Covid Masks',
+             'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
+             'MTB related (e.g. inner tubes, water bottles etc)',
+             'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
+             'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
+             'Miscellaneous','Too small/dirty to ID','Weird/Retro']
+             
+            
+            
+           
+            
+            
+            
+            
+            
+            
     
     
                                       

@@ -195,9 +195,11 @@ def overview_stats(folderin, folderout):
     area_survey = areas_survey.sum()   
     
     plastic = ['BinBags','Full Dog Poo Bags',
-            'Unused Dog Poo Bags', 'Plastic Water Bottles','Plastic Soft Drink Bottles',
+            'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+            'Plastic Water Bottles','Plastic Soft Drink Bottles',
             'Plastic bottle, top','Plastic energy drink bottles',
             'Plastic energy gel sachet','Plastic energy gel end', 'Plastic straws',
+            'Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
             'Plastic carrier bags','Plastic bin bags',
             'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
             'Confectionary/sweet wrappers',
@@ -208,9 +210,8 @@ def overview_stats(folderin, folderout):
             'Plastic food containers','Cleaning products containers']
             
             
-    potentially_plastic = ['Toys (eg., tennis balls)','Other Pet Related Stuff',
-             'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
-             'Drinks tops (eg., McDonalds drinks)','Food on the go (eg.salad boxes)']        
+    potentially_plastic = ['Hot drinks cups','Drinks tops (eg., McDonalds drinks)',
+                           'Food on the go (eg.salad boxes)']        
             
     metal = ['Aluminium soft drink cans','Aluminium energy drink can',
              'Aluminium alcoholic drink cans','Glass bottle tops',
@@ -232,8 +233,36 @@ def overview_stats(folderin, folderout):
              'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
              'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
              'Miscellaneous','Too small/dirty to ID','Weird/Retro']
-             
-            
+    
+    
+    plastics = []
+    metals = []
+    glasses = []
+    papers = []
+    for p in plastic:
+        item = survey[p].sum()
+        CSitem = CSsurvey[p].sum()
+        total = item + CSitem
+        plastics.append(total)
+        
+    for p in metal:
+        item = survey[p].sum()
+        CSitem = CSsurvey[p].sum()
+        total = item + CSitem
+        metals.append(total)
+
+    for p in glass:
+        item = survey[p].sum()
+        CSitem = CSsurvey[p].sum()
+        total = item + CSitem
+        glasses.append(total)
+
+    for p in papers:
+        item = survey[p].sum()
+        CSitem = CSsurvey[p].sum()
+        total = item + CSitem
+        papers.append(total)             
+           
             
            
             

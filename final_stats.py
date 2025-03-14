@@ -162,7 +162,7 @@ def overview_stats(folderin, folderout):
                                       'total_kg','total_cokecans'])
     
     
-    #Count stats
+#Count stats
     
     
     #this will only work once dfs are the same 
@@ -177,12 +177,42 @@ def overview_stats(folderin, folderout):
 #how much is out there per km
     prevalence = items/distance
     
-#rest TBD
+#hot spots????
+
+    mostzonesindy = ['MostZonesCarpark','MostZonesVisitorInfrastructure','MostZonesTrailMaps',
+    'MostZonesTrailhead','MostZonesDogPoo','MostZonesShakedown','MostZonesTopClimb',
+    'MostZonesView','MostZonesPicnic','MostZonesRoadCrossing','MostZonesSwimspot',
+    'MostZonesBottomDescent','MostZonesJumps','MostZonesPause','MostZonesAlmostHome',
+    'MostZonesLake','MostZonesRiver','MostZonesBeach','MostZonesSanddunes']
+    
+    mostzonesCS = ['MostZonesCarpark','MostZonesVisitorInfrastructure',
+    'MostZonesTrailMaps','MostZonesTrailhead','MostZonesDogPoo','MostZonesShakedown',
+    'MostZonesBottomDescent','MostZonesTopClimb','MostZonesView','MostZonesJumps',
+    'MostZonesUplift','MostZonesPause','MostZonesPicnic','MostZonesPuncture',
+    'MostZonesRoadCrossing','MostZonesAlmostHome','MostZonesSummit','MostZonesRoadCrossing',
+    'MostZonesSwimspot','MostZonesCamp','MostZonesToilet','MostZonesSkiLift','MostZonesOther']
+
+    zonecounts = []
+    for z in mostzonesindy:
+        df = count[count[z].notna()]
+        for index,i in df.iterrows():
+            zonecounts.append(z)
+        
+    for z in mostzonesCS:
+        df = CScount[CScount[z].notna()]
+
+        for index,i in df.iterrows():
+            zonecounts.append(z)        
+
+#mostpolluted trail zone
+    topzone = max(set(zonecounts), key=zonecounts.count)
 
 
 
 
-    #Survey stats
+
+
+#Survey stats
     
 #first ones currently covered in overvies
     
@@ -194,45 +224,45 @@ def overview_stats(folderin, folderout):
 #area directly protected - excludes Lite
     area_survey = areas_survey.sum()   
     
-    plastic = ['BinBags','Full Dog Poo Bags',
-            'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
-            'Plastic Water Bottles','Plastic Soft Drink Bottles',
-            'Plastic bottle, top','Plastic energy drink bottles',
-            'Plastic energy gel sachet','Plastic energy gel end', 'Plastic straws',
-            'Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
-            'Plastic carrier bags','Plastic bin bags',
-            'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
-            'Confectionary/sweet wrappers',
-            'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
-            'Crisps Packets','Disposable vapes','Salt/mineral lick buckets','Silage wrap',
-            'Tree guards','Cable ties','Industrial plastic wrap','Rubber/nitrile gloves',
-            'Normal balloons','Helium balloons','Plastic milk bottles',
-            'Plastic food containers','Cleaning products containers']
+    plastic = ['Value Full Dog Poo Bags',
+            'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
+            'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+            'Value Plastic bottle, top','Value Plastic energy drink bottles',
+            'Value Plastic energy gel sachet','Value Plastic energy gel end', 'Value Plastic straws',
+            'Value Hot drinks tops and stirrers','Value Drinks tops (eg., McDonalds drinks)',
+            'Value Plastic carrier bags','Value Plastic bin bags',
+            'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+            'Value Confectionary/sweet wrappers',
+            'Value Wrapper "corners" / tear-offs','Value Other confectionary (eg., Lollipop Sticks)',
+            'Value Crisps Packets','Value Disposable vapes','Value Salt/mineral lick buckets','Value Silage wrap',
+            'Value Tree guards','Value Cable ties','Value Industrial plastic wrap','Value Rubber/nitrile gloves',
+            'Value Normal balloons','Value Helium balloons','Value Plastic milk bottles',
+            'Value Plastic food containers','Value Cleaning products containers']
             
             
-    potentially_plastic = ['Hot drinks cups','Drinks tops (eg., McDonalds drinks)',
-                           'Food on the go (eg.salad boxes)']        
+    potentially_plastic = ['Value Hot drinks cups','Value Drinks cups (eg., McDonalds drinks)',
+                           'Value Food on the go (eg.salad boxes)']        
             
-    metal = ['Aluminium soft drink cans','Aluminium energy drink can',
-             'Aluminium alcoholic drink cans','Glass bottle tops',
-             'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',]   
+    metal = ['Value Aluminium soft drink cans','Value Aluminium energy drink can',
+             'Value Aluminium alcoholic drink cans','Value Glass bottle tops',
+             'Value Disposable BBQs and / or BBQ related items','Value BBQs and / or BBQ related items',]   
 
-    glass = ['Glass soft drink bottles','Glass alcoholic bottles',]     
+    glass = ['Value Glass soft drink bottles','Value Glass alcoholic bottles',]     
     
-    cardboard_paper_wood = ['Cartons','Paper straws',
-            'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-            'Vaping / E-Cigarette Paraphernalia','Toilet tissue','Cardboard food containers',]
+    cardboard_paper_wood = ['Value Cartons','Value Paper straws',
+            'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+            'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue','Value Cardboard food containers',]
     
-    other = ['Used Chewing Gum','Fruit peel & cores','Cigarette Butts','Smoking related',
-             'Drugs related','Farming',
-             'Forestry','Industrial','Homemade lunch (eg., aluminium foil, cling film)',
-             'Face/ baby wipes',
-             'Nappies','Single-Use Period products','Single-Use Covid Masks',
-             'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
-             'MTB related (e.g. inner tubes, water bottles etc)',
-             'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
-             'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
-             'Miscellaneous','Too small/dirty to ID','Weird/Retro']
+    other = ['Value Used Chewing Gum','Value Fruit peel & cores','Value Cigarette Butts','Value Smoking related',
+             'Value Drugs related','Value Farming',
+             'Value Forestry','Value Industrial','Value Homemade lunch (eg., aluminium foil, cling film)',
+             'Value Face/ baby wipes',
+             'Value Nappies','Value Single-Use Period products','Value Single-Use Covid Masks',
+             'Value utdoor event (eg Festival)','Value Camping','Value Halloween & Fireworks','Value Seasonal (Christmas and/or Easter)',
+             'Value MTB related (e.g. inner tubes, water bottles etc)',
+             'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
+             'Value Outdoor sports event related (e.g.race)','Value Textiles','Value Clothes & Footwear',
+             'Value Miscellaneous','Value Too small/dirty to ID','Value Weird/Retro']
     
     
     plastics = []
@@ -257,13 +287,54 @@ def overview_stats(folderin, folderout):
         total = item + CSitem
         glasses.append(total)
 
-    for p in papers:
+    for p in cardboard_paper_wood:
         item = survey[p].sum()
         CSitem = CSsurvey[p].sum()
         total = item + CSitem
-        papers.append(total)             
-           
-            
+        papers.append(total)
+    
+    totpl = sum(plastics)
+    totme = sum(metals)
+    totgl = sum(glasses)
+    totpa = sum(papers)    
+
+    typedf = pd.DataFrame({'type': ['plastic','metal','glass','paper'],
+                           'quantity':[totpl, totme, totgl,totpa]})
+    
+  
+
+    s = typedf.max()
+#Most common material    
+    most_type = s['type']  
+
+    SUP=[]
+    df2 = survey[survey['Perc_SU'].notna()]
+    for index,i in df2.iterrows():
+        perSUP = i['Perc_SU']
+        percSUP = float(perSUP)
+        totitems = i['TotItems']
+        result = percSUP/100 * totitems
+        SUP.append(result) 
+
+    df3 = CSsurvey[CSsurvey['Perc_SU'].notna()]
+    for index,i in df3.iterrows():
+        perSUP = i['Perc_SU']
+        percSUP = float(perSUP)
+        totitems = i['TotItems']
+        result = percSUP/100 * totitems
+        SUP.append(result) 
+
+    srvy_tot = df2['TotItems'].sum()
+    CSsrvy_tot = df3['TotItems'].sum()
+    tot_items_surveys = srvy_tot + CSsrvy_tot
+    tot_SUP = sum(SUP) 
+    #calcualte percentage
+#SUP proportion % reported    
+    tot_percSUP = tot_SUP/tot_items_surveys *100   
+    
+    
+
+                          
            
             
             

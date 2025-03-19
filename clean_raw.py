@@ -250,18 +250,18 @@ def join_survey_clean_data(oldin, newin, cleanout):
     #read in 'old' data and 'new' data
     orig_data = pd.read_csv(oldin)   
     new_data = pd.read_csv(newin)
-    #cols2 = list(orig_data) # only needed if using column names from 'old' data or to check columns
+    cols2 = list(orig_data) # only needed if using column names from 'old' data or to check columns
 
     #check column headers - not needed unless df_final has more columns than orig_data
-    #c = []
-    #for val in cols:
-    #    if val not in cols2:
-    #        c.append(val)
-    #        
-    #d = []
-    #for val in cols2:
-    #    if val not in cols:
-    #        d.append(val)  
+    c = []
+    for val in cols:
+        if val not in cols2:
+            c.append(val)
+            
+    d = []
+    for val in cols2:
+        if val not in cols:
+            d.append(val)  
 
       
     #add new cleaned data to top of original data
@@ -618,4 +618,10 @@ def citizen_science_count_clean_data(TFTin, TFTout):
                   
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout)
+    
+    
+    
+    
+    
+    
     

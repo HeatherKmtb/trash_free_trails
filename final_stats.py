@@ -81,17 +81,19 @@ def overview_stats(folderin, folderout):
         #tot_items.append(items)
     
     #add to total people the number of lite and count submissions
-    tot_people.append(count_lite)
+    lite_people = count_lite * 3.08
+    tot_people.append(lite_people)
     tot_people.append(count_count)
  
 #volunteers
     total_people = sum(tot_people)
     
     survey_km = survey['Distance_km'].sum()
-    count_m = count['Total_distance_m'].sum()
+    count_m = count['Total_distance(m)'].sum()
     count_km = count_m / 1000
-    CScount_m = CScount['Total_distance_m'].sum()
+    CScount_m = CScount['Total_distance(m)'].sum()
     CScount_km = CScount_m / 1000
+    lite_km = count_lite * 7.57
     
     survey_area = survey_km * 0.006
     count_area = count_km * 0.006
@@ -100,18 +102,20 @@ def overview_stats(folderin, folderout):
     
     areas = [survey_area, count_area, CScount_area, CSsurvey_area]
 #area cleaned / surveyed - excludes Lite
-    area = areas.sum()   
+    area = sum(areas)   
     
     CSsurvey_km = CSsurvey_area / 0.006
-    kms = [survey_km, count_km, CSsurvey_km, CScount_km]
-#distance cleaned / surveyed - excludes Lite
-    km = kms.sum()
+    kms = [survey_km, count_km, CSsurvey_km, CScount_km, lite_km]
+#distance cleaned / surveyed 
+    km = sum(kms)
         
     #method to estimate time spent on count
     count_time = count_count * 1.52
-    tot_time.apppend(count_time)
-#time - excludes Lite
-    total_time = sum(tot_time) #doesn't include lite - no data
+    lite_time = count_lite * 1.64
+    tot_time.append(count_time)
+    tot_time.append(lite_time)
+#time 
+    total_time = sum(tot_time) 
 
     
     srvy_items = []
@@ -135,11 +139,12 @@ def overview_stats(folderin, folderout):
     srvy_items.append(CScount_items)
     
     removed_items = sum(rmv_items)
-    surveyed_items = sum(srvy_items)    
-    tot_items = surveyed_items
-    tot_items.append(lite_items)
-#total items
-    total_items = sum(tot_items)
+    surveyed_items = sum(srvy_items)   
+#total items    
+    total_items = surveyed_items + lite_items
+
+
+
 #weight removed items
     total_kg = removed_items / 57  
 #volume of removed items as number of coke cans
@@ -176,7 +181,7 @@ def overview_stats(folderin, folderout):
 
     mostzonesindy = ['MostZonesCarpark','MostZonesVisitorInfrastructure','MostZonesTrailMaps',
     'MostZonesTrailhead','MostZonesDogPoo','MostZonesShakedown','MostZonesTopClimb',
-    'MostZonesView','MostZonesPicnic','MostZonesRoadCrossing','MostZonesSwimspot',
+    'MostZonesView','MostZonesLunch','MostZonesRoadCrossing','MostZonesSwimspot',
     'MostZonesBottomDescent','MostZonesJumps','MostZonesPause','MostZonesAlmostHome',
     'MostZonesLake','MostZonesRiver','MostZonesBeach','MostZonesSanddunes']
     
@@ -223,13 +228,13 @@ def overview_stats(folderin, folderout):
     values = [total_survey, count_lite]
     total_all_survey = sum(values)
     
-    kms_survey = [survey_km, CSsurvey_km] 
+    kms_survey = [survey_km, CSsurvey_km, lite_km] 
 #distance covered - doesn't include Lite    
-    km_survey = kms_survey.sum()
+    km_survey = sum(kms_survey)
     
     areas_survey = [survey_area,  CSsurvey_area]
 #area directly protected - excludes Lite
-    area_survey = areas_survey.sum()   
+    area_survey = sum(areas_survey)   
     
     plastic = ['Value Full Dog Poo Bags',
             'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
@@ -310,9 +315,9 @@ def overview_stats(folderin, folderout):
     
   
 
-    s = typedf.max()
+    t = typedf.loc[typedf['quantity'].idxmax()]
 #Most common material    
-    most_type = s['type']  
+    most_type = t['type']  
 
     SUP=[]
     df2 = survey[survey['Perc_SU'].notna()]
@@ -366,20 +371,22 @@ def overview_stats(folderin, folderout):
     'Value Cleaning products containers']
      
     calc_perc_SUP = []
+    df2 = survey[survey['MoreInfoY'].notna()]
     for index, i in df2.iterrows():
         SUP_items = i[col_list_SUP].sum()   
         tot_items = i['TotItems']
         calculated_SUP = (SUP_items/tot_items)*100
         calc_perc_SUP.append(calculated_SUP)
         
+    df3 = CSsurvey       
     for index, i in df3.iterrows():
         SUP_items = i[col_list_SUP].sum()   
         tot_items = i['TotItems']
         calculated_SUP = (SUP_items/tot_items)*100
         calc_perc_SUP.append(calculated_SUP)        
-        
+    SUPs = sum(calc_perc_SUP)     
 #SUP proportion % calculated          
-    tot_calc_SUP = calc_perc_SUP.sum()      
+    tot_calc_SUP = SUPs/len(calc_perc_SUP)     
     
     pet_stuff = ['Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
     'Value Toys (eg., tennis balls)','Value Other Pet Related Stuff']
@@ -525,7 +532,7 @@ def overview_stats(folderin, folderout):
                            'quantity':[totpet, totdrs, totsn, totsm, totag, tothy,
                                        totrec, totsp, tottx, totho, totmis]})
     
-    c = catdf.max()
+    c = catdf.loc[catdf['quantity'].idxmax()]
 #Most common category of SUP    
     most_cat = c['type']    
 

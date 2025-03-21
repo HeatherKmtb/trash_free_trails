@@ -38,6 +38,8 @@ def building_averages(TFTin, dataout):
     df2 = df[df['Distance_km'].notna()]
     for index,i in df2.iterrows():
         km = i['Distance_km']
+        if km > 40:
+            continue
         kms.append(km)
         
     #repeating steps above for time    

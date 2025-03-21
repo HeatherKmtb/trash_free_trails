@@ -93,7 +93,7 @@ def overview_stats(folderin, folderout):
     count_km = count_m / 1000
     CScount_m = CScount['Total_distance(m)'].sum()
     CScount_km = CScount_m / 1000
-    lite_km = count_lite * 7.57
+    lite_km = count_lite * 5.47
     
     survey_area = survey_km * 0.006
     count_area = count_km * 0.006
@@ -110,7 +110,7 @@ def overview_stats(folderin, folderout):
     km = sum(kms)
         
     #method to estimate time spent on count
-    count_time = count_count * 1.52
+    count_time = count_count * 1.38
     lite_time = count_lite * 1.64
     tot_time.append(count_time)
     tot_time.append(lite_time)
@@ -569,7 +569,9 @@ def overview_stats(folderin, folderout):
             
     DRS_lite = sum(lite_DRS)
     tot_DRS_subs = DRS_subs + DRS_lite   
-    subs_for_DRS = [count_survey, count_CSsurvey, count_lite]
+      
+    no_survey = len(df2.index)
+    subs_for_DRS = [no_survey, count_CSsurvey, count_lite]
     subs = sum(subs_for_DRS)
     
 #% Submissions reporting DRS                
@@ -578,6 +580,17 @@ def overview_stats(folderin, folderout):
     DRS_tot_items = sum(DRS_submissions)
 #DRS total glass items
     DRS_tot_glass = sum(DRS_glass_ttl)
+    
+    srv_tot_items = df2['TotItems'].sum()
+    tt_itms_list = [srv_tot_items, CSsurvey_items]
+    tt_items = sum(tt_itms_list)
+#% of total items that are DRS - from those reporting breakdown
+    DRS_proportion = DRS_tot_items/tt_items
+#%of DRS items that are glass    
+    glass_DRS_proportion = DRS_tot_glass/DRS_tot_items
+#% of total items that are glass DRS
+    glass_proportion = DRS_tot_glass/tt_items 
+    
     
     vaping = []
     for index, i in survey.iterrows():

@@ -742,24 +742,26 @@ def overview_stats(folderin, folderout):
     bags_proportion = (bags_total/tt_items)*100
 
 
-    outdoor = ['Value Outdoor event (eg Festival)','Value Camping', 'Value MTB related (e.g. inner tubes, water bottles etc)',
+    outdoor = ['Value Outdoor event (eg Festival)','Value Camping','Value MTB related (e.g. inner tubes, water bottles etc)',
     'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
     'Value Outdoor sports event related (e.g.race)']
     
     out = []
     out_subs = []
-    
-    for index, i in survey.iterrows():
-        outs = (survey[outdoor].notna).any(axis="columns")
+    out_df = survey[outdoor]
+    outCS_df = CSsurvey[outdoor]
+    for index, i in out_df.iterrows():
+        outs = i.sum()
         if outs > 0:
             out_subs.append(1)
-        out.append(outs)
+        out.append(outs)  
         
-    for index, i in CSsurvey.iterrows():
-        outs = (CSsurvey[outdoor].notna).any(axis="columns")
+    for index, i in outCS_df.iterrows():
+        outs = i.sum()
         if outs > 0:
             out_subs.append(1)
-        out.append(outs)        
+        out.append(outs)      
+    
         
 #% submissions reporting outdoor gear    
     outs_reported = len(out_subs)

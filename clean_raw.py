@@ -153,7 +153,7 @@ def survey_clean_data(newin, rawout, cleanout):
     time = df_clean['Time_min']#.astype(float)
     km = df_clean['Distance_km']#.astype(float)
     #calculate ATI
-    denominator = people*time*km
+    denominator = (people*time)*km
     AdjTotItems = TotItems/denominator 
     #Add ATI column to df in correct location
     df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
@@ -358,8 +358,20 @@ def count_clean_data(TFTin, TFTout):
         
     df3['month'] = m
     df3['year'] = y
+    
+    TotItems = df3['TotItems']#.astype(float)
+    people = df3['People']#.astype(float)
+    time = df_clean['Time_min']#.astype(float)
+    km = df_clean['Distance_km']#.astype(float)
+    #calculate ATI
+    denominator = (people*time)*km
+    AdjTotItems = TotItems/denominator 
+    #Add ATI column to df in correct location
+    df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
         
     df3.to_csv(TFTout)
+    
+    
     
     
     

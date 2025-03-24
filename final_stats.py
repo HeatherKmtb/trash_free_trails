@@ -26,7 +26,7 @@ def overview_stats(folderin, folderout):
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 'total_survey',
                                       'no_people', 'area_km2', 'distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
-                                      'total_kg','total_cokecans'])
+                                      'total_kg','total_cokecans','Adjusted Total Items'])
     
       
     survey = pd.read_csv(folderin + 'survey.csv')
@@ -143,19 +143,71 @@ def overview_stats(folderin, folderout):
 #total items    
     total_items = surveyed_items + lite_items
 
-
-
 #weight removed items
     total_kg = removed_items / 57  
 #volume of removed items as number of coke cans
     total_cokecans = removed_items / 1.04
+    
+    ATI_survey = survey['AdjTotItems'].sum()
+    
+    ATIs = []
+    for index, i in CSsurvey.iterrows():
+        TotItems = i['TotItems']#.astype(float)
+        people = i['People']#.astype(float)
+        hours = i['Time_hours']#.astype(float)
+        time = hours*60
+        area = i['Area_km2']#.astype(float)
+        km = area / 0.006
+        #calculate ATI
+        denominator = (people*time)*km
+        if denominator == 0:
+            continue
+        AdjTotItems = TotItems/denominator 
+        ATIs.append(AdjTotItems)
+        
+        
+    for index, i in count.iterrows():
+        TotItems = i['TotItems']#.astype(float)
+        people = i['People']#.astype(float)
+        time = 1.38
+        m = i['Total_distance(m)']#.astype(float)
+        km = m / 1000
+        #calculate ATI
+        denominator = (people*time)*km
+        if denominator == 0:
+            continue
+        AdjTotItems = TotItems/denominator     
+        ATIs.append(AdjTotItems)
+
+    for index, i in CScount.iterrows():
+        TotItems = i['TotItems']#.astype(float)
+        people = i['People']#.astype(float)
+        hours = i['Time_hours']#.astype(float)
+        time = hours*60
+        m = i['Total_distance(m)']#.astype(float)
+        km = m / 1000
+        #calculate ATI
+        denominator = (people*time)*km
+        if denominator == 0:
+            continue
+        AdjTotItems = TotItems/denominator     
+        ATIs.append(AdjTotItems)  
+              
+    
+    lite_denom = (lite_people*lite_time)*lite_km
+    ATI_lite = lite_items/lite_denom
+    
+    ATI_next = sum(ATIs)
+#Adjusted total items    
+    ATI = ATI_next + ATI_lite + ATI_survey
     
     results = results.append({'total_submisssions':total_CS, 'total_count':total_count,
                               'total_survey':total_survey,'no_people':total_people, 
                               'area_km2':area, 'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
                               'items_surveyed':surveyed_items, 'total_items':total_items,
-                              'total_kg':total_kg,'total_cokecans':total_cokecans}, ignore_index=True)                                         
+                              'total_kg':total_kg,'total_cokecans':total_cokecans,
+                              'Adjusted Total Items':ATI}, ignore_index=True)                                         
     
     results.to_csv(folderout + '/overview.csv')    
     
@@ -216,9 +268,14 @@ def overview_stats(folderin, folderout):
     survey_results = pd.DataFrame(columns = ['survey_submisssions', 'total items removed', 
                 'weight removed', 'volume removed', 'distance_kms', 'area kms2',
                 'most common material', 'SUP reported','SUP calculated','most common category',
-                'DRS reported','DRS total items','DRS total glass','vapes reported',
-                'vapes total items','gel ends reported','gel ends total items',
-                'poo bags reported','poo bags total items','brand 1','brand 2',
+                'DRS reported','DRS total items','DRS total glass','DRS % of total items',
+                'glass DRS % of DRS items','glass DRS % of total items','vapes reported',
+                'vapes total items','vapes % of total items','vapes % of smoking related items',
+                'gel ends reported','gel ends total items','gel ends % of total items',
+                'gels reported','gels total items','gels % of total items'
+                'poo bags reported','poo bags total items','poo bags % of total items',
+                'outdoor gear reported','outdoor gear total items',
+                'outdoor gear % of total items','brand 1','brand 2',
                 'brand 3'])
 
 
@@ -468,8 +525,8 @@ def overview_stats(folderin, folderout):
     for p in smoking:
         item = survey[p].sum()
         CSitem = CSsurvey[p].sum()
-        total = item + CSitem
-        smokes.append(total)
+        smoke_total = item + CSitem
+        smokes.append(smoke_total)
         
     for p in agro_ind:
         item = survey[p].sum()
@@ -493,7 +550,7 @@ def overview_stats(folderin, folderout):
         item = survey[p].sum()
         CSitem = CSsurvey[p].sum()
         total = item + CSitem
-        smokes.append(total)
+        sport.append(total)
 
     for p in textiles:
         item = survey[p].sum()
@@ -603,6 +660,11 @@ def overview_stats(folderin, folderout):
     vapes_reported = (vapes_subs/total_survey)*100
 #vapes_total_items    
     vapes_total = sum(vaping)
+#% of total items that are vapes
+    vapes_proportion = (vapes_total/tt_items)*100
+#% of smoking items that are vapes    
+    vapes_in_smoke = (vapes_total/smoke_total)*100
+    
     
     gel_ends = []
     for index, i in survey.iterrows():
@@ -610,12 +672,39 @@ def overview_stats(folderin, folderout):
         if ends > 0:
             gel_ends.append(ends)
             
-    gel_subs = len(gel_ends)
+    for index, i in CSsurvey.iterrows():
+        ends = i['Value Plastic energy gel end']
+        if ends > 0:
+            gel_ends.append(ends)            
+            
+    gelend_subs = len(gel_ends)
+#% submissions reporting gel ends    
+    gelends_reported = (gelend_subs/total_survey)*100
+#gel ends_total_items    
+    gelends_total = sum(gel_ends)
+#% of total items that are gel ends
+    gelends_proportion = (gelends_total/tt_items)*100 
+    
+    gels = []
+    for index, i in survey.iterrows():
+        ends = i['Value Plastic energy gel sachet']
+        if ends > 0:
+            gels.append(ends)
+            
+    for index, i in CSsurvey.iterrows():
+        ends = i['Value Plastic energy gel sachet']
+        if ends > 0:
+            gels.append(ends)            
+            
+    gel_subs = len(gels)
 #% submissions reporting gel ends    
     gels_reported = (gel_subs/total_survey)*100
 #gel ends_total_items    
     gels_total = sum(gel_ends)
-    
+#% of total items that are gel ends
+    gels_proportion = (gels_total/tt_items)*100 
+       
+        
     poo = []
     bag = []
     for index, i in survey.iterrows():
@@ -645,10 +734,42 @@ def overview_stats(folderin, folderout):
                 bag.append(1)                
             
     all_bags = len(bag)
-#% submissions reporting gel ends    
+#% submissions reporting poo bags   
     bags_reported = (all_bags/total_survey)*100
-#gel ends_total_items    
-    bags_total = sum(poo)    
+#poo bags_total_items    
+    bags_total = sum(poo)   
+#% of total items that are poo bags
+    bags_proportion = (bags_total/tt_items)*100
+
+
+    outdoor = ['Value Outdoor event (eg Festival)','Value Camping', 'Value MTB related (e.g. inner tubes, water bottles etc)',
+    'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
+    'Value Outdoor sports event related (e.g.race)']
+    
+    out = []
+    out_subs = []
+    
+    for index, i in survey.iterrows():
+        outs = (survey[outdoor].notna).any(axis="columns")
+        if outs > 0:
+            out_subs.append(1)
+        out.append(outs)
+        
+    for index, i in CSsurvey.iterrows():
+        outs = (CSsurvey[outdoor].notna).any(axis="columns")
+        if outs > 0:
+            out_subs.append(1)
+        out.append(outs)        
+        
+#% submissions reporting outdoor gear    
+    outs_reported = len(out_subs)
+#outdoor gear_total_items    
+    outs_total = sum(out)   
+#% of total items that are outdoor gear
+    outs_proportion = (outs_total/tt_items)*100        
+        
+        
+    
 
     #calculate brands
     brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
@@ -683,10 +804,22 @@ def overview_stats(folderin, folderout):
                 'SUP reported':tot_percSUP,'SUP calculated':tot_calc_SUP,
                 'most common category':most_cat,'DRS reported':DRS_reported,
                 'DRS total items':DRS_tot_items,'DRS total glass':DRS_tot_glass,
+                'DRS % of total items':DRS_proportion,'glass DRS % of DRS items':glass_DRS_proportion,
+                'glass DRS % of total items':glass_proportion,
                 'vapes reported':vapes_reported,'vapes total items':vapes_total,
-                'gel ends reported':gels_reported,'gel ends total items':gels_total,
+                'vapes % of total items':vapes_proportion,
+                'vapes % of smoking related items':vapes_in_smoke,
+                'gel ends reported':gelends_reported,'gel ends total items':gelends_total,
+                'gel ends % of total items':gelends_proportion,'gels reported':gels_reported,
+                'gels total items':gels_total,'gels % of total items':gels_proportion,
                 'poo bags reported':bags_reported,'poo bags total items':bags_total,
+                'poo bags % of total items':bags_proportion,
+                'outdoor gear reported':outs_reported,'outdoor gear total items':outs_total,
+                'outdoor gear % of total items':outs_proportion,
                 'brand 1':brand1,'brand 2':brand2,'brand 3':brand3}, ignore_index=True)  
+    
+   
+
 
     survey_results.to_csv(folderout + '/survey.csv')  
     
@@ -695,7 +828,7 @@ def overview_stats(folderin, folderout):
     
     
     
-    'Value Outdoor event (eg Festival)','Value Camping', + Sports
+
             
             
     
@@ -716,7 +849,7 @@ def overview_stats(folderin, folderout):
 
     
     
-#COMPARE ORIG & CS DATA
+
 
     
     

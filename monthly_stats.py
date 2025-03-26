@@ -325,7 +325,7 @@ def lite_monthly_stats(TFTin, year, month, folderout):
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
     results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
-    results.to_csv(folderout + 'bag_res_lite.csv')
+    results.to_csv(folderout + 'bag_res_lite_10.csv')
     del results
 
 

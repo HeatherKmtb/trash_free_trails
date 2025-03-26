@@ -95,7 +95,7 @@ def clean_old_data(TFTin, folderout):
             if data.empty:
                 continue
             #write df with monthly data
-            data.to_csv(folderout + '{}_{}.csv'.format(year,month))
+            data.to_csv(folderout + 'lite_{}.csv'.format(month))
             del data
             
             

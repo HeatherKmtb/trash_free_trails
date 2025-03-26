@@ -7,9 +7,9 @@ Created on Mon Nov 18 14:37:41 2024
 """
 
 import pandas as pd
-import numpy as np
 
-def survey_clean_data(newin, rawout, cleanout):
+
+def survey_clean_data(TFTin, TFTout):
     """
     A function which takes new raw TFT survey data and prepares it for joining with
     existing data
@@ -17,17 +17,15 @@ def survey_clean_data(newin, rawout, cleanout):
     Parameters
     ----------
              
-    newin: string
-            path to input csv file with new data  
+    TFTin: string
+            path to folder with input csv file with new data  
              
-    rawout:  string        
-            path to save file with raw data
             
     TFTout: string
-            path to save file with clean data
+            path to folder to save file with clean data
     """
     #read csv file
-    df = pd.read_csv(newin)
+    df = pd.read_csv(TFTin + 'survey.csv' )
     
     #remove unneeded columns
     df = df.drop('Respondent ID', axis=1)
@@ -221,57 +219,8 @@ def survey_clean_data(newin, rawout, cleanout):
     df3['year'] = y
                   
     #exporting the cleaned monthly data 
-    df3.to_csv(cleanout)
+    df3.to_csv(TFTout + 'survey.csv')
     
-def join_survey_clean_data(oldin, newin, cleanout):
-    """
-    A function which takes new cleaned monthly TFT survey data and joins it with
-    existing data
-    
-    Parameters
-    ----------
-    
-    TFTin: string
-            path to input csv file with original TFT data
-             
-    newin: string
-            path to input csv file with new data  
-             
-    monthout: string
-            path to save the clean data just for the month you are processing
-            
-    rawout:  string        
-            path to save file with raw data
-            
-    TFTout: string
-            path to save file with clean data
-    """    
-
-    #read in 'old' data and 'new' data
-    orig_data = pd.read_csv(oldin)   
-    new_data = pd.read_csv(newin)
-    cols2 = list(orig_data) # only needed if using column names from 'old' data or to check columns
-
-    #check column headers - not needed unless df_final has more columns than orig_data
-    c = []
-    for val in cols:
-        if val not in cols2:
-            c.append(val)
-            
-    d = []
-    for val in cols2:
-        if val not in cols:
-            d.append(val)  
-
-      
-    #add new cleaned data to top of original data
-    dfs = (new_data, orig_data)
-    
-    #stage above may be changed so data is added to the appropriate yearly/monhtly dataset
-    
-    df_final = pd.concat(dfs, ignore_index = True) 
-    
-    df_final.to_csv(cleanout)
     
 def count_clean_data(TFTin, TFTout):
     """
@@ -298,7 +247,7 @@ def count_clean_data(TFTin, TFTout):
     
     #same for citizen science stuff, should probably collate all first?
     
-    df = pd.read_csv(TFTin)
+    df = pd.read_csv(TFTin + 'count.csv')
     
     #remove unneeded columns
     df = df.drop('Respondent ID', axis=1)
@@ -358,24 +307,12 @@ def count_clean_data(TFTin, TFTout):
         
     df3['month'] = m
     df3['year'] = y
-    
-    TotItems = df3['TotItems']#.astype(float)
-    people = df3['People']#.astype(float)
-    time = df_clean['Time_min']#.astype(float)
-    km = df_clean['Distance_km']#.astype(float)
-    #calculate ATI
-    denominator = (people*time)*km
-    AdjTotItems = TotItems/denominator 
-    #Add ATI column to df in correct location
-    df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
-        
-    df3.to_csv(TFTout)
+            
+    df3.to_csv(TFTout + 'count.csv')
     
     
     
-    
-    
-def lite_clean_data(TFTin, month, year, TFTout):
+def lite_clean_data(TFTin, bag_res_out, TFTout):
     """
     A function which takes raw TFT lite data and prepares it for analyses
     
@@ -393,7 +330,7 @@ def lite_clean_data(TFTin, month, year, TFTout):
             path to save new file
     """
     
-    df = pd.read_csv(TFTin)
+    df = pd.read_csv(TFTin + 'lite.csv')
     
     #change date to year and month data to be able to extract monthly data 
     m = []
@@ -408,11 +345,105 @@ def lite_clean_data(TFTin, month, year, TFTout):
         
     df['month'] = m
     df['year'] = y
+        
+    df.to_csv(TFTout + 'lite.csv')
     
-    new=df.loc[df['year']==year]
-    data=new.loc[new['month']==month]
+        
+    #now extract TRUE data for each bafg size and calcualte total items per bag type
+    results = pd.DataFrame(columns = ['bag', 'TotItems', 'no. of bags'])
     
-    data.to_csv(TFTout)
+    clean = df
+    #handful * 6.2            
+    df2 = clean[clean['Quantity - Handful'] == True]
+    bag_total = []
+    nobags = []
+    bag = 'handful'
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 6
+        bag_total.append(items) 
+        nobags.append(bags)
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+  
+    #pocketful * 10
+    df2 = clean[clean['Quantity - Pocketful'] == True]
+    bag = 'pocketful'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 10
+        bag_total.append(items) 
+        nobags.append(bags)
+ 
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+     
+    #bread bag * 25
+    df2 = clean[clean['Quantity - Bread Bag'] == True]
+    bag = 'breadbag'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 25
+        bag_total.append(items) 
+        nobags.append(bags)
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+     
+    #carrier bag * 35
+    df2 = clean[clean['Quantity - Carrier Bag'] == True]
+    bag = 'carrierbag'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 35
+        bag_total.append(items) 
+        nobags.append(bags)
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+
+    #standard bin bag * 143
+    df2 = clean[clean['Quantity - Generic Bin Bag'] == True]
+    bag = 'binbag'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 143
+        bag_total.append(items) 
+        nobags.append(bags)
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+        
+        
+    #multiple standard bin bags * 143
+    df2 = clean[clean['Quantity - Multiple Bin Bags'] == True]
+    bag = 'multiplebinbags'
+    nobags = []
+    bag_total = []
+    for index, i in df2.iterrows():
+        bags = i['How many bags?']
+        items = bags * 143
+        bag_total.append(items) 
+        nobags.append(bags)        
+        
+    tot_items = sum(bag_total)
+    tot_bags = sum(nobags)
+    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+    results.to_csv(TFTout + 'bag_res_lite.csv')
     
     
 def citizen_science_survey_clean_data(TFTin, TFTout):
@@ -430,7 +461,7 @@ def citizen_science_survey_clean_data(TFTin, TFTout):
     """
 
     #read csv file
-    df = pd.read_csv(TFTin)
+    df = pd.read_csv(TFTin + 'CSsurvey.csv')
     
     #remove unneeded columns
     df = df.drop('Respondent ID', axis=1)
@@ -538,7 +569,7 @@ def citizen_science_survey_clean_data(TFTin, TFTout):
     df3['year'] = y
                   
     #exporting the cleaned monthly data 
-    df3.to_csv(TFTout)
+    df3.to_csv(TFTout + 'CS_survey.csv')
     
    
     
@@ -557,7 +588,7 @@ def citizen_science_count_clean_data(TFTin, TFTout):
     """
 
     #read csv file
-    df = pd.read_csv(TFTin)
+    df = pd.read_csv(TFTin + 'CScount.csv')
     
     #remove unneeded columns
     df = df.drop('Respondent ID', axis=1)
@@ -574,7 +605,7 @@ def citizen_science_count_clean_data(TFTin, TFTout):
     cols = ['Date_Count','People','postcode', 'TrailName','ActivityBike',
         'ActivityRun','ActivityWalk','ActivityCombo','ActivityOther','TFTmethods_Y',
         'TFTmethods_N','TFTmethods_NotSure','Record_Y', 'Record_N','Komoot_link',
-        'Time(hours)','Total_distance(m)','100m_transect',
+        'Time_hours','Total_distance(m)','100m_transect',
         '1km_transect','other_transect','Transect100m','Transect200m','Transect300m',
         'Transect400m','Transect500m','Transect600m','Transect700m','Transect800m',
         'Transect900m','Transect1km','Transect1.1km','Transect1.2km','Transect1.3km',
@@ -629,7 +660,7 @@ def citizen_science_count_clean_data(TFTin, TFTout):
     df3['year'] = y
                   
     #exporting the cleaned monthly data 
-    df3.to_csv(TFTout)
+    df3.to_csv(TFTout + 'CS_count.csv')
     
     
     

@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -21,7 +22,7 @@ def overview_stats(folderin, folderout):
     folderout: string
            path for folder to save results in
     """
-
+    month = '11'
     
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 'total_survey',
@@ -30,12 +31,12 @@ def overview_stats(folderin, folderout):
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
       
-    survey = pd.read_csv(folderin + 'survey.csv')
-    lite = pd.read_csv(folderin + 'lite.csv')
-    count = pd.read_csv(folderin + 'count.csv')
-    CSsurvey = pd.read_csv(folderin + 'CS_survey.csv')
-    CScount = pd.read_csv(folderin + 'CS_count.csv')
-    bag_res_lite = pd.read_csv(folderin + 'bag_res_lite.csv')
+    survey = pd.read_csv(folderin + 'survey_' + month + '.csv')
+    lite = pd.read_csv(folderin + 'lite_' + month + '.csv')
+    count = pd.read_csv(folderin + 'count_' + month + '.csv')
+    CSsurvey = pd.read_csv(folderin + 'CS_survey_' + month + '.csv')
+    CScount = pd.read_csv(folderin + 'CS_count_' + month + '.csv')
+    bag_res_lite = pd.read_csv(folderin + 'bag_res_lite_' + month + '.csv')
     
     dfs = [survey, CSsurvey, CScount]
     

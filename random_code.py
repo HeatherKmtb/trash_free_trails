@@ -65,4 +65,32 @@ def join_survey_clean_data(oldin, newin, cleanout):
     df_final = pd.concat(dfs, ignore_index = True) 
     
     df_final.to_csv(cleanout)    
+
+#SUP / m checks
+count = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/Count/2024.csv')    
+
+ms = count['Total_distance(m)']
+itms = count['TotItems']
+items = [x for x in itms if str(x) != 'nan'] 
+m = [x for x in ms if str(x) != 'nan']
+
+prevs = []
+for index, i in count.iterrows():
+    item = i['TotItems']
+    distance = i['Total_distance(m)']
+    if item == 0:
+        continue
+    if distance == 0:
+        continue
+    prev = item/distance
+    prevs.append(prev)
+
+
+prv = [x for x in prevs if str(x) != 'nan']    
+denom = len(prv)
+nom = sum(prv)  
+new_prevalence = nom/denom  
+sum_items = sum(items)
+sum_m = sum(m)
+prevalence_notna = sum_items/sum_m
     

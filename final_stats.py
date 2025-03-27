@@ -94,7 +94,7 @@ def overview_stats(folderin, folderout):
     count_km = count_m / 1000
     CScount_m = CScount['Total_distance(m)'].sum()
     CScount_km = CScount_m / 1000
-    lite_km = count_lite * 5.47
+    lite_km = count_lite * 6.77
     
     survey_area = survey_km * 0.006
     count_area = count_km * 0.006
@@ -269,9 +269,20 @@ def overview_stats(folderin, folderout):
     #km = df['Distance_km'].sum()
     #items = df['TotItems'].sum()  
     #prevalence = items/km
+    count_df1 = count[count['TotItems'].notna()]
+    count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
+    CScount_df1 = CScount[CScount['TotItems'].notna()]
+    CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()]   
+    count_ms = count_df2['Total_distance(m)'].sum()
+    count_kms = count_ms / 1000
+    CScount_ms = CScount_df2['Total_distance(m)'].sum()
+    CScount_kms = CScount_ms / 1000
+    count_itms = count_df2['TotItems'].sum()
+    CScount_itms = CScount_df2['TotItems'].sum()
     
-    distance = CScount_km + count_km
-    items = CScount_items + count_items
+    
+    distance = CScount_kms + count_kms
+    items = CScount_itms + count_itms
 #how much is out there per km
     prevalence = items/distance
     
@@ -333,7 +344,7 @@ def overview_stats(folderin, folderout):
     total_all_survey = sum(values)
     
     kms_survey = [survey_km, CSsurvey_km, lite_km] 
-#distance covered - doesn't include Lite    
+#distance covered    
     km_survey = sum(kms_survey)
     
     areas_survey = [survey_area,  CSsurvey_area]

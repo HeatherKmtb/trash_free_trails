@@ -81,7 +81,7 @@ def clean_old_data(TFTin, folderout):
     del dates, year, month, split
     #get list of years and months
     years = list(np.unique(df2['year']))
-    months = list(np.unique(df2['month']))
+    months = list(np.unique(new['month']))
     
     for year in years:
         #extract data for one year
@@ -95,7 +95,7 @@ def clean_old_data(TFTin, folderout):
             if data.empty:
                 continue
             #write df with monthly data
-            data.to_csv(folderout + 'lite_{}.csv'.format(month))
+            data.to_csv(folderout + 'survey_{}.csv'.format(month))
             del data
             
             

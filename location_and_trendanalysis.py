@@ -83,7 +83,7 @@ def plot_data_and_trend (datain, figout):
 
 
     Wilsarno['Date_TrailClean'] = pd.to_datetime(Wilsarno['Date_TrailClean'])
-    Dates = Wilsarno['Date_TrailClean'].apply(datetime.date.toordinal)
+    Dates = Wilsarno['Date_TrailClean'].apply(datetime.toordinal)
     Wilsarno['Adj_Date']= Dates.sort_values()
 
     # x axis values
@@ -125,4 +125,8 @@ def plot_data_and_trend (datain, figout):
     #plt.show()
     plt.savefig(figout)
 
- 
+    y2 = Wilsarno['Distance_km']
+    y4 = Wilsarno['TotItems']
+    y3 = y4/y2
+    
+    y = y3

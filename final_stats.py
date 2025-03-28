@@ -822,6 +822,27 @@ def overview_stats(folderin, folderout):
 
     survey_results.to_csv(folderout + '/survey.csv', index=False)  
     
+    impacts_results = pd.DataFrame([columns = 'Fauna Interaction', 'Fauna Death',
+                    'First Time', 'Repeat volunteers','Felt proud',
+                    'Felt more connected','met someone inspiring', 'went out after',
+                    'Would do again','provided contact info'])
+    
+    #animal interaction - how many (%) answered the question
+    
+    
+    count_AI = df['AnimalsY'].value_counts().get('Yes', 0)
+    perc_AI = count_AI/count_total *100
+    type_AI = df['AnimalsInfo'].value_counts(dropna=True)
+    print(type_AI)
+    
+    #nature connection
+    more_connected = df['Connection_ConnectionY'].value_counts().get('Yes', 0) / count_total * 100
+    new_people = df['Connection_NewPeopleY'].value_counts().get('Yes', 0) / count_total * 100
+    activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0) / count_total * 100
+    
+    #participant data
+    count_1sttime = df['First time'].value_counts().get('This is my first time!', 0)
+    
     
 
 

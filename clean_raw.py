@@ -7,6 +7,7 @@ Created on Mon Nov 18 14:37:41 2024
 """
 
 import pandas as pd
+import glob
 
 
 def survey_clean_data(TFTin, TFTout):
@@ -662,7 +663,28 @@ def citizen_science_count_clean_data(TFTin, TFTout):
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'CS_count.csv')
     
+def add_to_existing_data(monthin, yearly_folder):
+    """
+    A function which takes raw TFT lite data and prepares it for analyses
     
+    Parameters
+    ----------
+    
+    monthin: string
+            path to folder with input csv files with cleaned raw monthly data
+            
+    yearin: string
+            path to folder with input csv files with cleaned raw yearly data and
+            for output files 
+             
+    """
+
+    filelist = glob.glob(monthin + '*.csv')
+    forms = ['count', 'survey', 'CScount', 'CSsurvey', 'lite']
+    #read csv file
+    for file in forms:
+        df_month = pd.read_csv(monthin + file + '.csv')   
+        
     
     
     

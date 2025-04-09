@@ -39,7 +39,8 @@ def get_country_data(postcodesin, TFTin, folderout):
          first = postcode.upper()
          new = first.replace(" ","")
          start = new[:4]
-         postcodes.append(start)
+         letters = ''.join(x for x in start if x.isalpha())
+         postcodes.append(letters)
          
     df['postcode_start'] = postcodes  
 
@@ -72,7 +73,7 @@ def get_country_data(postcodesin, TFTin, folderout):
          new = df.loc[df['postcode_start']==p]
          eng = eng.append(new)      
      
-    folderout = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/Survey/to_end2024_countries/'
+
 
     eng.to_csv(folderout + 'england.csv')
     scots.to_csv(folderout + 'alba.csv')

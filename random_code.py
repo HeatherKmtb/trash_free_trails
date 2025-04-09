@@ -93,4 +93,30 @@ new_prevalence = nom/denom
 sum_items = sum(items)
 sum_m = sum(m)
 prevalence_notna = sum_items/sum_m
+
+
+
+
+years = [2024, 2025]
+months = [1,2,3,4,5,6,8,9,10,11,12]
+
+csv = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/to_end2024_countries/lite/cymru.csv'
+folderout = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/to_end2024_countries/months/'
+
+df = pd.read_csv(csv)
+
+for year in years:
+        #extract data for one year
+        new=df.loc[df['year']==year]
+        
+        
+        #extract data for each month
+        for month in months:
+            data=new.loc[new['month']==month]
+            if data.empty:
+                continue
+            #write df with monthly data
+            data.to_csv(folderout + 'lite_{}_{}.csv'.format(month,year))
+            del data
+            
     

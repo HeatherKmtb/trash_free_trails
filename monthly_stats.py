@@ -80,7 +80,7 @@ def survey_monthly_stats(TFTin, folderout):
     tot_Recycle = sum(re)
     tot_percRecycled = tot_Recycle/tot_items *100
  
-    #animal interaction - how many (%) answered the question
+    #animal interaction - how many (%) answered the question - how may submissions report animal interaction
     CSsurv_AI = ['AnimalsY','AnimalsN','AnimalsNotChecked','AnimalsInfo']
     CScount_AI = ['AIY','AIN','AIDidntLook','AINotSure']
     survey_AI = ['AnimalsY','AnimalsN','AnimalsInfo']

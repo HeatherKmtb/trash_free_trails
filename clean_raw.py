@@ -12,8 +12,7 @@ import glob
 
 def survey_clean_data(TFTin, TFTout):
     """
-    A function which takes new raw TFT survey data and prepares it for joining with
-    existing data
+    A function which takes new raw TFT survey data and prepares it for analyses
     
     Parameters
     ----------
@@ -220,29 +219,23 @@ def survey_clean_data(TFTin, TFTout):
     df3['year'] = y
                   
     #exporting the cleaned monthly data 
-    df3.to_csv(TFTout + 'survey.csv')
+    df3.to_csv(TFTout + 'survey.csv', index=False)
     
     
 def count_clean_data(TFTin, TFTout):
     """
-    A function which takes raw TFT survey data and prepares it for joining with
-    existing data
+    A function which takes raw TFT count data and prepares it for analyses
     
     Parameters
     ----------
-    
+             
     TFTin: string
-            path to input csv file with original TFT data
+            path to folder with input csv file with new data  
              
-    newin: string
-            path to input csv file with new data  
-             
-    monthout: string
-            path to save the clean data just for the month you are processing
             
     TFTout: string
-            path to save new file
-    """
+            path to folder to save file with clean data
+    """        
     
     #awaiting answers to questions to understand purpose and where we want to go with this.
     
@@ -278,9 +271,10 @@ def count_clean_data(TFTin, TFTout):
         'MostZonesBottomDescent','MostZonesJumps','MostZonesPause','MostZonesAlmostHome',
         'MostZonesLake','MostZonesRiver','MostZonesBeach','MostZonesSanddunes','TotItems',
         'Transect1','Transect2','Transect3','Transect4','Transect5','Transect6',
-        'Transect7','Transect8','Transect9','Transect10','Connect_SUP_amount',
-        'Connect_Feel','Connect_ConnectY','Connect_ConnectN','Connect_ConnectSame',
-        'Connect_ConnectNotSure','Count_UnnaturalY','Count_UnnaturalN',
+        'Transect7','Transect8','Transect9','Transect10','Connection_SUP_amount',
+        'Connection_Feel','Connection_ConnectionY','Connection_ConnectionN',
+        'Connection_ConnectionSame','Connection_ConnectionNotSure',
+        'Count_UnnaturalY','Count_UnnaturalN',
         'Count_UnnaturalNotSure','Participate_CleanY','Participate_CleanN',
         'Participate_CleanNotSure','First_time','Volunteer','A-Team','CH',
         'FirstName','LastName','email','phone','email','SMS']
@@ -309,26 +303,25 @@ def count_clean_data(TFTin, TFTout):
     df3['month'] = m
     df3['year'] = y
             
-    df3.to_csv(TFTout + 'count.csv')
+    df3.to_csv(TFTout + 'count.csv', index=False)
     
     
     
-def lite_clean_data(TFTin, bag_res_out, TFTout):
+def lite_clean_data(TFTin, TFTout):
     """
-    A function which takes raw TFT lite data and prepares it for analyses
+    A function which takes raw TFT lite data and prepares it for analyses,
+    producing 2 .csvs one with clean TFT lite data and one with number of
+    items and number of bags reported from our averages data
     
     Parameters
     ----------
     
     TFTin: string
-            path to input csv file with original TFT data
-            
-    year: string
-
-    month: string       
+            path to folder with input csv file with new data  
              
+            
     TFTout: string
-            path to save new file
+            path to folder to save files with clean data
     """
     
     df = pd.read_csv(TFTin + 'lite.csv')
@@ -347,7 +340,7 @@ def lite_clean_data(TFTin, bag_res_out, TFTout):
     df['month'] = m
     df['year'] = y
         
-    df.to_csv(TFTout + 'lite.csv')
+    df.to_csv(TFTout + 'lite.csv', index=False)
     
         
     #now extract TRUE data for each bafg size and calcualte total items per bag type
@@ -444,21 +437,22 @@ def lite_clean_data(TFTin, bag_res_out, TFTout):
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
     results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
-    results.to_csv(TFTout + 'bag_res_lite.csv')
+    results.to_csv(TFTout + 'bag_res_lite.csv', index=False)
     
     
 def citizen_science_survey_clean_data(TFTin, TFTout):
     """
-    A function which takes raw TFT lite data and prepares it for analyses
+    A function which takes raw TFT Citizen Science raw survey data and prepares it for analyses
     
     Parameters
     ----------
-    
-    TFTin: string
-            path to input csv file with original TFT data
              
+    TFTin: string
+            path to folder with input csv file with new data  
+             
+            
     TFTout: string
-            path to save new file
+            path to folder to save file with clean data
     """
 
     #read csv file
@@ -570,22 +564,23 @@ def citizen_science_survey_clean_data(TFTin, TFTout):
     df3['year'] = y
                   
     #exporting the cleaned monthly data 
-    df3.to_csv(TFTout + 'CS_survey.csv')
+    df3.to_csv(TFTout + 'CS_survey.csv', index=False)
     
    
     
 def citizen_science_count_clean_data(TFTin, TFTout):
     """
-    A function which takes raw TFT lite data and prepares it for analyses
+    A function which takes TFT citizen science raw count data and prepares it for analyses
     
     Parameters
     ----------
-    
-    TFTin: string
-            path to input csv file with original TFT data
              
+    TFTin: string
+            path to folder with input csv file with new data  
+             
+            
     TFTout: string
-            path to save new file
+            path to folder to save file with clean data
     """
 
     #read csv file
@@ -661,11 +656,12 @@ def citizen_science_count_clean_data(TFTin, TFTout):
     df3['year'] = y
                   
     #exporting the cleaned monthly data 
-    df3.to_csv(TFTout + 'CS_count.csv')
+    df3.to_csv(TFTout + 'CS_count.csv', index=False)
     
-def add_to_existing_data(monthin, yearly_folder):
+def add_to_existing_data(monthin, year_folder):
     """
-    A function which takes raw TFT lite data and prepares it for analyses
+    A function which takes the prepared monthly TFT data and adds it to the 
+    correct yearly file
     
     Parameters
     ----------
@@ -679,11 +675,14 @@ def add_to_existing_data(monthin, yearly_folder):
              
     """
 
-    filelist = glob.glob(monthin + '*.csv')
-    forms = ['count', 'survey', 'CScount', 'CSsurvey', 'lite']
+    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite']
     #read csv file
     for file in forms:
         df_month = pd.read_csv(monthin + file + '.csv')   
+        df_year = pd.read_csv(year_folder + file + '/' + file + '_2025.csv')
+        dfs = (df_month, df_year)
+        df_final = pd.concat(dfs, ignore_index = True) 
+        df_final.to_csv(year_folder + file + '/' + file + '_2025.csv', index=False)    
         
     
     

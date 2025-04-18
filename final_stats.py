@@ -828,8 +828,11 @@ def overview_stats(folderin, folderout):
                     'Would do again','provided contact info'])
     
     #animal interaction - how many (%) answered the question
-    
-    
+    CSsurv_AI = ['AnimalsY','AnimalsN','AnimalsNotChecked','AnimalsInfo']
+    CScount_AI = ['AIY','AIN','AIDidntLook','AINotSure']
+    survey_AI = ['AnimalsY','AnimalsN','AnimalsInfo']
+    lite_AI = ["Animal Interaction - Didn't Check",'Animal Interaction - No',
+               'Animal Interaction - Chew Marks','Animal Interaction - Death']    
     count_AI = df['AnimalsY'].value_counts().get('Yes', 0)
     perc_AI = count_AI/count_total *100
     type_AI = df['AnimalsInfo'].value_counts(dropna=True)

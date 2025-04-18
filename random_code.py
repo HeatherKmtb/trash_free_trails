@@ -96,12 +96,12 @@ prevalence_notna = sum_items/sum_m
 
 
 
-
+#
 years = [2024, 2025]
 months = [1,2,3,4,5,6,8,9,10,11,12]
 
-csv = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/to_end2024_countries/lite/cymru.csv'
-folderout = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/to_end2024_countries/months/'
+csv = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/to_end2024_countries/survey/cymru2025.csv'
+folderout = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/to_end2024_countries/months_cymru/'
 
 df = pd.read_csv(csv)
 
@@ -116,7 +116,26 @@ for year in years:
             if data.empty:
                 continue
             #write df with monthly data
-            data.to_csv(folderout + 'lite_{}_{}.csv'.format(month,year))
+            data.to_csv(folderout + 'survey_{}_{}.csv'.format(month,year))
             del data
             
+ 
+    
+
+
+folderin = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Monthly stats/2025/'
+months = ['2025_01','2025_02','2025_03']
+data = ['count.csv','CS_count.csv','CS_survey.csv','lite.csv','survey.csv']
+folderout = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/to_end2024_countries/2025/'
+
+for d in data:
+    dfs = []
+    for month in months:
+       df = pd.read_csv(folderin + month + '/input/' + d)
+       dfs.append(df)
+    new = pd.concat(dfs, ignore_index=True)
+    new.to_csv(folderout + d)
+    
+       
+       
     

@@ -276,7 +276,7 @@ def count_clean_data(TFTin, TFTout):
         'Connection_ConnectionSame','Connection_ConnectionNotSure',
         'Count_UnnaturalY','Count_UnnaturalN',
         'Count_UnnaturalNotSure','Participate_CleanY','Participate_CleanN',
-        'Participate_CleanNotSure','First_time','Volunteer','A-Team','CH',
+        'Participate_CleanNotSure','First_time','Volunteer','A-Team','Community Hub',
         'FirstName','LastName','email','phone','email','SMS']
     
     #rename columns
@@ -653,7 +653,7 @@ def citizen_science_count_clean_data(TFTin, TFTout):
             y.append(year)
         
     df3['month'] = m
-    df3['year'] = y
+    df3['year'] = ymunity 
                   
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'CS_count.csv', index=False)

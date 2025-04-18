@@ -832,11 +832,64 @@ def overview_stats(folderin, folderout):
     CScount_AI = ['AIY','AIN','AIDidntLook','AINotSure']
     survey_AI = ['AnimalsY','AnimalsN','AnimalsInfo']
     lite_AI = ["Animal Interaction - Didn't Check",'Animal Interaction - No',
-               'Animal Interaction - Chew Marks','Animal Interaction - Death']    
-    count_AI = df['AnimalsY'].value_counts().get('Yes', 0)
-    perc_AI = count_AI/count_total *100
-    type_AI = df['AnimalsInfo'].value_counts(dropna=True)
-    print(type_AI)
+               'Animal Interaction - Chew Marks','Animal Interaction - Death'] 
+    
+    AI_survey = survey[survey_AI].notna().any(axis=1)
+    AI_CSsurvey = CSsurvey[CSsurv_AI].notna().any(axis=1)
+    AI_CScount = CScount[CScount_AI].notna().any(axis=1)
+    AI_lite = lite[lite_AI].any(axis=1)
+    
+    AIs = [AI_survey, AI_CSsurvey, AI_CScount, AI_lite]
+    AI_tot = sum(AIs)
+    
+    subs_for_AI = [count_survey, count_lite, count_CSsurvey,
+                            count_CScount]
+    subs_tot = sum(subs_for_AI)
+#percent submissions reporting AI    
+    perc_AI = (AI_tot/subs_tot)*100
+    
+    dfs = [CSsurvey, survey]
+    deaths = []
+    for df in dfs:
+        death = df['AnimalsInfo'].str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
+        deaths.append(death)
+
+    lite_death = lite['Animal Interaction - Death'].sum()
+    deaths.append(lite_death)
+    lite_notchecked =  lite["Animal Interaction - Didn't Check"].sum()
+    lite_subs = count_lite - lite_notchecked
+    
+    tot_deaths = sum(deaths)
+    subs_for_death = [count_survey, lite_subs, count_CSsurvey]
+    death_subs_tot = sum(subs_for_death)
+#percent submissions reporting death    
+    perc_death = (tot_deaths/death_subs_tot)*100
+    
+    survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
+    CSsurvey_1st = CSsurvey['Connection_TakePartBeforeN'].value_counts().get('No', 0)
+    count_1st = count['First time'].value_counts().get('This is my first time!', 0)
+    
+    subs_for_1st = [survey_1st, CSsurvey_1st, count_1st]
+#number submitting for first time - not lite    
+    no_1st = sum(subs_for_1st)
+    
+    multiple_cols = ['Volunteer','A-Team','Community Hub']
+    dfs = [count, survey]
+    befores = []
+    for df in dfs:
+        before = df[cols].notna().sum()
+        befores.append(before)
+     
+#number submitting again - not including CS or lite        
+    beforers = sum(befores)    
+    
+    p_survey = survey['Connection_Action'].value_counts().get(4, 0)
+    p_CSsurvey = CSsurvey['Connection_Action'].value_counts().get(4, 0)
+    p_CScount = CScount['Connect_Feel'].value_counts().get(4, 0)
+    proud = [p_survey, p_CSsurvey, p_CScount]  
+#number feeling proud after taking action    
+    prouds = sum(proud)
+    
     
     #nature connection
     more_connected = df['Connection_ConnectionY'].value_counts().get('Yes', 0) / count_total * 100

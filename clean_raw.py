@@ -273,11 +273,11 @@ def count_clean_data(TFTin, TFTout):
         'Transect1','Transect2','Transect3','Transect4','Transect5','Transect6',
         'Transect7','Transect8','Transect9','Transect10','Connection_SUP_amount',
         'Connection_Feel','Connection_ConnectionY','Connection_ConnectionN',
-        'Connection_ConnectionSame','Connection_ConnectionNotSure',
+        'Connection_ConnectionSame','Connection_Unsure',
         'Count_UnnaturalY','Count_UnnaturalN',
         'Count_UnnaturalNotSure','Participate_CleanY','Participate_CleanN',
         'Participate_CleanNotSure','First_time','Volunteer','A-Team','Community Hub',
-        'FirstName','LastName','email','phone','email','SMS']
+        'FirstName','LastName','Email','phone','email','SMS']
     
     #rename columns
     df.columns=cols

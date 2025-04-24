@@ -817,8 +817,159 @@ def overview_stats(folderin, folderout):
 
         survey_results.to_csv(folderout + '/survey.csv', index=False)  
     
-    
+        impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 'Fauna Death',
+                        'First Time', 'Repeat volunteers','Felt proud',
+                        'Felt more connected','met someone inspiring', 'went out after',
+                        'Would do again','provided contact info'])
+        
+        #animal interaction - how many (%) answered the question and checked
+        CSsurv_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
+        CScount_AIcols = ['AIY','AIN','AINotSure']
+        survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
+        lite_AIcols = ['Animal Interaction - No',
+                   'Animal Interaction - Chew Marks','Animal Interaction - Death'] 
+        
+        AI_survey = survey[survey_AIcols].notna().any(axis=1)
+        AI_CSsurvey = CSsurvey[CSsurv_AIcols].notna().any(axis=1)
+        AI_CScount = CScount[CScount_AIcols].notna().any(axis=1)
+        AI_lite = lite[lite_AIcols].any(axis=1)
+        
+        AI_subs = [AI_survey, AI_CSsurvey, AI_CScount, AI_lite]
+        subs_tot = sum(AI_subs)
+        survey_AI = survey['AnimalsY'].value_counts().get('Yes', 0)
+        CSsurvey_AI = CSsurvey['AnimalsY'].value_counts().get('Yes', 0)
+        CScount_AI = CScount['AIY'].value_counts().get('Yes', 0)
+        lite_AI = lite['AnimalsY'].sum()
+        AI_yes = [survey_AI, CSsurvey_AI, CScount_AI, lite_AI]
+        AI_tot = sum(AI_yes)
+        
+    #percent submissions reporting AI observed
+        perc_AI = (AI_tot/subs_tot)*100
+        
+        dfs = [CSsurvey, survey]
+        deaths = []
+        for df in dfs:
+            death = df['AnimalsInfo'].str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
+            deaths.append(death)
 
+        lite_death = lite['Animal Interaction - Death'].sum()
+        deaths.append(lite_death)
+        
+        tot_deaths = sum(deaths)
+        subs_for_death = [AI_survey, AI_lite, AI_CSsurvey]
+        death_subs_tot = sum(subs_for_death)
+    #percent submissions reporting death of those reporting they checked for AI  
+        perc_death = (tot_deaths/death_subs_tot)*100
+        
+        survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
+        CSsurvey_1st = CSsurvey['Connection_TakePartBeforeN'].value_counts().get('No', 0)
+        count_1st = count['First time'].value_counts().get('This is my first time!', 0)
+        
+        subs_for_1st = [survey_1st, CSsurvey_1st, count_1st]
+    #number submitting for first time - not lite    
+        no_1st = sum(subs_for_1st)
+        
+        multiple_cols = ['Volunteer','A-Team','Community Hub']
+        dfs = [count, survey]
+        befores = []
+        for df in dfs:
+            before = df[multiple_cols].notna().sum()
+            befores.append(before)
+         
+    #number submitting again - not including CS or lite        
+        beforers = sum(befores)    
+        
+        p_survey4 = survey['Connection_Action'].value_counts().get(4, 0)
+        p_CSsurvey4 = CSsurvey['Connection_Action'].value_counts().get(4, 0)
+        p_CScount4 = CScount['Connect_Feel'].value_counts().get(4, 0)
+        p_survey5 = survey['Connection_Action'].value_counts().get(5, 0)
+        p_CSsurvey5 = CSsurvey['Connection_Action'].value_counts().get(5, 0)
+        p_CScount5 = CScount['Connect_Feel'].value_counts().get(5, 0)
+        proud = [p_survey4, p_CSsurvey4, p_CScount4, p_survey5, p_CSsurvey5, p_CScount5]     
+        prouds = sum(proud)
+        na_survey = survey['Connection_Action'].notna().sum()
+        na_CSsurvey = CSsurvey['Connection_Action'].notna().sum()
+        na_CScount = CScount['Connect_Feel'].notna().sum()
+        nas = [na_survey, na_CSsurvey, na_CScount]
+        count_nas = sum(nas)
+    #percent feeling proud after taking action 
+        perc_proud = (prouds/count_nas) * 100
+
+        dfs = [survey, count, CSsurvey]
+        connection = []
+        counts_connect = []
+        for df in dfs:
+            more_connected = df['Connection_ConnectionY'].value_counts().get('Yes', 0) 
+            connection.append(more_connected)
+            columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
+                                   'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
+            count_connect = df[columns_of_interest].notnull().any(axis=1).sum()
+            count_connect.append(count_connect)
+        
+        lite_connects = lite['Increased Nature Connection - Yes'].sum()
+        connection.append(lite_connects)
+        counts_connect.append(count_lite)
+        
+        total_answer_connect = sum(counts_connect)
+        connects = sum(connection)
+    #percent feeling more connected    
+        perc_more_connected = (connects/total_answer_connect) *100
+        
+        dfs = [survey, CSsurvey] 
+        people = []
+        answered_p = []
+        activity = []
+        answered_a = []
+        for df in dfs:
+            new_people = df['Connection_NewPeopleY'].value_counts().get('Yes', 0)
+            answered_people = df['Connection_NewPeopleY'].notnull().sum()
+            activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0)
+            answered_activity = df['Connection_ActivityAfterY'].notnull().sum()
+            people.append(new_people)
+            answered_p.append(answered_people)
+            activity.append(activity_after)
+            answered_a.append(answered_activity)
+        
+        new_people = sum(people)
+        ans_people = sum(answered_p)
+    #percentage meeting inspiring/new people    
+        perc_new_peeps = (new_people/ans_people) *100
+        
+        active_after = sum(activity)
+        ans_act = sum(answered_a)
+    #percentage doing an activity after
+        perc_active = (active_after/ans_act) * 100
+        
+        again = df['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
+        answered_again = df['Connection_TakePartAgainY'].notnull().sum()
+    #percentage who would participate again
+        perc_participate_again = (again/answered_again)*100
+
+        dfs = [count, survey, lite]
+        contacts = []
+        for df in dfs:
+            contact = df['Email'].notnull().sum()
+            contacts.append(contact)
+        
+        no_subs = [count_count, count_survey, count_lite]
+        contact_deets = sum(contacts)
+        subs_contact = sum(no_subs)
+    #pewrcent leaving contact details    
+        perc_contacts = (contact_deets/subs_contact)*100
+
+
+        impacts_results = impacts_results.append({'Fauna Interaction':perc_AI, 
+                        'Fauna Death':perc_death,'First Time':no_1st, 
+                        'Repeat volunteers':beforers,'Felt proud':perc_proud,
+                           'Felt more connected':perc_more_connected,
+                           'met someone inspiring':perc_new_peeps, 
+                           'went out after':perc_active,
+                           'Would do again':perc_participate_again,
+                           'provided contact info':perc_contacts  }, ignore_index=True)     
+        
+        impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
+               
+            
 
 def overview_stats_just_survey_and_count(folderin, folderout):
     """
@@ -1470,13 +1621,134 @@ def overview_stats_just_survey_and_count(folderin, folderout):
                 'outdoor gear reported':outs_reported,'outdoor gear total items':outs_total,
                 'outdoor gear % of total items':outs_proportion,
                 'brand 1':brand1,'brand 2':brand2,'brand 3':brand3}, ignore_index=True)  
-    
-   
-
 
     survey_results.to_csv(folderout + 'survey.csv', index=False)  
     
+    impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 'Fauna Death',
+                    'First Time', 'Repeat volunteers','Felt proud',
+                    'Felt more connected','met someone inspiring', 'went out after',
+                    'Would do again','provided contact info'])
+    
+    #animal interaction - how many (%) answered the question and checked
+    survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
 
+    subs_tot = survey[survey_AIcols].notna().any(axis=1)
+
+    AI_tot = survey['AnimalsY'].value_counts().get('Yes', 0)
+
+#percent submissions reporting AI observed
+    perc_AI = (AI_tot/subs_tot)*100
+    
+    dfs = [survey]
+    deaths = []
+    for df in dfs:
+        death = df['AnimalsInfo'].str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
+        deaths.append(death)
+
+    tot_deaths = sum(deaths)
+    subs_for_death = [subs_tot]
+    death_subs_tot = sum(subs_for_death)
+#percent submissions reporting death of those reporting they checked for AI  
+    perc_death = (tot_deaths/death_subs_tot)*100
+    
+    
+    survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
+    count_1st = count['First time'].value_counts().get('This is my first time!', 0)
+    
+    subs_for_1st = [survey_1st, count_1st]
+#number submitting for first time - not lite    
+    no_1st = sum(subs_for_1st)
+    
+    multiple_cols = ['Volunteer','A-Team','Community Hub']
+    dfs = [count, survey]
+    befores = []
+    for df in dfs:
+        before = df[multiple_cols].notna().sum()
+        befores.append(before)
+     
+#number submitting again - not including CS or lite        
+    beforers = sum(befores)    
+    
+    p_survey4 = survey['Connection_Action'].value_counts().get(4, 0)
+    p_survey5 = survey['Connection_Action'].value_counts().get(5, 0)
+    proud = [p_survey4, p_survey5]     
+    prouds = sum(proud)
+    count_nas = survey['Connection_Action'].notna().sum()
+
+#percent feeling proud after taking action 
+    perc_proud = (prouds/count_nas) * 100
+
+    dfs = [survey, count]
+    connection = []
+    counts_connect = []
+    for df in dfs:
+        more_connected = df['Connection_ConnectionY'].value_counts().get('Yes', 0) 
+        connection.append(more_connected)
+        columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
+                               'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
+        count_connect = df[columns_of_interest].notnull().any(axis=1).sum()
+        count_connect.append(count_connect)
+    
+    total_answer_connect = sum(counts_connect)
+    connects = sum(connection)
+#percent feeling more connected    
+    perc_more_connected = (connects/total_answer_connect) *100
+    
+    dfs = [survey] 
+    people = []
+    answered_p = []
+    activity = []
+    answered_a = []
+    for df in dfs:
+        new_people = df['Connection_NewPeopleY'].value_counts().get('Yes', 0)
+        answered_people = df['Connection_NewPeopleY'].notnull().sum()
+        activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0)
+        answered_activity = df['Connection_ActivityAfterY'].notnull().sum()
+        people.append(new_people)
+        answered_p.append(answered_people)
+        activity.append(activity_after)
+        answered_a.append(answered_activity)
+    
+    new_people = sum(people)
+    ans_people = sum(answered_p)
+#percentage meeting inspiring/new people    
+    perc_new_peeps = (new_people/ans_people) *100
+    
+    active_after = sum(activity)
+    ans_act = sum(answered_a)
+#percentage doing an activity after
+    perc_active = (active_after/ans_act) * 100
+    
+    again = df['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
+    answered_again = df['Connection_TakePartAgainY'].notnull().sum()
+#percentage who would participate again
+    perc_participate_again = (again/answered_again)*100
+
+    dfs = [count, survey]
+    contacts = []
+    for df in dfs:
+        contact = df['Email'].notnull().sum()
+        contacts.append(contact)
+    
+    no_subs = [count_count, count_survey]
+    contact_deets = sum(contacts)
+    subs_contact = sum(no_subs)
+#pewrcent leaving contact details    
+    perc_contacts = (contact_deets/subs_contact)*100
+
+
+    impacts_results = impacts_results.append({'Fauna Interaction':perc_AI, 
+                    'Fauna Death':perc_death,'First Time':no_1st, 
+                    'Repeat volunteers':beforers,'Felt proud':perc_proud,
+                       'Felt more connected':perc_more_connected,
+                       'met someone inspiring':perc_new_peeps, 
+                       'went out after':perc_active,
+                       'Would do again':perc_participate_again,
+                       'provided contact info':perc_contacts  }, ignore_index=True)     
+    
+    impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
+           
+        
     
 
 def overview_stats_just_survey(folderin, folderout):
@@ -2072,8 +2344,123 @@ def overview_stats_just_survey(folderin, folderout):
 
         survey_results.to_csv(folderout + '2022_survey.csv', index=False)
     
-    
-    
+        impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 'Fauna Death',
+                        'First Time', 'Repeat volunteers','Felt proud',
+                        'Felt more connected','met someone inspiring', 'went out after',
+                        'Would do again','provided contact info'])
+        
+        #animal interaction - how many (%) answered the question and checked
+        survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
+
+        subs_tot = survey[survey_AIcols].notna().any(axis=1)
+
+        AI_tot = survey['AnimalsY'].value_counts().get('Yes', 0)
+
+    #percent submissions reporting AI observed
+        perc_AI = (AI_tot/subs_tot)*100
+        
+        dfs = [survey]
+        deaths = []
+        for df in dfs:
+            death = df['AnimalsInfo'].str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
+            deaths.append(death)
+
+        tot_deaths = sum(deaths)
+        subs_for_death = [subs_tot]
+        death_subs_tot = sum(subs_for_death)
+    #percent submissions reporting death of those reporting they checked for AI  
+        perc_death = (tot_deaths/death_subs_tot)*100
+
+    #number submitting for first time - not lite           
+        survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
+
+        
+        multiple_cols = ['Volunteer','A-Team','Community Hub']
+
+    #number submitting again - not including CS or lite 
+        beforers = survey[multiple_cols].notna().sum()
+         
+
+        p_survey4 = survey['Connection_Action'].value_counts().get(4, 0)
+        p_survey5 = survey['Connection_Action'].value_counts().get(5, 0)
+        proud = [p_survey4, p_survey5]     
+        prouds = sum(proud)
+        count_nas = survey['Connection_Action'].notna().sum()
+
+    #percent feeling proud after taking action 
+        perc_proud = (prouds/count_nas) * 100
+
+        dfs = [survey]
+        connection = []
+        counts_connect = []
+        for df in dfs:
+            more_connected = df['Connection_ConnectionY'].value_counts().get('Yes', 0) 
+            connection.append(more_connected)
+            columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
+                                   'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
+            count_connect = df[columns_of_interest].notnull().any(axis=1).sum()
+            count_connect.append(count_connect)
+             
+        total_answer_connect = sum(counts_connect)
+        connects = sum(connection)
+    #percent feeling more connected    
+        perc_more_connected = (connects/total_answer_connect) *100
+        
+        dfs = [survey] 
+        people = []
+        answered_p = []
+        activity = []
+        answered_a = []
+        for df in dfs:
+            new_people = df['Connection_NewPeopleY'].value_counts().get('Yes', 0)
+            answered_people = df['Connection_NewPeopleY'].notnull().sum()
+            activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0)
+            answered_activity = df['Connection_ActivityAfterY'].notnull().sum()
+            people.append(new_people)
+            answered_p.append(answered_people)
+            activity.append(activity_after)
+            answered_a.append(answered_activity)
+        
+        new_people = sum(people)
+        ans_people = sum(answered_p)
+    #percentage meeting inspiring/new people    
+        perc_new_peeps = (new_people/ans_people) *100
+        
+        active_after = sum(activity)
+        ans_act = sum(answered_a)
+    #percentage doing an activity after
+        perc_active = (active_after/ans_act) * 100
+        
+        again = df['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
+        answered_again = df['Connection_TakePartAgainY'].notnull().sum()
+    #percentage who would participate again
+        perc_participate_again = (again/answered_again)*100
+
+        dfs = [survey]
+        contacts = []
+        for df in dfs:
+            contact = df['Email'].notnull().sum()
+            contacts.append(contact)
+        
+        no_subs = [count_survey]
+        contact_deets = sum(contacts)
+        subs_contact = sum(no_subs)
+    #pewrcent leaving contact details    
+        perc_contacts = (contact_deets/subs_contact)*100
+
+
+        impacts_results = impacts_results.append({'Fauna Interaction':perc_AI, 
+                        'Fauna Death':perc_death,'First Time':survey_1st, 
+                        'Repeat volunteers':beforers,'Felt proud':perc_proud,
+                           'Felt more connected':perc_more_connected,
+                           'met someone inspiring':perc_new_peeps, 
+                           'went out after':perc_active,
+                           'Would do again':perc_participate_again,
+                           'provided contact info':perc_contacts  }, ignore_index=True)     
+        
+        impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
+     
+        
 
             
             

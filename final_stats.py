@@ -827,25 +827,28 @@ def overview_stats(folderin, folderout):
                     'Felt more connected','met someone inspiring', 'went out after',
                     'Would do again','provided contact info'])
     
-    #animal interaction - how many (%) answered the question
-    CSsurv_AI = ['AnimalsY','AnimalsN','AnimalsNotChecked','AnimalsInfo']
-    CScount_AI = ['AIY','AIN','AIDidntLook','AINotSure']
-    survey_AI = ['AnimalsY','AnimalsN','AnimalsInfo']
-    lite_AI = ["Animal Interaction - Didn't Check",'Animal Interaction - No',
+    #animal interaction - how many (%) answered the question and checked
+    CSsurv_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
+    CScount_AIcols = ['AIY','AIN','AINotSure']
+    survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
+    lite_AIcols = ['Animal Interaction - No',
                'Animal Interaction - Chew Marks','Animal Interaction - Death'] 
     
-    AI_survey = survey[survey_AI].notna().any(axis=1)
-    AI_CSsurvey = CSsurvey[CSsurv_AI].notna().any(axis=1)
-    AI_CScount = CScount[CScount_AI].notna().any(axis=1)
-    AI_lite = lite[lite_AI].any(axis=1)
+    AI_survey = survey[survey_AIcols].notna().any(axis=1)
+    AI_CSsurvey = CSsurvey[CSsurv_AIcols].notna().any(axis=1)
+    AI_CScount = CScount[CScount_AIcols].notna().any(axis=1)
+    AI_lite = lite[lite_AIcols].any(axis=1)
     
-    AIs = [AI_survey, AI_CSsurvey, AI_CScount, AI_lite]
-    AI_tot = sum(AIs)
+    AI_subs = [AI_survey, AI_CSsurvey, AI_CScount, AI_lite]
+    subs_tot = sum(AI_subs)
+    survey_AI = survey['AnimalsY'].value_counts().get('Yes', 0)
+    CSsurvey_AI = CSsurvey['AnimalsY'].value_counts().get('Yes', 0)
+    CScount_AI = CScount['AIY'].value_counts().get('Yes', 0)
+    lite_AI = lite['AnimalsY'].sum()
+    AI_yes = [survey_AI, CSsurvey_AI, CScount_AI, lite_AI]
+    AI_tot = sum(AI_yes)
     
-    subs_for_AI = [count_survey, count_lite, count_CSsurvey,
-                            count_CScount]
-    subs_tot = sum(subs_for_AI)
-#percent submissions reporting AI    
+#percent submissions reporting AI observed
     perc_AI = (AI_tot/subs_tot)*100
     
     dfs = [CSsurvey, survey]
@@ -856,13 +859,11 @@ def overview_stats(folderin, folderout):
 
     lite_death = lite['Animal Interaction - Death'].sum()
     deaths.append(lite_death)
-    lite_notchecked =  lite["Animal Interaction - Didn't Check"].sum()
-    lite_subs = count_lite - lite_notchecked
     
     tot_deaths = sum(deaths)
-    subs_for_death = [count_survey, lite_subs, count_CSsurvey]
+    subs_for_death = [AI_survey, AI_lite, AI_CSsurvey]
     death_subs_tot = sum(subs_for_death)
-#percent submissions reporting death    
+#percent submissions reporting death of those reporting they checked for AI  
     perc_death = (tot_deaths/death_subs_tot)*100
     
     survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
@@ -971,7 +972,7 @@ def overview_stats(folderin, folderout):
                        'Would do again':perc_participate_again,
                        'provided contact info':perc_contacts  }, ignore_index=True)     
     
-                          
+    impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
            
             
             

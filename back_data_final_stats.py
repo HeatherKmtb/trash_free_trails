@@ -45,6 +45,11 @@ def overview_stats(folderin, folderout):
     
     count_results = pd.DataFrame(columns = ['month','count_submisssions', 'prevalence', 'hotspots',
                                       'worst_zone'])
+    
+    impacts_results = pd.DataFrame(columns = ['month','Fauna Interaction', 'Fauna Death',
+                        'First Time', 'Repeat volunteers','Felt proud',
+                        'Felt more connected','met someone inspiring', 'went out after',
+                        'Would do again','provided contact info'])
 
     
     for month in months:
@@ -781,8 +786,8 @@ def overview_stats(folderin, folderout):
             b3CS = CSsurvey[CSsurvey['B3_' + b].notna()]        
             dfs = (b1, b2, b3, b1CS, b2CS, b3CS)
             brand = pd.concat(dfs, ignore_index = True)
-            count = len(brand.index)
-            brand_res = brand_res.append({'brand':b, 'count':count}, ignore_index=True)
+            counted = len(brand.index)
+            brand_res = brand_res.append({'brand':b, 'count':counted}, ignore_index=True)
     
         test = brand_res.sort_values(by = ['count'], ascending=False)
 #brands 1, 2 and 3    
@@ -817,10 +822,7 @@ def overview_stats(folderin, folderout):
 
         survey_results.to_csv(folderout + '/survey.csv', index=False)  
     
-        impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 'Fauna Death',
-                        'First Time', 'Repeat volunteers','Felt proud',
-                        'Felt more connected','met someone inspiring', 'went out after',
-                        'Would do again','provided contact info'])
+
         
         #animal interaction - how many (%) answered the question and checked
         CSsurv_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
@@ -828,18 +830,18 @@ def overview_stats(folderin, folderout):
         survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
         lite_AIcols = ['Animal Interaction - No',
                    'Animal Interaction - Chew Marks','Animal Interaction - Death'] 
-        
-        AI_survey = survey[survey_AIcols].notna().any(axis=1)
-        AI_CSsurvey = CSsurvey[CSsurv_AIcols].notna().any(axis=1)
-        AI_CScount = CScount[CScount_AIcols].notna().any(axis=1)
-        AI_lite = lite[lite_AIcols].any(axis=1)
+
+        AI_survey = survey[survey_AIcols].notna().any(axis=1).sum()
+        AI_CSsurvey = CSsurvey[CSsurv_AIcols].notna().any(axis=1).sum()
+        AI_CScount = CScount[CScount_AIcols].notna().any(axis=1).sum()
+        AI_lite = lite[lite_AIcols].any(axis=1).sum()
         
         AI_subs = [AI_survey, AI_CSsurvey, AI_CScount, AI_lite]
         subs_tot = sum(AI_subs)
         survey_AI = survey['AnimalsY'].value_counts().get('Yes', 0)
         CSsurvey_AI = CSsurvey['AnimalsY'].value_counts().get('Yes', 0)
         CScount_AI = CScount['AIY'].value_counts().get('Yes', 0)
-        lite_AI = lite['AnimalsY'].sum()
+        lite_AI = (lite['Animal Interaction - Chew Marks'] | lite['Animal Interaction - Death']).sum()
         AI_yes = [survey_AI, CSsurvey_AI, CScount_AI, lite_AI]
         AI_tot = sum(AI_yes)
         
@@ -863,7 +865,11 @@ def overview_stats(folderin, folderout):
         
         survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
         CSsurvey_1st = CSsurvey['Connection_TakePartBeforeN'].value_counts().get('No', 0)
-        count_1st = count['First time'].value_counts().get('This is my first time!', 0)
+        if count['First_time'].isna().all:
+            count_1st = 0
+        else:
+            count_1st = count['First_time'].value_counts().get('This is my first time!', 0)
+
         
         subs_for_1st = [survey_1st, CSsurvey_1st, count_1st]
     #number submitting for first time - not lite    
@@ -874,7 +880,8 @@ def overview_stats(folderin, folderout):
         befores = []
         for df in dfs:
             before = df[multiple_cols].notna().sum()
-            befores.append(before)
+            before_tot = sum(before)
+            befores.append(before_tot)
          
     #number submitting again - not including CS or lite        
         beforers = sum(befores)    
@@ -904,7 +911,7 @@ def overview_stats(folderin, folderout):
             columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
                                    'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
             count_connect = df[columns_of_interest].notnull().any(axis=1).sum()
-            count_connect.append(count_connect)
+            counts_connect.append(count_connect)
         
         lite_connects = lite['Increased Nature Connection - Yes'].sum()
         connection.append(lite_connects)
@@ -940,8 +947,9 @@ def overview_stats(folderin, folderout):
     #percentage doing an activity after
         perc_active = (active_after/ans_act) * 100
         
-        again = df['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
-        answered_again = df['Connection_TakePartAgainY'].notnull().sum()
+        again = survey['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
+        again_cols = ['Connection_TakePartAgainY', 'Connection_TakePartAgainN', 'Connection_TakePartAgainUnsure']
+        answered_again = survey[again_cols].notnull().any(axis=1).sum()
     #percentage who would participate again
         perc_participate_again = (again/answered_again)*100
 
@@ -958,7 +966,7 @@ def overview_stats(folderin, folderout):
         perc_contacts = (contact_deets/subs_contact)*100
 
 
-        impacts_results = impacts_results.append({'Fauna Interaction':perc_AI, 
+        impacts_results = impacts_results.append({'month':month,'Fauna Interaction':perc_AI, 
                         'Fauna Death':perc_death,'First Time':no_1st, 
                         'Repeat volunteers':beforers,'Felt proud':perc_proud,
                            'Felt more connected':perc_more_connected,
@@ -984,7 +992,7 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     folderout: string
            path for folder to save results in
     """
-    month = '11'
+    month = ['3']
     
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 'total_survey',
@@ -1590,8 +1598,8 @@ def overview_stats_just_survey_and_count(folderin, folderout):
       
         dfs = (b1, b2, b3)
         brand = pd.concat(dfs, ignore_index = True)
-        count = len(brand.index)
-        brand_res = brand_res.append({'brand':b, 'count':count}, ignore_index=True)
+        counted = len(brand.index)
+        brand_res = brand_res.append({'brand':b, 'count':counted}, ignore_index=True)
     
     test = brand_res.sort_values(by = ['count'], ascending=False)
 #brands 1, 2 and 3    
@@ -1642,6 +1650,8 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     dfs = [survey]
     deaths = []
     for df in dfs:
+        if df['AnimalsInfo'].isna().all():
+            continue
         death = df['AnimalsInfo'].str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
         deaths.append(death)
 
@@ -1653,7 +1663,10 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     
     
     survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
-    count_1st = count['First time'].value_counts().get('This is my first time!', 0)
+    if not count['First_time'].dropna().empty:
+        count_1st = count['First_time'].value_counts().get('This is my first time!', 0)
+    else:
+        count_1st = 0
     
     subs_for_1st = [survey_1st, count_1st]
 #number submitting for first time - not lite    
@@ -1687,7 +1700,7 @@ def overview_stats_just_survey_and_count(folderin, folderout):
         columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
                                'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
         count_connect = df[columns_of_interest].notnull().any(axis=1).sum()
-        count_connect.append(count_connect)
+        counts_connect.append(count_connect)
     
     total_answer_connect = sum(counts_connect)
     connects = sum(connection)
@@ -1764,7 +1777,7 @@ def overview_stats_just_survey(folderin, folderout):
     folderout: string
            path for folder to save results in
     """
-    months = ['01','02','03','04','05','06','07','08','09','10','11','12']
+    months = ['01','02','03','04','05','06','07','08','09','10', '11','12']
     
     survey_results = pd.DataFrame(columns = ['month','survey_submisssions', 'total items removed', 
                 'weight removed', 'volume removed', 'distance_kms', 'area kms2',
@@ -1784,6 +1797,11 @@ def overview_stats_just_survey(folderin, folderout):
                                       'no_people', 'area_km2', 'distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
+    
+    impacts_results = pd.DataFrame(columns = ['month','Fauna Interaction', 'Fauna Death',
+                        'First Time', 'Repeat volunteers','Felt proud',
+                        'Felt more connected','met someone inspiring', 'went out after',
+                        'Would do again','provided contact info'])
 
     
     for month in months:
@@ -1915,7 +1933,7 @@ def overview_stats_just_survey(folderin, folderout):
                               'total_kg':total_kg,'total_cokecans':total_cokecans,
                               'Adjusted Total Items':ATI}, ignore_index=True)                                         
     
-        results.to_csv(folderout + '2022_overview.csv',index=False)    
+#        results.to_csv(folderout + '2022_overview.csv',index=False)    
     
 
 #Survey stats
@@ -2316,7 +2334,7 @@ def overview_stats_just_survey(folderin, folderout):
         brand2 = test.iloc[1]['brand']
         brand3 = test.iloc[2]['brand']
     
-        test.to_csv(folderout + '2022_' + month + '_brands.csv', index=False)
+#        test.to_csv(folderout + '2021_' + month + '_brands.csv', index=False)
     
         survey_results = survey_results.append({'month':month,'survey_submisssions':total_all_survey,
                 'total items removed':removed_items, 'weight removed':total_kg, 
@@ -2342,44 +2360,45 @@ def overview_stats_just_survey(folderin, folderout):
    
 
 
-        survey_results.to_csv(folderout + '2022_survey.csv', index=False)
+#        survey_results.to_csv(folderout + '2021_survey.csv', index=False)
     
-        impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 'Fauna Death',
-                        'First Time', 'Repeat volunteers','Felt proud',
-                        'Felt more connected','met someone inspiring', 'went out after',
-                        'Would do again','provided contact info'])
+
         
         #animal interaction - how many (%) answered the question and checked
         survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
 
-        subs_tot = survey[survey_AIcols].notna().any(axis=1)
-
-        AI_tot = survey['AnimalsY'].value_counts().get('Yes', 0)
+        AI_subs = survey[survey_AIcols].notna().any(axis=1)
+        subs_tot = sum(AI_subs)
+        if subs_tot == 0:
+            perc_AI = 'no respondents'
+        else:
+            AI_tot = survey['AnimalsY'].value_counts().get('Yes', 0)
 
     #percent submissions reporting AI observed
-        perc_AI = (AI_tot/subs_tot)*100
+            perc_AI = (AI_tot/subs_tot)*100
         
-        dfs = [survey]
-        deaths = []
-        for df in dfs:
-            death = df['AnimalsInfo'].str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
-            deaths.append(death)
+            dfs = [survey]
+            deaths = []
+            for df in dfs:
+                if df['AnimalsInfo'].isna().all():
+                    continue
+                death = df['AnimalsInfo'].str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
+                deaths.append(death)
 
-        tot_deaths = sum(deaths)
-        subs_for_death = [subs_tot]
-        death_subs_tot = sum(subs_for_death)
+            tot_deaths = sum(deaths)
+            death_subs_tot = subs_tot
     #percent submissions reporting death of those reporting they checked for AI  
-        perc_death = (tot_deaths/death_subs_tot)*100
+            perc_death = (tot_deaths/death_subs_tot)*100
 
     #number submitting for first time - not lite           
         survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
 
         
-        multiple_cols = ['Volunteer','A-Team','Community Hub']
+        multiple_cols = ['Volunteer','A-Team ','Community Hub']
 
+        befores = survey[multiple_cols].notna().sum()
     #number submitting again - not including CS or lite 
-        beforers = survey[multiple_cols].notna().sum()
-         
+        beforers = sum(befores)
 
         p_survey4 = survey['Connection_Action'].value_counts().get(4, 0)
         p_survey5 = survey['Connection_Action'].value_counts().get(5, 0)
@@ -2399,7 +2418,7 @@ def overview_stats_just_survey(folderin, folderout):
             columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
                                    'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
             count_connect = df[columns_of_interest].notnull().any(axis=1).sum()
-            count_connect.append(count_connect)
+            counts_connect.append(count_connect)
              
         total_answer_connect = sum(counts_connect)
         connects = sum(connection)
@@ -2449,16 +2468,16 @@ def overview_stats_just_survey(folderin, folderout):
         perc_contacts = (contact_deets/subs_contact)*100
 
 
-        impacts_results = impacts_results.append({'Fauna Interaction':perc_AI, 
-                        'Fauna Death':perc_death,'First Time':survey_1st, 
-                        'Repeat volunteers':beforers,'Felt proud':perc_proud,
+        impacts_results = impacts_results.append({'month':month,'Fauna Interaction':perc_AI, 
+                           'Fauna Death':perc_death,'First Time':survey_1st, 
+                           'Repeat volunteers':beforers,'Felt proud':perc_proud,
                            'Felt more connected':perc_more_connected,
                            'met someone inspiring':perc_new_peeps, 
                            'went out after':perc_active,
                            'Would do again':perc_participate_again,
                            'provided contact info':perc_contacts  }, ignore_index=True)     
         
-        impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
+        impacts_results.to_csv(folderout + '/2022_impacts.csv', index=False) 
      
         
 

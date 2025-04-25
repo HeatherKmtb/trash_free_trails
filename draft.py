@@ -131,4 +131,36 @@ years = ['2024','2025']
                                'duration_hours':total_time, 'connected':connected}, ignore_index=True)                                         
      
          results.to_csv(folderout + '/overview.csv',index=False)    
-    
+         
+         
+#SOMETHING ELSE
+#renaming count columns    
+
+years = ['2022','2023','2024']
+folderin = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Monthly stats/'
+
+for year in years:
+    filelist = glob.glob(folderin + year +'/input/count_*.csv')
+    for file in filelist:
+        df = pd.read_csv(file)
+        df = df.rename(columns={'Connect_ConnectY':'Connection_ConnectionY',
+            'Connect_ConnectN':'Connection_ConnectionN',
+            'Connect_ConnectSame':'Connection_ConnectionSame',
+            'Connect_ConnectNotSure':'Connection_Unsure','email':'Email'})
+        df.to_csv(file)
+        
+filelist = glob.glob(folderin +'2025/2025_*/input/count.csv')
+for file in filelist:
+        df = pd.read_csv(file)
+        df = df.rename(columns={'Connect_ConnectY':'Connection_ConnectionY',
+            'Connect_ConnectN':'Connection_ConnectionN',
+            'Connect_ConnectSame':'Connection_ConnectionSame',
+            'Connect_ConnectNotSure':'Connection_Unsure','email':'Email'})
+        df.to_csv(file)
+
+filelist = glob.glob(folderin +'survey_*.csv')
+for file in filelist:
+        df = pd.read_csv(file)
+        df = df.rename(columns={'A-Team ':'A-Team'})
+        df.to_csv(file)
+        

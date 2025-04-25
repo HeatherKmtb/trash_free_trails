@@ -785,8 +785,8 @@ def overview_stats(folderin, folderout):
         b3CS = CSsurvey[CSsurvey['B3_' + b].notna()]        
         dfs = (b1, b2, b3, b1CS, b2CS, b3CS)
         brand = pd.concat(dfs, ignore_index = True)
-        count = len(brand.index)
-        brand_res = brand_res.append({'brand':b, 'count':count}, ignore_index=True)
+        counted = len(brand.index)
+        brand_res = brand_res.append({'brand':b, 'count':counted}, ignore_index=True)
     
     test = brand_res.sort_values(by = ['count'], ascending=False)
 #brands 1, 2 and 3    
@@ -832,19 +832,19 @@ def overview_stats(folderin, folderout):
     CScount_AIcols = ['AIY','AIN','AINotSure']
     survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
     lite_AIcols = ['Animal Interaction - No',
-               'Animal Interaction - Chew Marks','Animal Interaction - Death'] 
+               'Animal Interaction - Chew Marks','Animal Interaction - Death']
     
-    AI_survey = survey[survey_AIcols].notna().any(axis=1)
-    AI_CSsurvey = CSsurvey[CSsurv_AIcols].notna().any(axis=1)
-    AI_CScount = CScount[CScount_AIcols].notna().any(axis=1)
-    AI_lite = lite[lite_AIcols].any(axis=1)
+    AI_survey = survey[survey_AIcols].notna().any(axis=1).sum()
+    AI_CSsurvey = CSsurvey[CSsurv_AIcols].notna().any(axis=1).sum()
+    AI_CScount = CScount[CScount_AIcols].notna().any(axis=1).sum()
+    AI_lite = lite[lite_AIcols].any(axis=1).sum()
     
     AI_subs = [AI_survey, AI_CSsurvey, AI_CScount, AI_lite]
     subs_tot = sum(AI_subs)
     survey_AI = survey['AnimalsY'].value_counts().get('Yes', 0)
     CSsurvey_AI = CSsurvey['AnimalsY'].value_counts().get('Yes', 0)
     CScount_AI = CScount['AIY'].value_counts().get('Yes', 0)
-    lite_AI = lite['AnimalsY'].sum()
+    lite_AI = (lite['Animal Interaction - Chew Marks'] | lite['Animal Interaction - Death']).sum()
     AI_yes = [survey_AI, CSsurvey_AI, CScount_AI, lite_AI]
     AI_tot = sum(AI_yes)
     
@@ -868,8 +868,11 @@ def overview_stats(folderin, folderout):
     
     survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
     CSsurvey_1st = CSsurvey['Connection_TakePartBeforeN'].value_counts().get('No', 0)
-    count_1st = count['First time'].value_counts().get('This is my first time!', 0)
-    
+    if count['First_time'].isna().all:
+        count_1st = 0
+    else:
+        count_1st = count['First_time'].value_counts().get('This is my first time!', 0)
+
     subs_for_1st = [survey_1st, CSsurvey_1st, count_1st]
 #number submitting for first time - not lite    
     no_1st = sum(subs_for_1st)
@@ -879,7 +882,8 @@ def overview_stats(folderin, folderout):
     befores = []
     for df in dfs:
         before = df[multiple_cols].notna().sum()
-        befores.append(before)
+        before_tot = sum(before)
+        befores.append(before_tot)
      
 #number submitting again - not including CS or lite        
     beforers = sum(befores)    
@@ -909,7 +913,7 @@ def overview_stats(folderin, folderout):
         columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
                                'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
         count_connect = df[columns_of_interest].notnull().any(axis=1).sum()
-        count_connect.append(count_connect)
+        counts_connect.append(count_connect)
     
     lite_connects = lite['Increased Nature Connection - Yes'].sum()
     connection.append(lite_connects)
@@ -945,8 +949,9 @@ def overview_stats(folderin, folderout):
 #percentage doing an activity after
     perc_active = (active_after/ans_act) * 100
     
-    again = df['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
-    answered_again = df['Connection_TakePartAgainY'].notnull().sum()
+    again = survey['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
+    again_cols = ['Connection_TakePartAgainY', 'Connection_TakePartAgainN', 'Connection_TakePartAgainUnsure']
+    answered_again = survey[again_cols].notnull().any(axis=1).sum()
 #percentage who would participate again
     perc_participate_again = (again/answered_again)*100
 

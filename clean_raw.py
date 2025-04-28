@@ -407,14 +407,14 @@ def lite_clean_data(TFTin, TFTout):
     tot_bags = sum(nobags)
     results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
 
-    #standard bin bag * 143
+    #standard bin bag * 184.6
     df2 = clean[clean['Quantity - Generic Bin Bag'] == True]
     bag = 'binbag'
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
         bags = i['How many bags?']
-        items = bags * 143
+        items = bags * 184.6
         bag_total.append(items) 
         nobags.append(bags)
         
@@ -423,14 +423,14 @@ def lite_clean_data(TFTin, TFTout):
     results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
         
         
-    #multiple standard bin bags * 143
+    #multiple standard bin bags * 184.6
     df2 = clean[clean['Quantity - Multiple Bin Bags'] == True]
     bag = 'multiplebinbags'
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
         bags = i['How many bags?']
-        items = bags * 143
+        items = bags * 184.6
         bag_total.append(items) 
         nobags.append(bags)        
         
@@ -653,7 +653,7 @@ def citizen_science_count_clean_data(TFTin, TFTout):
             y.append(year)
         
     df3['month'] = m
-    df3['year'] = ymunity 
+    df3['year'] = y 
                   
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'CS_count.csv', index=False)

@@ -992,7 +992,7 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     folderout: string
            path for folder to save results in
     """
-    month = ['3']
+    month = '3'
     
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 'total_survey',
@@ -1640,13 +1640,16 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     #animal interaction - how many (%) answered the question and checked
     survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
 
-    subs_tot = survey[survey_AIcols].notna().any(axis=1)
+    AI_subs = survey[survey_AIcols].notna().any(axis=1)
+    subs_tot = sum(AI_subs)
+    if subs_tot == 0:
+        perc_AI = 'no respondents'
+    else:
+        AI_tot = survey['AnimalsY'].value_counts().get('Yes', 0)
 
-    AI_tot = survey['AnimalsY'].value_counts().get('Yes', 0)
-
-#percent submissions reporting AI observed
+    #percent submissions reporting AI observed
     perc_AI = (AI_tot/subs_tot)*100
-    
+        
     dfs = [survey]
     deaths = []
     for df in dfs:
@@ -1656,11 +1659,10 @@ def overview_stats_just_survey_and_count(folderin, folderout):
         deaths.append(death)
 
     tot_deaths = sum(deaths)
-    subs_for_death = [subs_tot]
-    death_subs_tot = sum(subs_for_death)
-#percent submissions reporting death of those reporting they checked for AI  
+    death_subs_tot = subs_tot
+    #percent submissions reporting death of those reporting they checked for AI  
     perc_death = (tot_deaths/death_subs_tot)*100
-    
+
     
     survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
     if not count['First_time'].dropna().empty:
@@ -1677,8 +1679,8 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     befores = []
     for df in dfs:
         before = df[multiple_cols].notna().sum()
-        befores.append(before)
-     
+        before_tot = sum(before)
+        befores.append(before_tot)
 #number submitting again - not including CS or lite        
     beforers = sum(befores)    
     

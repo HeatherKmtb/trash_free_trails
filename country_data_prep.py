@@ -77,7 +77,7 @@ def get_country_data(postcodesin, TFTin, folderout):
 
     eng.to_csv(folderout + 'england.csv')
     scots.to_csv(folderout + 'alba.csv')
-    cymru.to_csv(folderout + 'cymru.csv')
+    cymru.to_csv(folderout + 'cymru_CScount.csv')
 
 def get_DRS_data_per_country(TFTin, folderout):
     """

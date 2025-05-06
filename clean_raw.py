@@ -340,9 +340,21 @@ def lite_clean_data(TFTin, TFTout):
     df['month'] = m
     df['year'] = y
         
-    df.to_csv(TFTout + 'lite.csv', index=False)
+    #remove rows with too many TRUES...
+    trash_cols = ['Quantity - Handful', 'Quantity - Pocketful', 'Quantity - Bread Bag',
+                  'Quantity - Carrier Bag', 'Quantity - Generic Bin Bag',
+                  'Quantity - Multiple Bin Bags']
     
-        
+    rows_to_drop = []
+
+    for index, row in df.iterrows():
+        true_counts = row[trash_cols].sum()
+        if true_counts != 1:
+            rows_to_drop.append(index)
+
+    df.drop(index=rows_to_drop, inplace=True)
+    
+    df.to_csv(TFTout + 'lite.csv', index=False)
     #now extract TRUE data for each bafg size and calcualte total items per bag type
     results = pd.DataFrame(columns = ['bag', 'TotItems', 'no. of bags'])
     
@@ -353,7 +365,7 @@ def lite_clean_data(TFTin, TFTout):
     nobags = []
     bag = 'handful'
     for index, i in df2.iterrows():
-        bags = i['How many bags?']
+        bags = 1
         items = bags * 6
         bag_total.append(items) 
         nobags.append(bags)
@@ -368,7 +380,7 @@ def lite_clean_data(TFTin, TFTout):
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
-        bags = i['How many bags?']
+        bags = 1
         items = bags * 10
         bag_total.append(items) 
         nobags.append(bags)
@@ -383,7 +395,7 @@ def lite_clean_data(TFTin, TFTout):
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
-        bags = i['How many bags?']
+        bags = 1
         items = bags * 25
         bag_total.append(items) 
         nobags.append(bags)
@@ -398,7 +410,7 @@ def lite_clean_data(TFTin, TFTout):
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
-        bags = i['How many bags?']
+        bags = 1
         items = bags * 35
         bag_total.append(items) 
         nobags.append(bags)
@@ -413,7 +425,7 @@ def lite_clean_data(TFTin, TFTout):
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
-        bags = i['How many bags?']
+        bags = 1
         items = bags * 184.6
         bag_total.append(items) 
         nobags.append(bags)
@@ -425,6 +437,7 @@ def lite_clean_data(TFTin, TFTout):
         
     #multiple standard bin bags * 184.6
     df2 = clean[clean['Quantity - Multiple Bin Bags'] == True]
+    df2['How many bags?'].fillna(1)
     bag = 'multiplebinbags'
     nobags = []
     bag_total = []

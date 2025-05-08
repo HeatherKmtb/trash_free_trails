@@ -137,6 +137,8 @@ def survey_clean_data(TFTin, TFTout):
     df_clean = df_clean.drop('GS?', axis=1)
     df_clean = df_clean.drop('GT?', axis=1)
     
+    df_clean = df_clean[~df_clean['TrailName'].str.contains(r'\btest\b', case=False, na=False)]
+    
     #Save file to add to raw dataset
     #df_clean.to_csv(rawout)
     
@@ -284,6 +286,8 @@ def count_clean_data(TFTin, TFTout):
     #remove row with extra column names that aren't now needed
     df3 = df.drop(index=0)
     
+    df3 = df3[~df3['TrailName'].str.contains(r'\btest\b', case=False, na=False)]
+  
     #prepare columns with year and month data to be able to extract monthly or yearly data 
     m = []
     y = []

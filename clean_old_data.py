@@ -213,8 +213,61 @@ def historic_survey_monthly_stats(folderin, dataout):
         
     results.to_csv(dataout) 
     
+def clean_google_forms_data(TFTin, folderout):
+    """
+    A function which takes clean monthly TFT survey data and produces monthly stats
     
-        
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with monthly TFT data
+            
+    folderout: string
+           path to save all new montly and yearly files
+    """    
+    
+    df = pd.read_csv(TFTin)
+
+    cols = df.columns
+    
+    , 'Postcode', 'SurveyType FullSurvey',
+           'SurveyType TrashCount', 'Time Start', 'xTFT ID',
+           'z_AnimalDeath YN', 'z_AnimalDesc', 'z_AnimalTot', 'z_Brand1',
+           'z_Brand2', 'z_Brand3', 'z_DateAll', 'z_MoreConnected',
+            'z_NewPeopleAll',
+           , 'z_RecycleTot', 'z_TakePartAll',
+             'Perc SU', 'Recycle Perc', 
+           
+            'Val Hygeine Baby',
+           'Val Hygiene Covid', 'Val Hygiene Products', 'Val Hygiene SUCovid',
+           'Val Ind Build', 'Val Ind Farm', 'Val Ind Forest', 'Val Misc Poly',
+           'Val Other',  'Val OtherSoft Cartons',
+           'Val OtherSoft Straws', 'Val Outdoor MTB', 'Val Outdoor Other',
+             'Val Rec Cable', 'Val Rec Festival',
+           'Val Rec Helium', 'Val Rec OutdoorEvents', 'Val Rec Seasonal',
+           'Val Smoke Butts', 'Val Smoke Drugs', 'Val Smoke Other',
+           'Val Smoke Vape', 'Val Snacks BBQ', 'Val Snacks Corners',
+           'Val Snacks Crisps', 'Val Snacks Fruit', 'Val Snacks Gum',
+           'Val Snacks Other', 'Val Snacks Pbags', 'Val Snacks Sticks',
+           'Val Snacks Wrap', 'Val Textiles Clothes', 'Val ToGo HotCups',
+           'Val ToGo Packaging', 'z_AnimalDeath', 'z_BinBagCalc', 'z_BinBagWeight',
+           'z_ItemPerKm', 'z_ITEMS_Alc', 'z_ITEMS_DRS_DrinksContainers',
+           'z_ITEMS_Energy_Products', 'z_ITEMS_SoftDrinks_and_water',
+           'z_ITEMS_SoftDrinksCans', 'z_PercAction', 'z_PercAnimal',
+           'z_PercAnimalDeath', 'z_PercConnection', 'z_PercNewPeople',
+           'z_PercNewPeople_survey', 'z_PercRecycled', 'z_PercTakePart',
+           , 'z_TotalCleans', 'z_Weight'
+    
+    new_order = ['Date TrailClean','z_people_Dimension', 'People', 'z_postcodeSect',
+                'Trail Name', 'z_ZonesAll', 'z_MostZonesAll','z_TimeSpentHours',
+                'Time', 'Distance', 'z_TotItemsAll', 'Bin Bags', 'Val Pet F Dog',  'Val Pet U Dog',
+                'Val Pet Other', 'Val PSoft Water', 'Val PSoft Soft', 'Val OtherSoft Cans',
+                'Val BH1PSoft Tops', 'Val Energy Bottles', 'Val Energy Cans', 'Val Energy Gel',
+                'Val Energy Gel and End', 'Val Energy GelEnd', 'Val Alc Cans', 
+                'Val Alc Glass', 'Val Alc Tops', 
+                ]
+    
           
     
     

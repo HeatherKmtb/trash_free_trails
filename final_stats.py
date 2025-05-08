@@ -24,8 +24,9 @@ def overview_stats(folderin, folderout):
 
     
     #create df for results - or could read in and append to overall stats sheet
-    results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 'total_survey',
-                                      'no_people', 'area_km2', 'distance_km','duration_hours', 
+    results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 
+                                      'total_survey', 'total_lite', 'trash_watch',
+                                      'no_people','area_km2','distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
@@ -58,6 +59,8 @@ def overview_stats(folderin, folderout):
     srvy = [count_survey, count_CSsurvey]
 #Total survey dasets
     total_survey = sum(srvy)
+#Total lite datasets calculated as count_lite
+    
     
     #Overview - volunteers, distance, hours, items
     mins = survey['Time_min']
@@ -97,11 +100,10 @@ def overview_stats(folderin, folderout):
     lite_km = count_lite * 6.77
     
     survey_area = survey_km * 0.006
-    count_area = count_km * 0.006
-    CScount_area = CScount_km * 0.006
+    lite_area = lite_km * 0.006
     CSsurvey_area = CSsurvey['Area_km2'].sum()
     
-    areas = [survey_area, count_area, CScount_area, CSsurvey_area]
+    areas = [survey_area, CSsurvey_area, lite_area]
 #area cleaned / surveyed - excludes Lite
     area = sum(areas)   
     
@@ -246,7 +248,8 @@ def overview_stats(folderin, folderout):
     ATI = ATI_next + ATI_lite + ATI_survey
     
     results = results.append({'total_submisssions':total_CS, 'total_count':total_count,
-                              'total_survey':total_survey,'no_people':total_people, 
+                              'total_survey':total_survey, 'total_lite': count_lite,
+                              'no_people':total_people, 
                               'area_km2':area, 'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
                               'items_surveyed':surveyed_items, 'total_items':total_items,
@@ -347,7 +350,7 @@ def overview_stats(folderin, folderout):
 #distance covered    
     km_survey = sum(kms_survey)
     
-    areas_survey = [survey_area,  CSsurvey_area]
+    areas_survey = [survey_area,  CSsurvey_area, lite_area]
 #area directly protected - excludes Lite
     area_survey = sum(areas_survey)   
     
@@ -930,11 +933,13 @@ def overview_stats(folderin, folderout):
     answered_p = []
     activity = []
     answered_a = []
+    people_cols = ['Connection_NewPeopleY', 'Connection_NewPeopleN', 'Connection_NewPeopleNotSure']
+    activity_cols = ['Connection_ActivityAfterY', 'Connection_ActivityAfterN', 'Connection_ActivityAfterNotSure']
     for df in dfs:
         new_people = df['Connection_NewPeopleY'].value_counts().get('Yes', 0)
-        answered_people = df['Connection_NewPeopleY'].notnull().sum()
+        answered_people = df[people_cols].notnull().any(axis=1).sum()
         activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0)
-        answered_activity = df['Connection_ActivityAfterY'].notnull().sum()
+        answered_activity = df[activity_cols].notnull().any(axis=1).sum()
         people.append(new_people)
         answered_p.append(answered_people)
         activity.append(activity_after)
@@ -965,7 +970,7 @@ def overview_stats(folderin, folderout):
     no_subs = [count_count, count_survey, count_lite]
     contact_deets = sum(contacts)
     subs_contact = sum(no_subs)
-#pewrcent leaving contact details    
+#percent leaving contact details    
     perc_contacts = (contact_deets/subs_contact)*100
 
 

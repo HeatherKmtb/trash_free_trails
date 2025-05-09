@@ -572,17 +572,16 @@ def overview_stats(folderin, folderout):
     most_cat = c['type']    
 
     sub_DRS =   ['Plastic Water Bottles','Plastic Soft Drink Bottles',
-    'Aluminium soft drink cans','Plastic bottle, top','Glass soft drink bottles',
+    'Aluminium soft drink cans','Glass soft drink bottles',
     'Plastic energy drink bottles','Aluminium energy drink can',
-    'Aluminium alcoholic drink cans','Glass alcoholic bottles', 'Glass bottle tops']
+    'Aluminium alcoholic drink cans','Glass alcoholic bottles']
     
     DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
-    'Value Aluminium soft drink cans','Value Plastic bottle, top','Value Glass soft drink bottles',
+    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
     'Value Plastic energy drink bottles','Value Aluminium energy drink can',
-    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles', 'Value Glass bottle tops']
+    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles']
     
-    DRS_glass = ['Value Glass soft drink bottles','Value Glass alcoholic bottles', 
-                 'Value Glass bottle tops']
+    DRS_glass = ['Value Glass soft drink bottles','Value Glass alcoholic bottles']
     
     df_DRS_subs = survey[sub_DRS]    
     subs_indy = df_DRS_subs.any(axis=1).sum()

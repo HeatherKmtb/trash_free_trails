@@ -137,5 +137,14 @@ for d in data:
     new.to_csv(folderout + d)
     
        
-       
-    
+folderin = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/lite/'  
+fileout = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/lite/all_lite.csv'   
+data = ['lite_2024', 'lite_2025']   
+
+dfs=[] 
+for d in data:
+    df = pd.read_csv(folderin + d + '.csv')
+    dfs.append(df)
+
+new = pd.concat(dfs, ignore_index=True)   
+new.to_csv(fileout)

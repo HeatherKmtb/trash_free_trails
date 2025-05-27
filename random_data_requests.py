@@ -96,7 +96,8 @@ def average_hours_per_person(datain):
 
 def overview_stats_with_extras(folderin, folderout):
     """
-    A function which takes clean monthly TFT survey data and produces monthly stats
+    A function which takes clean monthly TFT survey data and produces monthly stats,
+    add ons - fruit peel and others
     
     Parameters
     ----------
@@ -1118,16 +1119,139 @@ def overview_stats_with_extras(folderin, folderout):
     
     impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
            
+   
+def ateam_weekender(TFT24in, TFT25in, fileout):
+    """
+    A function which takes TFT dats since A-TEAMers were seperated and calcuates
+    some stats.
+    
+    Parameters
+    ----------
+    
+    TFT24in: string
+             path to input folder with 2024.csv file with TFT data
+             
+    TFT25in: string
+             path to input folder with 2024.csv file with TFT data             
             
-            
-            
-            
-            
-            
+    fileout: string
+           path for file to save results in
+    """         
+    
+    df1 = pd.read_csv(TFT24in)
+    df2 = pd.read_csv(TFT25in)
+    
+    dfs = [df1, df2]
+    df = pd.concat(dfs, ignore_index=True)
+    
+    results = pd.DataFrame(columns = ['kms_cleaned', 'total_items','top 3 items',
+                                      'top 3 brands', 'top 3 a-teamers (most cleans)',
+                                      '%DRS'])
+                           
+    dfA = df[df['A-Team '].notna()]
+    km = dfA['Distance_km'].sum()
+    tot_items = dfA['TotItems'].sum() 
+    
+    items = ['Full Dog Poo Bags','Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+          'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
+          'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
+          'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
+          'Aluminium alcoholic drink cans','Glass alcoholic bottles','Glass bottle tops',
+          'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
+          'Drinks tops (eg., McDonalds drinks)','Cartons','Plastic straws','Paper straws',
+          'Plastic carrier bags','Plastic bin bags','Confectionary/sweet wrappers',
+          'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
+          'Crisps Packets','Used Chewing Gum',
+          'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+          'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+          'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',
+          'Food on the go (eg.salad boxes)','Homemade lunch (eg., aluminium foil, cling film)',
+          'Fruit peel & cores','Cigarette Butts','Smoking related','Disposable vapes',
+          'Vaping / E-Cigarette Paraphernalia','Drugs related','Farming',
+          'Salt/mineral lick buckets','Silage wrap','Forestry','Tree guards','Industrial',
+          'Cable ties','Industrial plastic wrap','Toilet tissue','Face/ baby wipes',
+          'Nappies','Single-Use Period products','Single-Use Covid Masks','Rubber/nitrile gloves',
+          'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
+          'Normal balloons','Helium balloons','MTB related (e.g. inner tubes, water bottles etc)',
+          'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
+          'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
+          'Plastic milk bottles','Plastic food containers','Cardboard food containers',
+          'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
+          'Weird/Retro']   
     
     
-                                      
+    # Filter your DataFrame to just the columns that match your items
+    matching_cols = [col for col in df.columns if col in items]
 
+    # Sum the values in each item column
+    item_totals = dfA[matching_cols].sum().sort_values(ascending=False)
+
+    # Get the top 3 items
+    top_3_items = item_totals.head(3)
+
+            
+    #calculate brands
+    brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
+              'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway','Other']
+    
+    brand_res = pd.DataFrame(columns = ['brand','count'])
+                             
+    for b in brands:
+        b1 = df[df['B1_' + b].notna()]
+        b2 = df[df['B2_' + b].notna()]
+        b3 = df[df['B3_' + b].notna()]
+        dfs = (b1, b2, b3)
+        brand = pd.concat(dfs, ignore_index = True)
+          
+    # Sum the values in each brand column
+    brand_totals = dfA[brand].sum().sort_values(ascending=False)
+
+    # Get the top 3 items
+    top_3_brands = brand_totals.head(3)        
+
+    from rapidfuzz import process
+    
+    
+    dfA['Name'] = dfA['Name'].astype(str)
+    dfA['Surname'] = dfA['Surname'].astype(str)
+    dfA['full_name'] = dfA['Name'].fillna('') + ' ' + dfA['Surname'].fillna('')
+    dfA['full_name'] = dfA['full_name'].str.strip().str.lower()
+    
+    mask_fullname_in_name = dfA.apply(lambda row: row['Surname'].lower() in row['Name'].lower(), axis=1)
+    dfA.loc[mask_fullname_in_name, 'full_name'] = dfA.loc[mask_fullname_in_name, 'Name'].str.lower().str.strip()
+
+    # Get unique names
+    unique_names = dfA['full_name'].unique()
+
+    # Map similar names to a canonical name
+    name_map = {}
+    canonical_names = []
+    for name in unique_names:
+        result = process.extractOne(name, canonical_names, score_cutoff=90)
+    
+        if result:  # result is a tuple like (match, score, index)
+           match = result[0]
+           name_map[name] = match
+        else:
+            name_map[name] = name
+            canonical_names.append(name)
+
+    # Apply mapping
+    dfA['cleaned_name'] = dfA['full_name'].map(name_map)      
+    top_contributors = dfA['cleaned_name'].value_counts().head(3)
+    
+    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
+    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles']
+                                      
+    DRSs = dfA.sum(axis=0)[DRS].to_list() 
+    DRS_items = sum(DRSs)
+    perc_DRS = (DRS_items/tot_items)*100
+    
+    
+    
+    
     
     
 

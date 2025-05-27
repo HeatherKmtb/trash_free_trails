@@ -702,6 +702,99 @@ def add_to_existing_data(monthin, year_folder):
         df_final.to_csv(year_folder + file + '/' + file + '_2025.csv', index=False)    
         
     
+
+def TFR_clean_data(TFTin, TFTout):
+    """
+    A function which takes new raw TFR survey data and prepares it for analyses
+    
+    Parameters
+    ----------
+             
+    TFTin: string
+            path to folder with input csv file with new data  
+             
+            
+    TFTout: string
+            path to folder to save file with clean data
+    """
+    #read csv file
+    df = pd.read_csv(TFTin + 'survey.csv' )
+    
+    #remove unneeded columns
+    df = df.drop('Respondent ID', axis=1)
+    df = df.drop('Collector ID', axis=1)
+    df = df.drop('Start Date', axis=1)
+    df = df.drop('End Date', axis=1)
+    df = df.drop('IP Address', axis=1)
+    df = df.drop('Email Address', axis=1)
+    df = df.drop('First Name', axis=1)
+    df = df.drop('Last Name', axis=1)
+    df = df.drop('Custom Data 1', axis=1)
+
+
+    #provide correct column names - could read from existing once wierd columns are sorted
+    cols = ['Start_Date', 'End_Date','postcode','EventName','ActivityMTB',
+        'ActivityGravel','ActivityRun','ActivityTriathlon','ActivityHike',
+        'ActivityFestival','ActivityOther', 'Attendees',
+        'Conversations','Newsletters','Merch_teeS','Merch_teeS', 'Merch_teeM'
+        'Merch_teeL', 'Merch_teeXL', 'Merch_tee_5-6', 'Merch_tee_7-8',
+        'Merch_tee_9-11', 'Merch_hoodyS', 'Merch_hoodyM', 'Merch_hoodyL', 
+        'Merch_hoodyXL', 'Mech_glasscoffee', 'Merch_KBCcoffee', 'Merch_Hydroflask',
+        'Merch_Stanleyflask', 'Merch_Patch_TFTlogo', 'Merch_Patch_PAlogo', 
+        'Merch_Patch_PAwhitesquare', 'Merch_Patch_Trashmob', 'Merch_woodmarker',
+        'Merch_steelmarker', 'Full Dog Poo Bags',
+        'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+        'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
+        'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
+        'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
+        'Aluminium alcoholic drink cans','Glass alcoholic bottles','Glass bottle tops',
+        'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
+        'Drinks tops (eg., McDonalds drinks)','Cartons','Plastic straws','Paper straws',
+        'Plastic carrier bags','Plastic bin bags','Confectionary/sweet wrappers',
+        'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
+        'Crisps Packets','Used Chewing Gum',
+        'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+        'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+        'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',
+        'Food on the go (eg.salad boxes)','Homemade lunch (eg., aluminium foil, cling film)',
+        'Fruit peel & cores','Cigarette Butts','Smoking related','Disposable vapes',
+        'Vaping / E-Cigarette Paraphernalia','Drugs related','Farming',
+        'Salt/mineral lick buckets','Silage wrap','Forestry','Tree guards','Industrial',
+        'Cable ties','Industrial plastic wrap','Toilet tissue','Face/ baby wipes',
+        'Nappies','Single-Use Period products','Rubber/nitrile gloves', 'Single-Use Covid Masks',
+        'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
+        'Normal balloons','Helium balloons','MTB related (e.g. inner tubes, water bottles etc)',
+        'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
+        'Textiles','Clothes & Footwear',
+        'Plastic milk bottles', 'Glass milk bottles','Plastic food containers',
+        'Cardboard food containers',
+        'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
+        'Weird/Retro', 'Plastic cups', 'Event info leaflets', 'Giveaways',
+        'Race tape', 'Food tokens', 'Receipts', 'Paper napkins', 'Reusable bottle',
+        'B1_Lucozade','B1_Coke','B1_RedBull','B1_Monster','B1_Cadbury',
+        'B1_McDonalds','B1_Walkers','B1_Mars','B1_StellaArtois','B1_Strongbow','B1_Costa',
+        'B1_Budweiser','B1_Haribo','B1_SIS','B1_Carling','B1_Fosters','B1_Thatchers',
+        'B1_Pepsi','B1_Nestle','B1_Subway','B1_Other','B2_Lucozade','B2_Coke','B2_RedBull',
+        'B2_Monster','B2_Cadbury','B2_McDonalds','B2_Walkers','B2_Mars','B2_StellaArtois',
+        'B2_Strongbow','B2_Costa','B2_Budweiser','B2_Haribo','B2_SIS','B2_Carling',
+        'B2_Fosters','B2_Thatchers','B2_Pepsi','B2_Nestle','B2_Subway','B2_Other',
+        'B3_Lucozade','B3_Coke','B3_RedBull','B3_Monster','B3_Cadbury','B3_McDonalds',
+        'B3_Walkers','B3_Mars','B3_StellaArtois','B3_Strongbow','B3_Costa','B3_Budweiser',
+        'B3_Haribo','B3_SIS','B3_Carling','B3_Fosters','B3_Thatchers','B3_Pepsi',
+        'B3_Nestle','B3_Subway','B3_Other','AnimalsY','AnimalsN','AnimalsNotChecked',
+        'AnimalsInfo']
+
+
+    #rename columns
+    df.columns=cols
+    #remove row with extra column names that aren't now needed
+    df_clean = df.drop(index=0)
+    
+    #need distance = 0 changed to ? here - use an average here!!!!
+    df_clean.loc[df_clean['Distance_km'] == 0, 'Distance_km'] = 4.83
+                  
+    #exporting the cleaned monthly data 
+    df_clean.to_csv(TFTout + 'TFR.csv', index=False)
     
     
     

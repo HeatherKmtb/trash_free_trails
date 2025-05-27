@@ -1249,6 +1249,18 @@ def ateam_weekender(TFT24in, TFT25in, fileout):
     DRS_items = sum(DRSs)
     perc_DRS = (DRS_items/tot_items)*100
     
+    Names = ['Alistair Hair', 'Andy Lund', 'Chloe Parker', 'Dan Jarvis', 
+             'Dom Barry', 'Ed Roberts', 'Emma Johnson', 'Gill Houlsby', 
+             'Hannah Lowther', 'Hari Milburn', 'Harry Wood', 'Ian White', 
+             'Ian Lean', 'Jake Rainford', 'James Mackeddie', 'Jane Chisholm', 
+             'Jay Schreiber', 'Jo Shwe', 'John Bellis', 'Kyle Harvey', 
+             'Lauren Munro-Bennet', 'Leon Rosser', 'Mario Presi', 'Mark Wilson', 
+             'Marv Davies', 'Matt Kennelly', 'Monet Adams', 'Neil Hudson', 
+             'Nush Lee', 'Pete Scullion', 'Ram Gurung', 'Rosie Holdsworth', 
+             'Ross Lambie', 'Sam Piper', 'Tom Laws', 'Will Atkinson', 
+             'Victoria Herbert', 'Ollie Cain', 'Laurance Ward', 'Tim Bowden', 
+             'Kristina Vackova', 'Helen Wilson', 'Lauren Cattell']
+    
     
     
     

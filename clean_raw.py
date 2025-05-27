@@ -718,7 +718,7 @@ def TFR_clean_data(TFTin, TFTout):
             path to folder to save file with clean data
     """
     #read csv file
-    df = pd.read_csv(TFTin + 'survey.csv' )
+    df = pd.read_csv(TFTin + 'Trash Free Races.csv' )
     
     #remove unneeded columns
     df = df.drop('Respondent ID', axis=1)
@@ -789,10 +789,7 @@ def TFR_clean_data(TFTin, TFTout):
     df.columns=cols
     #remove row with extra column names that aren't now needed
     df_clean = df.drop(index=0)
-    
-    #need distance = 0 changed to ? here - use an average here!!!!
-    df_clean.loc[df_clean['Distance_km'] == 0, 'Distance_km'] = 4.83
-                  
+          
     #exporting the cleaned monthly data 
     df_clean.to_csv(TFTout + 'TFR.csv', index=False)
     

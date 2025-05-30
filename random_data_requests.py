@@ -10,6 +10,8 @@ import numpy as np
 import statistics
 import glob
 from os import path
+from rapidfuzz import process
+import re
 
 
 def get_data_quantity_per_month(datain, dataout):
@@ -1209,7 +1211,7 @@ def ateam_weekender(TFT24in, TFT25in, fileout):
     # Get the top 3 items
     top_3_brands = brand_totals.head(3)        
 
-    from rapidfuzz import process
+
     
     
     dfA['Name'] = dfA['Name'].astype(str)
@@ -1248,34 +1250,314 @@ def ateam_weekender(TFT24in, TFT25in, fileout):
     DRSs = dfA.sum(axis=0)[DRS].to_list() 
     DRS_items = sum(DRSs)
     perc_DRS = (DRS_items/tot_items)*100
+
+
+def ateam_weekender_alt(folderin,  folderout):
+    """
+    A function which takes TFT dats since A-TEAMers were seperated and calcuates
+    some stats.
     
-    Names = ['Alistair Hair', 'Andy Lund', 'Chloe Parker', 'Dan Jarvis', 
-             'Dom Barry', 'Ed Roberts', 'Emma Johnson', 'Gill Houlsby', 
-             'Hannah Lowther', 'Hari Milburn', 'Harry Wood', 'Ian White', 
-             'Ian Lean', 'Jake Rainford', 'James Mackeddie', 'Jane Chisholm', 
-             'Jay Schreiber', 'Jo Shwe', 'John Bellis', 'Kyle Harvey', 
-             'Lauren Munro-Bennet', 'Leon Rosser', 'Mario Presi', 'Mark Wilson', 
-             'Marv Davies', 'Matt Kennelly', 'Monet Adams', 'Neil Hudson', 
-             'Nush Lee', 'Pete Scullion', 'Ram Gurung', 'Rosie Holdsworth', 
-             'Ross Lambie', 'Sam Piper', 'Tom Laws', 'Will Atkinson', 
-             'Victoria Herbert', 'Ollie Cain', 'Laurance Ward', 'Tim Bowden', 
-             'Kristina Vackova', 'Helen Wilson', 'Lauren Cattell']
+    Parameters
+    ----------
+    
+    folderin: string
+             path to input folder with yearly TFT data
+             
+    fileout: string
+           path for file to save results in
+    """   
+    
+    Names = ['alistair hair', 'andy lund', 'chloe parker', 'dan jarvis', 
+             'dom barry', 'ed roberts', 'emma johnson', 'gill houlsby', 
+             'hannah lowther', 'hari milburn', 'harry wood', 'ian white', 
+             'ian lean', 'jake rainford', 'james mackeddie', 'jane chisholm', 
+             'jay schreiber', 'jo shwe', 'john bellis', 'kyle harvey', 
+             'lauren munro-bennet', 'leon rosser', 'mario presi', 'mark wilson', 
+             'marv davies', 'matt kennelly', 'monet adams', 'neil hudson', 
+             'nush lee', 'pete scullion', 'ram gurung', 'rosie holdsworth', 
+             'ross lambie', 'sam piper', 'tom laws', 'will atkinson', 
+             'victoria herbert', 'ollie cain', 'laurance ward', 'tim bowden', 
+             'kristina vackova', 'helen wilson', 'lauren cattell']
     
     
+    df1 = pd.read_csv(folderin + 'survey/survey_2024.csv')
+    df2 = pd.read_csv(folderin + 'survey/survey_2025.csv')
     
+    dfs = [df1, df2]
+    dfA = pd.concat(dfs, ignore_index=True)
     
+  #sort out names
+    # Normalize names function
+    def normalize_name(name):
+        name = name.lower().strip()
+        name = re.sub(r'\b(\w+)( \1\b)+', r'\1', name)  # Remove repeated words
+        name = re.sub(r'\s+', ' ', name)               # Normalize whitespace
+        return name
     
+    dfA['Name'] = dfA['Name'].astype(str).fillna('')
+    dfA['Surname'] = dfA['Surname'].astype(str).fillna('')
+    dfA['full_name'] = dfA['Name'].fillna('') + ' ' + dfA['Surname'].fillna('')
+    dfA['full_name'] = dfA['full_name'].apply(normalize_name)
+    
+    # Fuzzy match to canonical list
+    dfA['matched_name'] = dfA['full_name'].apply(
+        lambda x: process.extractOne(x, Names, score_cutoff=80)[0]
+              if process.extractOne(x, Names, score_cutoff=80)
+              else x)
+    
+    survey = dfA
+    
+    df1 = pd.read_csv(folderin + 'lite/lite_2024.csv')
+    df2 = pd.read_csv(folderin + 'lite/lite_2025.csv')
+    
+    dfs = [df1, df2]
+    dfA = pd.concat(dfs, ignore_index=True)    
+    
+    dfA['Title'] = dfA['Title'].astype(str)
+    dfA['full_name'] = dfA['Title'].apply(normalize_name)
+        
+    # Fuzzy match to canonical list
+    dfA['matched_name'] = dfA['full_name'].apply(
+        lambda x: process.extractOne(x, Names, score_cutoff=80)[0]
+              if process.extractOne(x, Names, score_cutoff=80)
+              else x)
+    
+    lite = dfA        
+    
+    df1 = pd.read_csv(folderin + 'count/count_2024.csv')
+    df2 = pd.read_csv(folderin + 'count/count_2025.csv')
+    
+    dfs = [df1, df2]
+    dfA = pd.concat(dfs, ignore_index=True)    
+        
+    dfA['FirstName'] = dfA['FirstName'].astype(str).fillna('')
+    dfA['LastName'] = dfA['LastName'].astype(str).fillna('')
+    dfA['full_name'] = dfA['FirstName'].fillna('') + ' ' + dfA['LastName'].fillna('')
+    dfA['full_name'] = dfA['full_name'].apply(normalize_name)
+    
+    # Fuzzy match to canonical list
+    dfA['matched_name'] = dfA['full_name'].apply(
+        lambda x: process.extractOne(x, Names, score_cutoff=80)[0]
+              if process.extractOne(x, Names, score_cutoff=80)
+              else x)
+    
+    count = dfA    
+    
+  #get number of times each A-TEAMer has submitted
+    all_matched_names = pd.concat([
+    survey['matched_name'],
+    lite['matched_name'],
+    count['matched_name']])
+
+    # Count occurrences of each name
+    name_counts = all_matched_names.value_counts().reset_index()
+    name_counts.columns = ['name', 'count']
+
+    # Ensure all names are represented, even those with zero counts
+    canonical_df = pd.DataFrame({'name': Names})
+    final_counts = canonical_df.merge(name_counts, on='name', how='left').fillna(0)
+    
+    final_counts.to_csv(folderout + 'subs_per_person.csv')
+
+  #get distance, items removed and surveyed per person 
+    results = pd.DataFrame(columns = ['name', 'distance_km','total_items'])
+    for name in Names:
+        s_name = survey[survey['matched_name']==name]
+        l_name = lite[lite['matched_name']==name]
+        
+        s_dist = s_name['Distance_km'].sum()
+        count_lite = len(l_name.index)
+        l_dist = count_lite * 6.77
+        dists = [s_dist, l_dist]
+        dist = sum(dists)
+        
+        s_items = s_name['TotItems'].sum() 
+        results = results.append({'name':name, 'distance_km':dist,
+                                   'total_items':s_items}, ignore_index=True) 
+        
+    results.to_csv(folderout + 'per_person.csv')  
+    
+  #get kms cleaned. removed and surveyed items, top 3 items, top 3 brands, %DRS
+    dfA_s = survey[survey['matched_name'].isin(Names)]
+    dfA_l = lite[lite['matched_name'].isin(Names)] 
+    
+    s_dist = dfA_s['Distance_km'].sum()
+    count_lite = len(dfA_l.index)
+    l_dist = count_lite * 6.77
+    dists = [s_dist, l_dist]
+    dist = sum(dists)
+
+    s_items = dfA_s['TotItems'].sum()     
+    
+    items = ['Full Dog Poo Bags','Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+          'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
+          'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
+          'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
+          'Aluminium alcoholic drink cans','Glass alcoholic bottles','Glass bottle tops',
+          'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
+          'Drinks tops (eg., McDonalds drinks)','Cartons','Plastic straws','Paper straws',
+          'Plastic carrier bags','Plastic bin bags','Confectionary/sweet wrappers',
+          'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
+          'Crisps Packets','Used Chewing Gum',
+          'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+          'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+          'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',
+          'Food on the go (eg.salad boxes)','Homemade lunch (eg., aluminium foil, cling film)',
+          'Fruit peel & cores','Cigarette Butts','Smoking related','Disposable vapes',
+          'Vaping / E-Cigarette Paraphernalia','Drugs related','Farming',
+          'Salt/mineral lick buckets','Silage wrap','Forestry','Tree guards','Industrial',
+          'Cable ties','Industrial plastic wrap','Toilet tissue','Face/ baby wipes',
+          'Nappies','Single-Use Period products','Single-Use Covid Masks','Rubber/nitrile gloves',
+          'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
+          'Normal balloons','Helium balloons','MTB related (e.g. inner tubes, water bottles etc)',
+          'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
+          'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
+          'Plastic milk bottles','Plastic food containers','Cardboard food containers',
+          'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
+          'Weird/Retro']
+
+    results = []
+    for i in items:
+        col = 'Value ' + i
+        if col in dfA_s.columns:
+            total = dfA_s[col].dropna().astype(int).sum()
+            if total > 0:
+                results.append({'item': i, 'count': total})
+
+    item_res = pd.DataFrame(results) 
+    item_res.to_csv(folderout + 'items.csv') 
+        
+    brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
+              'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway']
+            
+    results = []
+    for b in brands:
+        cols = [f'B1_{b}', f'B2_{b}', f'B3_{b}']
+        count = 0
+
+        for col in cols:
+            if col in survey.columns:
+                count += survey[col].notna().sum()
+
+        results.append({'brand': b, 'count': count})
+
+    brand_res = pd.DataFrame(results)
+
+    brand_res.to_csv(folderout + 'brands.csv')
+    
+    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
+    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles']
+
+    results = []
+    for col in DRS:
+        if col in dfA_s.columns:
+            total = dfA_s[col].dropna().sum()
+            if total > 0:
+                results.append(total)
+
+    DRS_tot = sum(results)
+    perc_DRS = (DRS_tot/s_items) * 100
     
 
 
+
+
+
+def HQ_comparison(folderin,  fileout):
+    """
+    A function which takes TFT dats since A-TEAMers were seperated and calcuates
+    some stats.
+    
+    Parameters
+    ----------
+    
+    folderin: string
+             path to input folder with yearly TFT data
+             
+    fileout: string
+           path for file to save results in
+    """   
+    
+    Names = ['heather friendship', 'dominic ferris', 'leigh rose', 'sarah-jane brown', 
+             'rach coleman', 'rich breedon']
     
     
+    df1 = pd.read_csv(folderin + 'survey/survey_2024.csv')
+    df2 = pd.read_csv(folderin + 'survey/survey_2025.csv')
     
+    dfs = [df1, df2]
+    dfA = pd.concat(dfs, ignore_index=True)
+    
+    # Normalize names function
+    def normalize_name(name):
+        name = name.lower().strip()
+        name = re.sub(r'\b(\w+)( \1\b)+', r'\1', name)  # Remove repeated words
+        name = re.sub(r'\s+', ' ', name)               # Normalize whitespace
+        return name
+    
+    dfA['Name'] = dfA['Name'].astype(str).fillna('')
+    dfA['Surname'] = dfA['Surname'].astype(str).fillna('')
+    dfA['full_name'] = dfA['Name'].fillna('') + ' ' + dfA['Surname'].fillna('')
+    dfA['full_name'] = dfA['full_name'].apply(normalize_name)
+    
+    # Fuzzy match to canonical list
+    dfA['matched_name'] = dfA['full_name'].apply(
+        lambda x: process.extractOne(x, Names, score_cutoff=80)[0]
+              if process.extractOne(x, Names, score_cutoff=80)
+              else x)
+    
+    survey = dfA
+    
+    df1 = pd.read_csv(folderin + 'lite/lite_2024.csv')
+    df2 = pd.read_csv(folderin + 'lite/lite_2025.csv')
+    
+    dfs = [df1, df2]
+    dfA = pd.concat(dfs, ignore_index=True)    
+    
+    dfA['Title'] = dfA['Title'].astype(str)
+    dfA['full_name'] = dfA['Title'].apply(normalize_name)
         
-        
-        
+    # Fuzzy match to canonical list
+    dfA['matched_name'] = dfA['full_name'].apply(
+        lambda x: process.extractOne(x, Names, score_cutoff=80)[0]
+              if process.extractOne(x, Names, score_cutoff=80)
+              else x)
     
+    lite = dfA        
     
+    df1 = pd.read_csv(folderin + 'count/count_2024.csv')
+    df2 = pd.read_csv(folderin + 'count/count_2025.csv')
+    
+    dfs = [df1, df2]
+    dfA = pd.concat(dfs, ignore_index=True)    
+        
+    dfA['FirstName'] = dfA['FirstName'].astype(str).fillna('')
+    dfA['LastName'] = dfA['LastName'].astype(str).fillna('')
+    dfA['full_name'] = dfA['FirstName'].fillna('') + ' ' + dfA['LastName'].fillna('')
+    dfA['full_name'] = dfA['full_name'].apply(normalize_name)
+    
+    # Fuzzy match to canonical list
+    dfA['matched_name'] = dfA['full_name'].apply(
+        lambda x: process.extractOne(x, Names, score_cutoff=80)[0]
+              if process.extractOne(x, Names, score_cutoff=80)
+              else x)
+    
+    count = dfA    
+    
+    all_matched_names = pd.concat([
+    survey['matched_name'],
+    lite['matched_name'],
+    count['matched_name']])
+
+    # Count occurrences of each name
+    name_counts = all_matched_names.value_counts().reset_index()
+    name_counts.columns = ['name', 'count']
+
+    # Ensure all canonical names are represented, even those with zero counts
+    canonical_df = pd.DataFrame({'name': Names})
+    final_counts = canonical_df.merge(name_counts, on='name', how='left').fillna(0)    
     
     
     

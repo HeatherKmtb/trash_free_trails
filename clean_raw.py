@@ -441,7 +441,7 @@ def lite_clean_data(TFTin, TFTout):
         
     #multiple standard bin bags * 184.6
     df2 = clean[clean['Quantity - Multiple Bin Bags'] == True]
-    df2['How many bags?'].fillna(1)
+    df2['How many bags?'].fillna(1, inplace = True)
     bag = 'multiplebinbags'
     nobags = []
     bag_total = []
@@ -675,7 +675,7 @@ def citizen_science_count_clean_data(TFTin, TFTout):
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'CS_count.csv', index=False)
     
-def add_to_existing_data(monthin, year_folder):
+def add_to_existing_data(TFTout, year_folder):
     """
     A function which takes the prepared monthly TFT data and adds it to the 
     correct yearly file
@@ -683,7 +683,7 @@ def add_to_existing_data(monthin, year_folder):
     Parameters
     ----------
     
-    monthin: string
+    TFTout: string
             path to folder with input csv files with cleaned raw monthly data
             
     yearin: string
@@ -695,7 +695,7 @@ def add_to_existing_data(monthin, year_folder):
     forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite']
     #read csv file
     for file in forms:
-        df_month = pd.read_csv(monthin + file + '.csv')   
+        df_month = pd.read_csv(TFTout + file + '.csv')   
         df_year = pd.read_csv(year_folder + file + '/' + file + '_2025.csv')
         dfs = (df_month, df_year)
         df_final = pd.concat(dfs, ignore_index = True) 

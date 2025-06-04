@@ -197,9 +197,9 @@ def overview_stats(folderin, folderout):
         hours = i['Time_hours']#.astype(float)
         time = hours*60
         area = i['Area_km2']#.astype(float)
-        km = area / 0.006
+        dist = area / 0.006
         #calculate ATI
-        denominator = (people*time)*km
+        denominator = (people*time)*dist
         if denominator == 0:
             continue
         AdjTotItems = TotItems/denominator 
@@ -932,8 +932,8 @@ def overview_stats(folderin, folderout):
     answered_p = []
     activity = []
     answered_a = []
-    people_cols = ['Connection_NewPeopleY', 'Connection_NewPeopleN', 'Connection_NewPeopleNotSure']
-    activity_cols = ['Connection_ActivityAfterY', 'Connection_ActivityAfterN', 'Connection_ActivityAfterNotSure']
+    people_cols = ['Connection_NewPeopleY', 'Connection_NewPeopleN']
+    activity_cols = ['Connection_ActivityAfterY', 'Connection_ActivityAfterN']
     for df in dfs:
         new_people = df['Connection_NewPeopleY'].value_counts().get('Yes', 0)
         answered_people = df[people_cols].notnull().any(axis=1).sum()

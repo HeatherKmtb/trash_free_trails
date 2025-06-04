@@ -1372,8 +1372,31 @@ def ateam_weekender_alt(folderin,  folderout):
         dist = sum(dists)
         
         s_items = s_name['TotItems'].sum() 
+        cols = ['Handful', 'Pocketful', 'Bread Bag', 'Carrier Bag',
+                      'Generic Bin Bag']
+        multipliers = {'Handful': 6,'Pocketful': 10,'Bread Bag': 25,
+              'Carrier Bag': 35,'Generic Bin Bag': 184.6}
+        
+        sum_items = []
+        for c in cols:
+            col_name = 'Quantity - ' + c
+            cat = l_name[col_name].astype(str).str.strip().str.upper().eq('TRUE').sum()
+            items = cat * multipliers[c]
+            sum_items.append(items)
+            
+        multipledf = l_name[l_name['Quantity - Multiple Bin Bags'] == True]
+        multipledf['How many bags?'].fillna(1, inplace = True)
+        for index, i in multipledf.iterrows():
+            bags = i['How many bags?']
+            items = bags * 184.6
+            sum_items.append(items)
+
+        
+        l_items = sum(sum_items)
+        tot_items = l_items + s_items
+  
         results = results.append({'name':name, 'distance_km':dist,
-                                   'total_items':s_items}, ignore_index=True) 
+                                   'total_items':tot_items, 'surveyed':s_items}, ignore_index=True) 
         
     results.to_csv(folderout + 'per_person.csv')  
     

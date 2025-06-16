@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from scipy import stats
-from datetime import datetime
+from datetime import date
 
 def sort_postcodes (TFTin, TFTout, CHs, folderout):
     """
@@ -81,27 +81,32 @@ def plot_data_and_trend (datain, figout):
 
     Wilsarno = pd.read_csv(datain)
 
+Dates = Wilsarno['Date_TrailClean'].apply(lambda d: d.toordinal())
+Wilsarno['Adj_Date'] = Dates
 
-    Wilsarno['Date_TrailClean'] = pd.to_datetime(Wilsarno['Date_TrailClean'])
-    Dates = Wilsarno['Date_TrailClean'].apply(datetime.toordinal)
-    Wilsarno['Adj_Date']= Dates.sort_values()
+# Convert ordinal back to datetime.date for plotting
+Wilsarno['Plot_Date'] = Wilsarno['Adj_Date'].apply(date.fromordinal)
 
-    # x axis values
-    x = Wilsarno['Adj_Date']
-    # corresponding y axis values
-    y = Wilsarno['AdjTotItems']
+# Sort by date for plotting
+Wilsarno = Wilsarno.sort_values(by='Plot_Date')
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    # plotting the points 
-    ax.plot(x, y, color='blue', marker='o', label='Adjusted Total Items')
-    #ax.set_xlim()
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # e.g., Jan 2025, Jul 2025
+# x and y values
+x = Wilsarno['Plot_Date']
+y = Wilsarno['AdjTotItems']
 
-    plt.xticks(rotation=45)
+# Plotting
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(x, y, color='blue', marker='o', label='Adjusted Total Items')
+
+# Format x-axis as dates
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
 
     #dates need to be numeric for trendline
 
-    Dates = Wilsarno['Date_TrailClean'].apply(datetime.date.toordinal)
+
 
     #calculate equation for trendline
     slope, y0, r, p, stderr = stats.linregress(Dates, Wilsarno['AdjTotItems'])

@@ -9,6 +9,29 @@ Created on Mon Feb 24 10:29:33 2025
 
 import pandas as pd
 
+def prep_files(filein, folderout):
+    """
+    A function which takes clean annual TFT survey data and produces monthly csvs
+    
+    Parameters
+    ----------
+    
+    folderin: string
+             path to input  csv file TFT data
+            
+    folderout: string
+           path for folder to save monthly csvs in
+    """
+    
+    df = pd.read_csv(filein)
+    
+    months = ['01','02','03','04','05','06','07','08','09','10','11','12']
+    
+    for month in months:
+        new_df = df[df['month']==month]
+        new_df.to_csv(folderout + 'survey_' + month + '.csv')
+    
+
 def overview_stats(folderin, folderout):
     """
     A function which takes clean monthly TFT survey data and produces monthly stats
@@ -1937,7 +1960,7 @@ def overview_stats_just_survey(folderin, folderout):
                               'total_kg':total_kg,'total_cokecans':total_cokecans,
                               'Adjusted Total Items':ATI}, ignore_index=True)                                         
     
-#        results.to_csv(folderout + '2022_overview.csv',index=False)    
+        results.to_csv(folderout + '2020_overview.csv',index=False)    
     
 
 #Survey stats
@@ -2340,7 +2363,7 @@ def overview_stats_just_survey(folderin, folderout):
         brand2 = test.iloc[1]['brand']
         brand3 = test.iloc[2]['brand']
     
-#        test.to_csv(folderout + '2021_' + month + '_brands.csv', index=False)
+        test.to_csv(folderout + '2020_' + month + '_brands.csv', index=False)
     
         survey_results = survey_results.append({'month':month,'survey_submisssions':total_all_survey,
                 'total items removed':removed_items, 'weight removed':total_kg, 
@@ -2366,7 +2389,7 @@ def overview_stats_just_survey(folderin, folderout):
    
 
 
-#        survey_results.to_csv(folderout + '2021_survey.csv', index=False)
+        survey_results.to_csv(folderout + '2020_survey.csv', index=False)
     
 
         
@@ -2483,7 +2506,7 @@ def overview_stats_just_survey(folderin, folderout):
                            'Would do again':perc_participate_again,
                            'provided contact info':perc_contacts  }, ignore_index=True)     
         
-        impacts_results.to_csv(folderout + '/2022_impacts.csv', index=False) 
+        impacts_results.to_csv(folderout + '/2020_impacts.csv', index=False) 
      
         
 

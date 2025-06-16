@@ -703,7 +703,7 @@ def add_to_existing_data(TFTout, year_folder):
         
     
 
-def TFR_clean_data(TFTin, TFTout):
+def TFRaces_clean_data(TFTin, TFTout):
     """
     A function which takes new raw TFR survey data and prepares it for analyses
     

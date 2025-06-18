@@ -12,7 +12,7 @@ import glob
 from os import path
 from rapidfuzz import process
 import re
-
+import matplotlib.pyplot as plt
 
 def get_data_quantity_per_month(datain, dataout):
     """
@@ -1582,7 +1582,189 @@ def HQ_comparison(folderin,  fileout):
     canonical_df = pd.DataFrame({'name': Names})
     final_counts = canonical_df.merge(name_counts, on='name', how='left').fillna(0)    
     
+def weekender_per_month(datain, dataout):
+    """
+    A function which takes full survey data and gets overall and yearly mean submissions per month
     
+    Parameters
+    ----------
     
+    datain: string
+             path to input csv file with all TFT survey data
+            
+    dataout: string
+           path to save results
+    """
+
+
+    df = pd.read_csv(datain)
+    
+    Names = ['alistair hair', 'andy lund', 'chloe parker', 'dan jarvis', 
+             'dom barry', 'ed roberts', 'emma johnson', 'gill houlsby', 
+             'hannah lowther', 'hari milburn', 'harry wood', 'ian white', 
+             'ian lean', 'jake rainford', 'james mackeddie', 'jane chisholm', 
+             'jay schreiber', 'jo shwe', 'john bellis', 'kyle harvey', 
+             'lauren munro-bennet', 'leon rosser', 'mario presi',
+             'marv davies', 'matt kennelly', 'monet adams', 'neil hudson', 
+             'nush lee', 'pete scullion', 'ram gurung', 'rosie holdsworth', 
+             'ross lambie', 'sam piper', 'tom laws', 'will atkinson', 
+             'victoria herbert', 'ollie cain', 'laurance ward', 'tim bowden', 
+             'kristina vackova', 'helen wilson', 'lauren cattell']
+   
+    df2 = df.loc[df['matched_name']=='mark wilson']
+    
+    for name in Names:
+        df2 = pd.concat([df2, df.loc[df['matched_name']== name]],ignore_index=True)
+       
+    
+    #get list of years and months
+    years = list(np.unique(df2['year']))
+    months = list(np.unique(df2['month']))
+    
+    results = pd.DataFrame(columns = ['year','month','items','distance','time'])
+    
+    for year in years:
+        #extract data for one year
+        new=df2.loc[df2['year']==year]
+        #extract data for each month
+        for month in months:
+            data=new.loc[new['month']==month]
+            if data.empty:
+                continue
+            submissions = len(data.index)
+            sup = data['TotItems'].sum()
+            distance = data['Distance_km'].sum()
+            time = data['Time_min'].sum()
+        
+            results = results.append({'year': year,'month': month,'items':sup,
+                        'distance': distance,'time': time}, ignore_index=True)
+            
+            
+    lite = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/A-TEAM_weekender/all_lite.csv')
+    
+   
+    df3 = lite.loc[lite['matched_name']=='mark wilson']
+    
+    for name in Names:
+        df3 = pd.concat([df3, lite.loc[lite['matched_name']== name]],ignore_index=True)
+       
+    
+    results = pd.DataFrame(columns = ['year','month', 'TotItems', 'lite_distance', 'lite_time'])
+    
+    for year in years:
+        #extract data for one year
+        new=df3.loc[df3['year']==year]
+        #extract data for each month
+        for month in months:
+            clean=new.loc[new['month']==month]
+            if clean.empty:
+                continue
+            
+            #handful * 6.2            
+            df2 = clean[clean['Quantity - Handful'] == True]
+            bag_total = []
+  
+            for index, i in df2.iterrows():
+                bags = 1
+                items = bags * 6
+                bag_total.append(items) 
+
+            #pocketful * 10
+            df2 = clean[clean['Quantity - Pocketful'] == True]
+
+            for index, i in df2.iterrows():
+                bags = 1
+                items = bags * 10
+                bag_total.append(items) 
+     
+            #bread bag * 25
+            df2 = clean[clean['Quantity - Bread Bag'] == True]
+
+            for index, i in df2.iterrows():
+                bags = 1
+                items = bags * 25
+                bag_total.append(items) 
+
+            #carrier bag * 35
+            df2 = clean[clean['Quantity - Carrier Bag'] == True]
+            for index, i in df2.iterrows():
+                bags = 1
+                items = bags * 35
+                bag_total.append(items) 
+ 
+            #standard bin bag * 184.6
+            df2 = clean[clean['Quantity - Generic Bin Bag'] == True]
+
+ 
+            for index, i in df2.iterrows():
+                bags = 1
+                items = bags * 184.6
+                bag_total.append(items) 
+
                 
+            #multiple standard bin bags * 184.6
+            df2 = clean[clean['Quantity - Multiple Bin Bags'] == True]
+            df2['How many bags?'].fillna(1, inplace = True)
+
+            for index, i in df2.iterrows():
+                bags = i['How many bags?']
+                items = bags * 184.6
+                bag_total.append(items) 
+        
+            tot_items = sum(bag_total)
+            
+            count_lite = len(clean.index)
+            lite_km = count_lite * 6.77
+            lite_time = count_lite * 1.64
+            
+            results = results.append({'year':year,'month':month, 
+                            'TotItems': tot_items, 'lite_distance':lite_km,
+                            'lite_time':lite_time}, ignore_index=True)  
+            
+    results.to_csv(folderout + 'res_lite.csv')  
+
+    #plotting
+    df = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/A-TEAM_weekender/res_survey.csv')
+
+# 1. Create a new 'date' column using year and month
+    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
+
+# 2. Sort by date (optional but helpful)
+    df = df.sort_values('date')
+
+# 3. Plot_items
+    plt.figure(figsize=(10, 5))
+    plt.plot(df['date'], df['items'], marker='o')
+    plt.plot(df['date'], df['lite_items'], marker='o', color = 'red')
+    plt.plot(df['date'], df['tot_items'], marker='o', color = 'green')
+    plt.xlabel('Date')
+    plt.ylabel('Items')
+    plt.title('Items over Time')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()   
+
+# 3. Plot time
+    plt.figure(figsize=(10, 5))
+    plt.plot(df['date'], df['time'], marker='o')
+    plt.plot(df['date'], df['lite_mins'], marker='o', color = 'red')
+    plt.plot(df['date'], df['tot_time'], marker='o', color = 'green')
+    plt.xlabel('Date')
+    plt.ylabel('Items')
+    plt.title('Items over Time')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()  
+
+# 3. Plot distance
+    plt.figure(figsize=(10, 5))
+    plt.plot(df['date'], df['distance'], marker='o')
+    plt.plot(df['date'], df['lite_distance'], marker='o', color = 'red')
+    plt.plot(df['date'], df['tot_distance'], marker='o', color = 'green')
+    plt.xlabel('Date')
+    plt.ylabel('Items')
+    plt.title('Items over Time')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()             
             

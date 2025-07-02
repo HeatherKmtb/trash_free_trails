@@ -1835,7 +1835,6 @@ def overview_stats_just_survey(folderin, folderout):
  
         survey = pd.read_csv(folderin + 'survey_' + month + '.csv')
     
-    
     #total submmissions before any filtering
         count_survey = len(survey.index)    
 

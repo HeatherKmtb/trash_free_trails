@@ -1449,6 +1449,7 @@ def ateam_weekender_alt(folderin,  folderout):
 
     item_res = pd.DataFrame(results) 
     item_res.to_csv(folderout + 'items.csv') 
+
         
     brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
               'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway']
@@ -1750,8 +1751,8 @@ def weekender_per_month(datain, dataout):
     plt.plot(df['date'], df['lite_mins'], marker='o', color = 'red')
     plt.plot(df['date'], df['tot_time'], marker='o', color = 'green')
     plt.xlabel('Date')
-    plt.ylabel('Items')
-    plt.title('Items over Time')
+    plt.ylabel('Time (minutes)')
+    plt.title('Time spent trail cleaning')
     plt.grid(True)
     plt.tight_layout()
     plt.show()  
@@ -1762,8 +1763,8 @@ def weekender_per_month(datain, dataout):
     plt.plot(df['date'], df['lite_distance'], marker='o', color = 'red')
     plt.plot(df['date'], df['tot_distance'], marker='o', color = 'green')
     plt.xlabel('Date')
-    plt.ylabel('Items')
-    plt.title('Items over Time')
+    plt.ylabel('Distance')
+    plt.title('Distance over Time')
     plt.grid(True)
     plt.tight_layout()
     plt.show()             

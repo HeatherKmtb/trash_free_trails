@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+a#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Dec 19 15:22:31 2024
@@ -82,17 +82,18 @@ def mach_power_hour(figout):
     y = [1400, 876, 604, 579]
 
 
-    plt.style.use('ggplot')
+    #plt.style.use('ggplot')
 
     # Set up figure
-    fig, ax = plt.subplots(figsize=(8, 5), dpi=100)
+    fig, ax = plt.subplots(figsize=(8, 5), dpi=100, facecolor='white')
+    ax.set_facecolor('white')
 
     # Assign unique hexcolors 
     hex_colors = ['#e5582e', '#f4a71c', '#072340', '#faf9ef']
 
 
     # Plot bars
-    bars = ax.bar(x, y, color=hex_colors, edgecolor='black', linewidth=0.8)
+    bars = ax.bar(x, y, color=hex_colors, edgecolor='black', linewidth=0.8, width = 0.6)
 
     # Format x-axis: integer years only
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
@@ -107,13 +108,13 @@ def mach_power_hour(figout):
 
 
     # Add axis labels and title, tweak fonts
-    ax.set_xlabel('Year', fontsize=12)
-    ax.set_ylabel('Items', fontsize=12)
+    ax.set_xlabel('Year', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Items', fontsize=12, fontweight='bold')
     ax.set_title('Items found at Machynlleth Pump Track per year', fontsize=14, fontweight='bold')
 
     # Optional: horizontal grid for readability
-    ax.yaxis.grid(True, linestyle='--', alpha=0.7)
-    ax.set_axisbelow(True)
+    #ax.yaxis.grid(True, linestyle='--', color='black', alpha=0.7)
+    #ax.set_axisbelow(True)
 
     plt.tight_layout()
     plt.show()

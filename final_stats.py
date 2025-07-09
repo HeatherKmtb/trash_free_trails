@@ -37,6 +37,7 @@ def overview_stats(folderin, folderout):
     CSsurvey = pd.read_csv(folderin + 'CS_survey.csv')
     CScount = pd.read_csv(folderin + 'CS_count.csv')
     bag_res_lite = pd.read_csv(folderin + 'bag_res_lite.csv')
+    tfr = pd.read_csv(folderin + 'TFR.csv')
     
     dfs = [survey, CSsurvey, CScount]
     
@@ -104,7 +105,7 @@ def overview_stats(folderin, folderout):
     CSsurvey_area = CSsurvey['Area_km2'].sum()
     
     areas = [survey_area, CSsurvey_area, lite_area]
-#area cleaned / surveyed - excludes Lite
+#area cleaned / surveyed
     area = sum(areas)   
     
     CSsurvey_km = CSsurvey_area / 0.006
@@ -174,6 +175,10 @@ def overview_stats(folderin, folderout):
     
     CScount_items = CScount['TotItems'].sum() 
     srvy_items.append(CScount_items)
+    
+    tfr_items = tfr['TotItems'].sum()
+    srvy_items.append(tfr_items)
+    rmv_items.append(tfr_items)
     
     removed_items = sum(rmv_items)
     surveyed_items = sum(srvy_items)   

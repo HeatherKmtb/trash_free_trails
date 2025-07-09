@@ -703,7 +703,7 @@ def add_to_existing_data(TFTout, year_folder):
         
     
 
-def TFRaces_clean_data(TFTin, TFTout):
+def TFRaces_clean_data_v1(TFTin, TFTout):
     """
     A function which takes new raw TFR survey data and prepares it for analyses
     
@@ -742,7 +742,7 @@ def TFRaces_clean_data(TFTin, TFTout):
         'Merch_hoodyXL', 'Mech_glasscoffee', 'Merch_KBCcoffee', 'Merch_Hydroflask',
         'Merch_Stanleyflask', 'Merch_Patch_TFTlogo', 'Merch_Patch_PAlogo', 
         'Merch_Patch_PAwhitesquare', 'Merch_Patch_Trashmob', 'Merch_woodmarker',
-        'Merch_steelmarker', 'Full Dog Poo Bags',
+        'Merch_steelmarker', 'survey', 'count', 'lite', 'TotItems', 'Full Dog Poo Bags',
         'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
         'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
         'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',

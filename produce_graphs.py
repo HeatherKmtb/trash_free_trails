@@ -119,3 +119,47 @@ def mach_power_hour(figout):
     plt.tight_layout()
     plt.show()
     fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
+    
+def poo_bags(TFTin, folderout):
+    """
+    A function which takes full TFT survey stats and produces some graphs
+   
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with all TFT data
+            
+    folderout: string
+           path to save all figures
+    """            
+            
+    df = pd.read_csv(TFTin)
+    
+    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
+    df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
+    
+    date = df['date']
+    reported_poo = df['poo bags reported']
+    amount_poo = df['poo bags total items']
+    perc_poo = df['poo bags % of total items']
+    total_poo = df['bags_per_km']
+    
+    #plot the result
+    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
+    plt.rcParams.update({'font.size':12})
+    #plots H_100 on x with I_CD on y
+    ax.scatter(date,total_poo,marker='.')
+    #sets title and axis labels
+    ax.set_title('Number of poo bags reported per kilometer')
+    ax.set_ylabel('Number of poo bags per km')
+    ax.set_xlabel('Date')
+    #ax.set_xlim([0, 600])
+    #ax.set_ylim([0,6])  
+    #obtain m (slope) and b(intercept) of linear regression line
+    x = date.map(pd.Timestamp.toordinal)
+    m, b = np.polyfit(x, total_poo, 1)
+    #add linear regression line to scatterplot 
+    plt.plot(date, m * x + b, color='red')
+    plt.close

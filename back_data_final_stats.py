@@ -1,4 +1,4 @@
-how it works I'm just not entirely sure what your expecting'
+cakehow it works I'm just not entirely sure what your expecting'
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -153,7 +153,7 @@ def overview_stats(folderin, folderout):
         area = sum(areas)   
     
         CSsurvey_km = CSsurvey_area / 0.006
-        kms = [survey_km, count_km, CSsurvey_km, CScount_km, lite_km]
+        kms = [survey_km, count_km, CScount_km, lite_km]
 #distance cleaned / surveyed 
         km = sum(kms)
         
@@ -292,7 +292,7 @@ def overview_stats(folderin, folderout):
 #Adjusted total items    
         ATI = ATI_next + ATI_lite + ATI_survey
     
-        results = results.append({'total_submisssions':total_CS, 'total_count':total_count,
+        results = results.append({'month':month,'total_submisssions':total_CS, 'total_count':total_count,
                               'total_survey':total_survey,'no_people':total_people, 
                               'area_km2':area, 'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
@@ -300,15 +300,12 @@ def overview_stats(folderin, folderout):
                               'total_kg':total_kg,'total_cokecans':total_cokecans,
                               'Adjusted Total Items':ATI}, ignore_index=True)                                         
     
-        results.to_csv(folderout + '/overview.csv',index=False)    
+        results.to_csv(folderout + 'overview.csv',index=False)    
     
         count = count.rename(columns={'ZMostonesAlmostHome':'MostZonesAlmostHome'})
         count = count.rename(columns={'MostZonesLunch':'MostZonesPicnic'})
     
-    
-
-
-    
+        
     #this will only work once dfs are the same 
     #dfs = (count, CScount) 
     #df = pd.concat(dfs, ignore_index = True) 
@@ -357,7 +354,7 @@ def overview_stats(folderin, folderout):
                 'prevalence':prevalence,
                 'worst_zone':topzone}, ignore_index=True)  
 
-        count_results.to_csv(folderout + '/count.csv',index=False)  
+        count_results.to_csv(folderout + 'count.csv',index=False)  
     
 
 #Survey stats
@@ -844,7 +841,7 @@ def overview_stats(folderin, folderout):
                 'brand 1':brand1,'brand 2':brand2,'brand 3':brand3}, ignore_index=True)  
     
 
-        survey_results.to_csv(folderout + '/survey.csv', index=False)  
+        survey_results.to_csv(folderout + 'survey.csv', index=False)  
     
 
         
@@ -999,7 +996,7 @@ def overview_stats(folderin, folderout):
                            'Would do again':perc_participate_again,
                            'provided contact info':perc_contacts  }, ignore_index=True)     
         
-        impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
+        impacts_results.to_csv(folderout + 'impacts.csv', index=False) 
                
             
 
@@ -1116,6 +1113,8 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     'Value Plastic milk bottles','Value Plastic food containers','Value Cardboard food containers',
     'Value Cleaning products containers','Value Miscellaneous','Value Too small/dirty to ID',
     'Value Weird/Retro']
+    
+
     
     reported_items = survey[all_items].sum()
     
@@ -1917,6 +1916,9 @@ def overview_stats_just_survey(folderin, folderout):
                      'Value Cleaning products containers','Value Miscellaneous','Value Too small/dirty to ID',
                      'Value Weird/Retro']
     
+        survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+
         reported_items = survey[all_items].sum()
     
         total_reported_items = sum(reported_items)
@@ -2388,7 +2390,7 @@ def overview_stats_just_survey(folderin, folderout):
    
 
 
-        survey_results.to_csv(folderout + '2020_survey.csv', index=False)
+        survey_results.to_csv(folderout + '/survey.csv', index=False)
     
 
         
@@ -2422,7 +2424,7 @@ def overview_stats_just_survey(folderin, folderout):
         survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
 
         
-        multiple_cols = ['Volunteer','A-Team ','Community Hub']
+        multiple_cols = ['Volunteer','A-Team','Community Hub']
 
         befores = survey[multiple_cols].notna().sum()
     #number submitting again - not including CS or lite 
@@ -2505,7 +2507,7 @@ def overview_stats_just_survey(folderin, folderout):
                            'Would do again':perc_participate_again,
                            'provided contact info':perc_contacts  }, ignore_index=True)     
         
-        impacts_results.to_csv(folderout + '/2020_impacts.csv', index=False) 
+        impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
      
         
 

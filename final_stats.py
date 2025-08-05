@@ -109,7 +109,7 @@ def overview_stats(folderin, folderout):
     area = sum(areas)   
     
     CSsurvey_km = CSsurvey_area / 0.006
-    kms = [survey_km, count_km, CSsurvey_km, CScount_km, lite_km]
+    kms = [survey_km, count_km, CScount_km, lite_km]
 #distance cleaned / surveyed 
     km = sum(kms)
         

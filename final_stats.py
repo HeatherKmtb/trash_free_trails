@@ -405,16 +405,18 @@ def overview_stats(folderin, folderout):
     metals = pd.concat([survey, CSsurvey]).sum(axis=0)[metal].to_list()
     glasses = pd.concat([survey, CSsurvey]).sum(axis=0)[glass].to_list()
     papers = pd.concat([survey, CSsurvey]).sum(axis=0)[cardboard_paper_wood].to_list()       
+    potentially_plastics = pd.concat([survey, CSsurvey]).sum(axis=0)[potentially_plastic].to_list()
+    others = pd.concat([survey, CSsurvey]).sum(axis=0)[other].to_list()     
     
     totpl = sum(plastics)
     totme = sum(metals)
     totgl = sum(glasses)
     totpa = sum(papers)    
+    totppl = sum(potentially_plastics)
+    tototh = sum(others)
 
-    typedf = pd.DataFrame({'type': ['plastic','metal','glass','paper'],
-                           'quantity':[totpl, totme, totgl,totpa]})
-    
-  
+    typedf = pd.DataFrame({'type': ['plastic','metal','glass','paper', 'potentially_plastic','other'],
+                           'quantity':[totpl, totme, totgl, totpa, totppl, tototh]})
 
     t = typedf.loc[typedf['quantity'].idxmax()]
 #Most common material    

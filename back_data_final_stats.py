@@ -1,4 +1,3 @@
-cakehow it works I'm just not entirely sure what your expecting'
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -796,27 +795,34 @@ def overview_stats(folderin, folderout):
         brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
               'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway','Other']
     
-        brand_res = pd.DataFrame(columns = ['brand','count'])
-                             
+        brand_res = pd.DataFrame(columns=['brand', 'weighted_count'])
+
+        # Weight mapping
+        weights = {'B1': 3, 'B2': 2, 'B3': 1}
+
         for b in brands:
-            b1 = survey[survey['B1_' + b].notna()]
-            b2 = survey[survey['B2_' + b].notna()]
-            b3 = survey[survey['B3_' + b].notna()]
-            b1CS = CSsurvey[CSsurvey['B1_' + b].notna()]
-            b2CS = CSsurvey[CSsurvey['B2_' + b].notna()]
-            b3CS = CSsurvey[CSsurvey['B3_' + b].notna()]        
-            dfs = (b1, b2, b3, b1CS, b2CS, b3CS)
-            brand = pd.concat(dfs, ignore_index = True)
-            counted = len(brand.index)
-            brand_res = brand_res.append({'brand':b, 'count':counted}, ignore_index=True)
-    
-        test = brand_res.sort_values(by = ['count'], ascending=False)
-#brands 1, 2 and 3    
-        brand1 = test.iloc[0]['brand']
-        brand2 = test.iloc[1]['brand']
-        brand3 = test.iloc[2]['brand']
-    
-        test.to_csv(folderout + month + '_brands.csv')
+            total_weighted = 0
+        
+            for col_prefix, weight in weights.items():
+                # Count non-null for survey
+                col_name = f"{col_prefix}_{b}"
+                count_survey = survey[col_name].notna().sum()
+                # Count non-null for CSsurvey
+                count_cs = CSsurvey[col_name].notna().sum()
+            
+                # Add weighted contribution
+                total_weighted += (count_survey + count_cs) * weight
+        
+            brand_res = brand_res.append({'brand': b, 'weighted_count': total_weighted}, ignore_index=True)
+
+        # Sort by weighted count
+        brand_res = brand_res.sort_values(by='weighted_count', ascending=False)
+        #brands 1, 2 and 3    
+        brand1 = brand_res.iloc[0]['brand']
+        brand2 = brand_res.iloc[1]['brand']
+        brand3 = brand_res.iloc[2]['brand']
+                                 
+        brand_res.to_csv(folderout + month + '_brands.csv')
     
         survey_results = survey_results.append({'month':month, 
                 'survey_submisssions':total_all_survey,
@@ -1613,25 +1619,32 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
               'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway','Other']
     
-    brand_res = pd.DataFrame(columns = ['brand','count'])
-                             
+    brand_res = pd.DataFrame(columns=['brand', 'weighted_count'])
+
+    # Weight mapping
+    weights = {'B1': 3, 'B2': 2, 'B3': 1}
+
     for b in brands:
-        b1 = survey[survey['B1_' + b].notna()]
-        b2 = survey[survey['B2_' + b].notna()]
-        b3 = survey[survey['B3_' + b].notna()]
-      
-        dfs = (b1, b2, b3)
-        brand = pd.concat(dfs, ignore_index = True)
-        counted = len(brand.index)
-        brand_res = brand_res.append({'brand':b, 'count':counted}, ignore_index=True)
+        total_weighted = 0
     
-    test = brand_res.sort_values(by = ['count'], ascending=False)
-#brands 1, 2 and 3    
-    brand1 = test.iloc[0]['brand']
-    brand2 = test.iloc[1]['brand']
-    brand3 = test.iloc[2]['brand']
+        for col_prefix, weight in weights.items():
+            # Count non-null for survey
+            col_name = f"{col_prefix}_{b}"
+            count_survey = survey[col_name].notna().sum()
+        
+            # Add weighted contribution
+            total_weighted += (count_survey) * weight
     
-    test.to_csv(folderout + 'brands.csv')
+        brand_res = brand_res.append({'brand': b, 'weighted_count': total_weighted}, ignore_index=True)
+
+    # Sort by weighted count
+    brand_res = brand_res.sort_values(by='weighted_count', ascending=False)
+    #brands 1, 2 and 3    
+    brand1 = brand_res.iloc[0]['brand']
+    brand2 = brand_res.iloc[1]['brand']
+    brand3 = brand_res.iloc[2]['brand']
+    
+    brand_res.to_csv(folderout + 'brands.csv')
     
     survey_results = survey_results.append({'survey_submisssions':total_all_survey,
                 'total items removed':removed_items, 'weight removed':total_kg, 
@@ -2346,25 +2359,32 @@ def overview_stats_just_survey(folderin, folderout):
         brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
               'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway','Other']
     
-        brand_res = pd.DataFrame(columns = ['brand','count'])
-                             
+        brand_res = pd.DataFrame(columns=['brand', 'weighted_count'])
+
+        # Weight mapping
+        weights = {'B1': 3, 'B2': 2, 'B3': 1}
+
         for b in brands:
-            b1 = survey[survey['B1_' + b].notna()]
-            b2 = survey[survey['B2_' + b].notna()]
-            b3 = survey[survey['B3_' + b].notna()]
-      
-            dfs = (b1, b2, b3)
-            brand = pd.concat(dfs, ignore_index = True)
-            count = len(brand.index)
-            brand_res = brand_res.append({'brand':b, 'count':count}, ignore_index=True)
-    
-        test = brand_res.sort_values(by = ['count'], ascending=False)
-#brands 1, 2 and 3    
-        brand1 = test.iloc[0]['brand']
-        brand2 = test.iloc[1]['brand']
-        brand3 = test.iloc[2]['brand']
-    
-        test.to_csv(folderout + '2020_' + month + '_brands.csv', index=False)
+            total_weighted = 0
+        
+            for col_prefix, weight in weights.items():
+                # Count non-null for survey
+                col_name = f"{col_prefix}_{b}"
+                count_survey = survey[col_name].notna().sum()
+            
+                # Add weighted contribution
+                total_weighted += (count_survey) * weight
+        
+            brand_res = brand_res.append({'brand': b, 'weighted_count': total_weighted}, ignore_index=True)
+
+        # Sort by weighted count
+        brand_res = brand_res.sort_values(by='weighted_count', ascending=False)
+        #brands 1, 2 and 3    
+        brand1 = brand_res.iloc[0]['brand']
+        brand2 = brand_res.iloc[1]['brand']
+        brand3 = brand_res.iloc[2]['brand']
+        
+        brand_res.to_csv(folderout + '2020_' + month + '_brands.csv', index=False)
     
         survey_results = survey_results.append({'month':month,'survey_submisssions':total_all_survey,
                 'total items removed':removed_items, 'weight removed':total_kg, 

@@ -163,3 +163,50 @@ def poo_bags(TFTin, folderout):
     #add linear regression line to scatterplot 
     plt.plot(date, m * x + b, color='red')
     plt.close
+
+def redbullvmonster(filein, figout):
+    """
+    A function you put your own data into and plot abarchart
+    
+    Parameters
+    ----------
+    figout: string
+           path to save figure
+    """            
+    
+    df = pd.read_csv(filein)
+    
+    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
+    
+    
+    x = df['date']
+    y1 = df['c_monster']
+    y2 = df['c_redbull']
+
+
+    pos = np.arange(len(df)) 
+    width = 0.4  # width of each bar
+
+    # Create figure and axis
+    fig, ax = plt.subplots()
+
+    # Plot the bars
+    ax.bar(pos - width/2, y1, width, label="Monster", color="#7CB701")
+    ax.bar(pos + width/2, y2, width, label="Red Bull", color="#1D19AC")
+
+    # X-axis labels
+    ax.set_xticks(pos)
+    ax.set_xticklabels(df['date'].dt.strftime('%Y-%m'), rotation=45, ha="right")
+
+    # Labels and title
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Score")
+    ax.set_title("Score of Red Bull v Monster")
+
+    # Legend
+    ax.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)

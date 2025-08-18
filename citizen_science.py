@@ -1,14 +1,476 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun 16 08:59:54 2025
+Created on Mon Jul  7 14:57:04 2025
 
 @author: heatherkay
 """
 
 import pandas as pd
+from os import path
+import glob
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
-def CS_stats(folderin, folderout):
+def sort_data(TFTin, TFTout):
+    """
+    A function which takes citizen science TFT survey or count data and 
+    splits it into location
+    
+    Parameters
+    ----------
+             
+    TFTin: string
+            path to folder with input csv file with data  
+             
+            
+    TFTout: string
+            path to folder to save files sorted by postcode
+    """
+    
+    df = pd.read_csv(TFTin)
+    
+    hd, tl = path.split(TFTin)
+    file_name = path.splitext(tl)[0]
+    name_comp = file_name.split('_')
+    dt = name_comp[2]
+    
+    df['postcode'] = df['postcode'].str.strip().str.upper()
+    
+    postcodes = df['postcode'].unique()   # unique so you don’t repeat work
+
+    for p in postcodes:
+        new_df = df[df['postcode'] == p]
+        new_df.to_csv(TFTout + p + '_' + dt + '.csv', index=False)
+        
+def count_transect_graphs(folderin, folderout):
+    """
+    A function which takes citizen science TFT count data seperated by postcode and 
+    analyses transect data, producing bar charts of the transects
+    
+    Parameters
+    ----------
+             
+    folderin: string
+            path to folder with input csv files with postcode data  
+             
+            
+    TFTout: string
+            path to folder to save graph files
+    """    
+    
+    filelist = glob.glob(folderin + '*.csv')
+    
+    for file in filelist:
+        df = pd.read_csv(file)
+        
+        hd, tl = path.split(file)
+        file_name = path.splitext(tl)[0]
+        
+        transect_cols = [c for c in df.columns if c.startswith("Transect") and df[c].notna().any()]
+        
+        # Sort df by date
+        df["Date_Count"] = pd.to_datetime(df["Date_Count"], format="%d/%m/%Y")
+        df = df.sort_values("Date_Count")
+
+        # Make a new figure for this file
+        plt.figure(figsize=(8,6))
+        
+    
+        #Convert to numpy for plotting
+        values = df[transect_cols].values
+        n_rows, n_cols = values.shape
+        x = np.arange(len(transect_cols))
+        width = 0.8 / n_rows
+
+        for i, (date, vals) in enumerate(zip(df["Date_Count"], values)):
+            plt.bar(x + i*width, vals, width=width, 
+                label=date.strftime("%d-%b-%Y")) 
+
+        plt.xticks(x + width*(n_rows-1)/2, transect_cols, rotation=45)
+        plt.xlim(-0.5, len(transect_cols) - 0.5)
+        plt.ylabel("Number of items")
+        plt.title(f"Transect Values - {file_name}")
+        plt.legend(title="Date", bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        plt.savefig(folderout + file_name + "_plot.png", dpi=300, bbox_inches="tight") 
+        plt.close
+    
+
+def count_transect_stats_plots(folderin, folderout):
+    """
+    Given a dataframe with a 'Date_Count' column and Transect columns, 
+    this function:
+      1. Plots a correlation heatmap between dates
+      2. Performs PCA on transect values and plots the first two PCs
+      
+    Parameters
+    ----------
+             
+    folderin: string
+            path to folder with input csv files with postcode data  
+             
+            
+    folderout: string
+            path to folder to save graph files  
+    """
+    
+    filelist = glob.glob(folderin + '*.csv')
+    
+    for file in filelist:
+        df = pd.read_csv(file)
+        
+        hd, tl = path.split(file)
+        file_name = path.splitext(tl)[0]
+        
+        # Convert Date_Count to datetime if not already
+        df["Date_Count"] = pd.to_datetime(df["Date_Count"], format="%d/%m/%Y")
+    
+        # Keep only transect columns that have at least one non-NaN value
+        transect_cols = [c for c in df.columns if c.startswith("Transect") and df[c].notna().any()]
+    
+        df[transect_cols] = df[transect_cols].fillna(0)
+    
+        # --- Correlation Heatmap ---
+        corr_matrix = df[transect_cols].T.corr()  # correlation between rows (dates)
+        
+        plt.figure(figsize=(10,8))
+        sns.heatmap(corr_matrix, annot=True, cmap="coolwarm",
+                xticklabels=df["Date_Count"].dt.strftime("%d-%b-%Y"),
+                yticklabels=df["Date_Count"].dt.strftime("%d-%b-%Y"))
+        plt.title("Correlation of Transect Patterns Between Dates")
+        plt.tight_layout()
+        
+        plt.savefig(folderout + file_name + "_correlation_matrix.png", dpi=300, bbox_inches="tight") 
+        plt.close
+    
+        # --- PCA ---
+        scaler = StandardScaler()
+        scaled_data = scaler.fit_transform(df[transect_cols])
+    
+        pca = PCA(n_components=2)
+        pc = pca.fit_transform(scaled_data)
+    
+        plt.figure(figsize=(8,6))
+        plt.scatter(pc[:,0], pc[:,1], c='blue')
+    
+        for i, date in enumerate(df["Date_Count"]):
+            plt.text(pc[i,0]+0.02, pc[i,1]+0.02, date.strftime("%d-%b"))
+    
+        plt.xlabel("PC1")
+        plt.ylabel("PC2")
+        plt.title("PCA of Transect Patterns")
+        plt.grid(True)
+        plt.tight_layout()
+        
+        plt.savefig(folderout + file_name + "_PCA.png") 
+        plt.close
+
+
+def survey_date_comparison(TFTin, folderout):
+    """
+    A function which takes clean CS survey data and produces a barchart of 
+    Total Items through time per location
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with CS data
+            
+    folderout: string
+           path for folder to save figures in
+    """    
+
+    df = pd.read_csv(TFTin)
+    
+    df['postcode'] = df['postcode'].str.strip().str.upper()
+    
+    postcodes = df['postcode'].unique() 
+
+    for p in postcodes:
+        dfp = df[df['postcode'] == p]
+
+        # Sort df by date
+        dfp["Date_TrailClean"] = pd.to_datetime(dfp["Date_TrailClean"], format="%d/%m/%Y")
+        dfp = dfp.sort_values("Date_TrailClean")
+
+        # Make a new figure for this file
+        plt.figure(figsize=(10,6))
+        
+        plt.bar(dfp['Date_TrailClean'].dt.strftime("%Y-%m-%d"), dfp['TotItems'], color='skyblue')
+
+        plt.title("Litter Collected Over Time")
+        plt.xlabel("Survey Date")
+        plt.ylabel("Total Items Collected")
+        plt.xticks(rotation=45)  # rotate labels for readability
+        plt.tight_layout()
+
+        plt.savefig(folderout + p + "_plot.png", dpi=300, bbox_inches="tight") 
+        plt.show()
+        plt.close() 
+        
+def survey_types_comparison_per_season(TFTin, folderout):
+    """
+    A function which takes clean and filtered CS survey data and something TBC
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with CS data
+            
+    folderout: string
+           path for folder to save figures in
+    """    
+
+    df = pd.read_csv(TFTin)
+    
+    #matrials categories
+    plastic = ['Value Full Dog Poo Bags',
+            'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
+            'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+            'Value Plastic bottle, top','Value Plastic energy drink bottles',
+            'Value Plastic energy gel sachet','Value Plastic energy gel end', 'Value Plastic straws',
+            'Value Hot drinks tops and stirrers','Value Drinks tops (eg., McDonalds drinks)',
+            'Value Plastic carrier bags','Value Plastic bin bags',
+            'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+            'Value Confectionary/sweet wrappers',
+            'Value Wrapper "corners" / tear-offs','Value Other confectionary (eg., Lollipop Sticks)',
+            'Value Crisps Packets','Value Disposable vapes','Value Salt/mineral lick buckets','Value Silage wrap',
+            'Value Tree guards','Value Cable ties','Value Industrial plastic wrap','Value Rubber/nitrile gloves',
+            'Value Normal balloons','Value Helium balloons','Value Plastic milk bottles',
+            'Value Plastic food containers','Value Cleaning products containers']
+            
+            
+    potentially_plastic = ['Value Hot drinks cups','Value Drinks cups (eg., McDonalds drinks)',
+                           'Value Food on the go (eg.salad boxes)']        
+            
+    metal = ['Value Aluminium soft drink cans','Value Aluminium energy drink can',
+             'Value Aluminium alcoholic drink cans','Value Glass bottle tops',
+             'Value Disposable BBQs and / or BBQ related items','Value BBQs and / or BBQ related items',]   
+
+    glass = ['Value Glass soft drink bottles','Value Glass alcoholic bottles']     
+    
+    cardboard_paper_wood = ['Value Cartons','Value Paper straws',
+            'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+            'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue','Value Cardboard food containers',]
+    
+    other = ['Value Used Chewing Gum','Value Fruit peel & cores','Value Cigarette Butts','Value Smoking related',
+             'Value Drugs related','Value Farming',
+             'Value Forestry','Value Industrial','Value Homemade lunch (eg., aluminium foil, cling film)',
+             'Value Face/ baby wipes',
+             'Value Nappies','Value Single-Use Period products','Value Single-Use Covid Masks',
+             'Value Outdoor event (eg Festival)','Value Camping','Value Halloween & Fireworks','Value Seasonal (Christmas and/or Easter)',
+             'Value MTB related (e.g. inner tubes, water bottles etc)',
+             'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
+             'Value Outdoor sports event related (e.g.race)','Value Textiles','Value Clothes & Footwear',
+             'Value Miscellaneous','Value Too small/dirty to ID','Value Weird/Retro']
+    
+    #Uses categories
+    pet_stuff = ['Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
+    'Value Toys (eg., tennis balls)','Value Other Pet Related Stuff']
+    
+    drinks_containers = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans','Value Plastic bottle, top','Value Glass soft drink bottles',
+    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+    'Value Plastic energy gel sachet','Value Plastic energy gel end','Value Aluminium alcoholic drink cans',
+    'Value Glass alcoholic bottles','Value Glass bottle tops','Value Hot drinks cups',
+    'Value Hot drinks tops and stirrers','Value Drinks cups (eg., McDonalds drinks)',
+    'Value Drinks tops (eg., McDonalds drinks)','Value Cartons','Value Plastic straws',
+    'Value Paper straws']
+    
+    snack = ['Value Plastic carrier bags','Value Plastic bin bags',
+    'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
+    'Value Other confectionary (eg., Lollipop Sticks)','Value Crisps Packets',
+    'Value Used Chewing Gum','Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+    'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+    'Value Disposable BBQs and / or BBQ related items','Value BBQs and / or BBQ related items',
+    'Value Food on the go (eg.salad boxes)','Value Homemade lunch (eg., aluminium foil, cling film)',
+    'Value Fruit peel & cores']
+    
+    smoking = ['Value Cigarette Butts','Value Smoking related',
+    'Value Disposable vapes','Value Vaping / E-Cigarette Paraphernalia','Value Drugs related']
+    
+    agro_ind = ['Value Farming','Value Salt/mineral lick buckets','Value Silage wrap',
+    'Value Forestry','Value Tree guards','Value Industrial','Value Cable ties',
+    'Value Industrial plastic wrap']
+    
+    hygiene = ['Value Toilet tissue','Value Face/ baby wipes',
+    'Value Nappies','Value Single-Use Period products','Value Single-Use Covid Masks',
+    'Value Rubber/nitrile gloves']
+    
+    recreation = ['Value Outdoor event (eg Festival)','Value Camping',
+    'Value Halloween & Fireworks','Value Seasonal (Christmas and/or Easter)',
+    'Value Normal balloons','Value Helium balloons']
+    
+    sports = ['Value MTB related (e.g. inner tubes, water bottles etc)',
+    'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
+    'Value Outdoor sports event related (e.g.race)']
+    
+    textiles = ['Value Textiles','Value Clothes & Footwear']
+    
+    house = ['Value Plastic milk bottles','Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers']
+    
+    misc = ['Value Miscellaneous','Value Too small/dirty to ID',
+    'Value Weird/Retro']
+    
+    material_groups = {"Glass": glass, "Plastic": plastic, "Metal": metal,
+             "Cardboard": cardboard_paper_wood, "Other": other}     
+    
+    for material, cols in material_groups.items():
+            df[f"Total_m_{material}"] = df[cols].sum(axis=1)
+        
+    use_groups = {'Pet': pet_stuff, 'DRS': drinks_containers, 'Snacks': snack, 
+                      'Smoking': smoking, 'Agro-ing': agro_ind, 'Hygiene': hygiene, 
+                      'Recreation': recreation, 'Sports': sports, 'Textiles': textiles, 
+                      'Household': house, 'Miscellaneous': misc}
+        
+    for use, cols in use_groups.items():
+            df[f"Total_u_{use}"] = df[cols].sum(axis=1)   
+    
+    #df['postcode'] = df['postcode'].str.strip().str.upper()
+    
+    season = df['Season'].unique() 
+
+    for s in season:
+        dfs = df[df['Season'] == s]
+
+        # Make a new figure for this file
+        plt.figure(figsize=(10,6))
+        
+        material_cols = [c for c in dfs.columns if c.startswith("Total_m_") and dfs[c].notna().any()]
+        material_legend = []
+        for m in material_cols:
+            name_comp = m.split('_')
+            mat = name_comp[2]
+            material_legend.append(mat)
+        
+        # Make a new figure for this file
+        plt.figure(figsize=(10,6))
+    
+        #Convert to numpy for plotting
+        values = dfs[material_cols].values
+        n_rows, n_cols = values.shape
+        x = np.arange(len(material_cols))
+        width = 0.8 / n_rows
+
+        for i, (loc, vals) in enumerate(zip(dfs["Location"], values)):
+            plt.bar(x + i*width, vals, width=width,label=loc) 
+
+        plt.xticks(x + width*(n_rows-1)/2, material_legend, rotation=45)
+        #plt.xlim(-0.5, len(material_cols) - 0.5)
+        plt.ylabel("Number of items")
+        plt.title(f"Values per location in {s}")
+        plt.legend(title="Location", bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        plt.savefig(folderout + s + "_materials_plot.png", dpi=300, bbox_inches="tight") 
+        plt.close
+        
+        use_cols = [c for c in dfs.columns if c.startswith("Total_u_") and dfs[c].notna().any()]
+        use_legend = []
+        for u in use_cols:
+            name_comp = u.split('_')
+            use = name_comp[2]
+            use_legend.append(use)
+        # Make a new figure for this file
+        plt.figure(figsize=(8,6))
+    
+        #Convert to numpy for plotting
+        values = dfs[use_cols].values
+        n_rows, n_cols = values.shape
+        x = np.arange(len(use_cols))
+        width = 0.8 / n_rows
+
+        for i, (loc, vals) in enumerate(zip(dfs["Location"], values)):
+            plt.bar(x + i*width, vals, width=width,label=loc) 
+
+        plt.xticks(x + width*(n_rows-1)/2, use_legend, rotation=45)
+        #plt.xlim(-0.5, len(use_cols) - 0.5)
+        plt.ylabel("Number of items")
+        plt.title(f"Values per location in {s}")
+        plt.legend(title="Location", bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        plt.savefig(folderout + s + "_use_plot.png", dpi=300, bbox_inches="tight") 
+        plt.close
+        
+        
+        
+        #percentages
+        # Make a new figure for this file
+        plt.figure(figsize=(10,6))
+    
+        #Convert to numpy for plotting
+        values = dfs[material_cols].div(dfs["TotItems"], axis=0).fillna(0).values * 100
+        n_rows, n_cols = values.shape
+        x = np.arange(len(material_cols))
+        width = 0.8 / n_rows
+
+        for i, (loc, vals) in enumerate(zip(dfs["Location"], values)):
+            plt.bar(x + i*width, vals, width=width,label=loc) 
+
+        plt.xticks(x + width*(n_rows-1)/2, material_legend, rotation=45)
+        #plt.xlim(-0.5, len(material_cols) - 0.5)
+        plt.ylabel("Number of items as % of Total Items")
+        plt.title(f"Values per location in {s} as a %")
+        plt.legend(title="Location", bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        plt.savefig(folderout + s + "_percentage_materials_plot.png", dpi=300, bbox_inches="tight") 
+        plt.close
+        
+        use_cols = [c for c in dfs.columns if c.startswith("Total_u_") and dfs[c].notna().any()]
+        use_legend = []
+        for u in use_cols:
+            name_comp = u.split('_')
+            use = name_comp[2]
+            use_legend.append(use)
+        # Make a new figure for this file
+        plt.figure(figsize=(8,6))
+    
+        #Convert to numpy for plotting
+        values = dfs[use_cols].div(dfs["TotItems"], axis=0).fillna(0).values * 100
+        n_rows, n_cols = values.shape
+        x = np.arange(len(use_cols))
+        width = 0.8 / n_rows
+
+        for i, (loc, vals) in enumerate(zip(dfs["Location"], values)):
+            plt.bar(x + i*width, vals, width=width,label=loc) 
+
+        plt.xticks(x + width*(n_rows-1)/2, use_legend, rotation=45)
+        #plt.xlim(-0.5, len(use_cols) - 0.5)
+        plt.ylabel("Number of items as % of Total Items")
+        plt.title(f"Values per location in {s} as a %")
+        plt.legend(title="Location", bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        plt.savefig(folderout + s + "_percentage_use_plot.png", dpi=300, bbox_inches="tight") 
+        plt.close
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def CS_standard_stats(folderin, folderout):
     """
     A function which takes clean monthly TFT survey data and produces monthly stats
     
@@ -293,5 +755,4 @@ def CS_stats(folderin, folderout):
     impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
            
             
-            
-          
+               

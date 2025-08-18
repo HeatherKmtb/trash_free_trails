@@ -393,7 +393,7 @@ def overview_stats(folderin, folderout):
              'Value Forestry','Value Industrial','Value Homemade lunch (eg., aluminium foil, cling film)',
              'Value Face/ baby wipes',
              'Value Nappies','Value Single-Use Period products','Value Single-Use Covid Masks',
-             'Value utdoor event (eg Festival)','Value Camping','Value Halloween & Fireworks','Value Seasonal (Christmas and/or Easter)',
+             'Value Outdoor event (eg Festival)','Value Camping','Value Halloween & Fireworks','Value Seasonal (Christmas and/or Easter)',
              'Value MTB related (e.g. inner tubes, water bottles etc)',
              'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
              'Value Outdoor sports event related (e.g.race)','Value Textiles','Value Clothes & Footwear',

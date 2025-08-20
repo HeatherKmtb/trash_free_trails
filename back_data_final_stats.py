@@ -2375,7 +2375,8 @@ def overview_stats_just_survey(folderin, folderout):
                 # Add weighted contribution
                 total_weighted += (count_survey) * weight
         
-            brand_res = brand_res.append({'brand': b, 'weighted_count': total_weighted}, ignore_index=True)
+            new_row = pd.DataFrame([{'brand': b, 'weighted_count': total_weighted}])
+            brand_res = pd.concat([brand_res, new_row], ignore_index=True)
 
         # Sort by weighted count
         brand_res = brand_res.sort_values(by='weighted_count', ascending=False)
@@ -2386,7 +2387,7 @@ def overview_stats_just_survey(folderin, folderout):
         
         brand_res.to_csv(folderout + '2020_' + month + '_brands.csv', index=False)
     
-        survey_results = survey_results.append({'month':month,'survey_submisssions':total_all_survey,
+        survey_new_row = pd.DataFrame([{'month':month,'survey_submisssions':total_all_survey,
                 'total items removed':removed_items, 'weight removed':total_kg, 
                 'volume removed':total_cokecans, 'distance_kms':km_survey, 
                 'area kms2':area_survey,'most common material':most_type, 
@@ -2405,7 +2406,9 @@ def overview_stats_just_survey(folderin, folderout):
                 'poo bags % of total items':bags_proportion,
                 'outdoor gear reported':outs_reported,'outdoor gear total items':outs_total,
                 'outdoor gear % of total items':outs_proportion,
-                'brand 1':brand1,'brand 2':brand2,'brand 3':brand3}, ignore_index=True)  
+                'brand 1':brand1,'brand 2':brand2,'brand 3':brand3}]) 
+        
+        survey_results = pd.concat([survey_results, survey_new_row], ignore_index=True)
     
    
 

@@ -152,8 +152,25 @@ def overview_stats(folderin, folderout):
     'Value Cleaning products containers','Value Miscellaneous','Value Too small/dirty to ID',
     'Value Weird/Retro']
     
-    reported_items = pd.concat([survey, CSsurvey]).sum(axis=0)[all_items].to_list()
     
+    # Apply conversion to both DataFrames individually
+    for df in [survey, CSsurvey]:
+        df[all_items] = df[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+    # Now they both have clean numeric columns
+    combined = pd.concat([survey, CSsurvey], ignore_index=True)
+
+    # Summation works the same
+    reported_items = combined[all_items].sum(axis=0).to_list()
+    
+    '''
+    combined = pd.concat([survey, CSsurvey], ignore_index=True)
+
+    # Convert to numeric, replace errors with NaN, then fill with 0 and cast to int
+    combined[all_items] = combined[all_items].apply(lambda col: pd.to_numeric(col, errors='coerce')).fillna(0).astype(int)
+
+    reported_items = combined[all_items].sum(axis=0).to_list()
+    '''
     total_reported_items = sum(reported_items)
     
     srvy_items = []
@@ -252,14 +269,16 @@ def overview_stats(folderin, folderout):
 #Adjusted total items    
     ATI = ATI_next + ATI_lite + ATI_survey
     
-    results = results.append({'total_submisssions':total_CS, 'total_count':total_count,
+    new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':total_count,
                               'total_survey':total_survey, 'total_lite': count_lite,
                               'no_people':total_people, 
                               'area_km2':area, 'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
                               'items_surveyed':surveyed_items, 'total_items':total_items,
                               'total_kg':total_kg,'total_cokecans':total_cokecans,
-                              'Adjusted Total Items':ATI}, ignore_index=True)                                         
+                              'Adjusted Total Items':ATI}])
+    results= pd.concat([results, new_row], ignore_index=True) 
+                                        
     
     results.to_csv(folderout + '/overview.csv',index=False)    
     
@@ -325,9 +344,11 @@ def overview_stats(folderin, folderout):
 #mostpolluted trail zone
     topzone = max(set(zonecounts), key=zonecounts.count)
 
-    count_results = count_results.append({'count_submisssions':total_count, 
+    new_row = pd.DataFrame([{'count_submisssions':total_count, 
                 'prevalence':prevalence,
-                'worst_zone':topzone}, ignore_index=True)  
+                'worst_zone':topzone}])
+    count_results = pd.concat([count_results, new_row], ignore_index=True) 
+ 
 
     count_results.to_csv(folderout + '/count.csv',index=False)  
     
@@ -400,13 +421,12 @@ def overview_stats(folderin, folderout):
              'Value Miscellaneous','Value Too small/dirty to ID','Value Weird/Retro']
     
     
-
-    plastics = pd.concat([survey, CSsurvey]).sum(axis=0)[plastic].to_list()
-    metals = pd.concat([survey, CSsurvey]).sum(axis=0)[metal].to_list()
-    glasses = pd.concat([survey, CSsurvey]).sum(axis=0)[glass].to_list()
-    papers = pd.concat([survey, CSsurvey]).sum(axis=0)[cardboard_paper_wood].to_list()       
-    potentially_plastics = pd.concat([survey, CSsurvey]).sum(axis=0)[potentially_plastic].to_list()
-    others = pd.concat([survey, CSsurvey]).sum(axis=0)[other].to_list()     
+    plastics = combined[plastic].sum(axis=0).to_list()
+    metals = combined[metal].sum(axis=0).to_list()
+    glasses = combined[glass].sum(axis=0).to_list()
+    papers = combined[cardboard_paper_wood].sum(axis=0).to_list()       
+    potentially_plastics = combined[potentially_plastic].sum(axis=0).to_list()
+    others = combined[other].sum(axis=0).to_list()     
     
     totpl = sum(plastics)
     totme = sum(metals)
@@ -543,17 +563,17 @@ def overview_stats(folderin, folderout):
     misc = ['Value Miscellaneous','Value Too small/dirty to ID',
     'Value Weird/Retro']
 
-    pets = pd.concat([survey, CSsurvey]).sum(axis=0)[pet_stuff].to_list()
-    drinks = pd.concat([survey, CSsurvey]).sum(axis=0)[drinks_containers].to_list()
-    snacks = pd.concat([survey, CSsurvey]).sum(axis=0)[snack].to_list()
-    smokes = pd.concat([survey, CSsurvey]).sum(axis=0)[smoking].to_list()
-    agros = pd.concat([survey, CSsurvey]).sum(axis=0)[agro_ind].to_list()
-    hyg = pd.concat([survey, CSsurvey]).sum(axis=0)[hygiene].to_list()
-    recre = pd.concat([survey, CSsurvey]).sum(axis=0)[recreation].to_list()
-    sport = pd.concat([survey, CSsurvey]).sum(axis=0)[sports].to_list()
-    text = pd.concat([survey, CSsurvey]).sum(axis=0)[textiles].to_list()
-    home = pd.concat([survey, CSsurvey]).sum(axis=0)[house].to_list()
-    miscs = pd.concat([survey, CSsurvey]).sum(axis=0)[misc].to_list()
+    pets = combined[pet_stuff].sum(axis=0).to_list()
+    drinks = combined[drinks_containers].sum(axis=0).to_list()
+    snacks = combined[snack].sum(axis=0).to_list()
+    smokes = combined[smoking].sum(axis=0).to_list()
+    agros = combined[agro_ind].sum(axis=0).to_list()
+    hyg = combined[hygiene].sum(axis=0).to_list()
+    recre = combined[recreation].sum(axis=0).to_list()
+    sport = combined[sports].sum(axis=0).to_list()
+    text = combined[textiles].sum(axis=0).to_list()
+    home = combined[house].sum(axis=0).to_list()
+    miscs = combined[misc].sum(axis=0).to_list()
 
     totpet = sum(pets)
     totdrs = sum(drinks)
@@ -595,8 +615,8 @@ def overview_stats(folderin, folderout):
     df_CSDRS_subs = CSsurvey[DRS]
     subs_CS = df_CSDRS_subs.any(axis=1).sum()
         
-    DRS_items = pd.concat([survey, CSsurvey]).sum(axis=0)[DRS].to_list()   
-    glass_DRS_items = pd.concat([survey, CSsurvey]).sum(axis=0)[DRS_glass].to_list()  
+    DRS_items = combined[DRS].sum(axis=0).to_list()   
+    glass_DRS_items = combined[DRS_glass].sum(axis=0).to_list()  
 
 
     lite_DRS = []
@@ -627,7 +647,8 @@ def overview_stats(folderin, folderout):
     
     
     vapes_indy = ['Disposable vapes','Value Disposable vapes']   
-    vape_items_indy = survey.sum(axis=0)[vapes_indy].to_list() 
+    survey['Disposable vapes'] = pd.to_numeric(survey['Disposable vapes'], errors='coerce').fillna(0).astype(int)
+    vape_items_indy = survey[vapes_indy].sum(axis=0).to_list()
                
     vapes_subs_indy = vape_items_indy[0]
     
@@ -802,8 +823,9 @@ def overview_stats(folderin, folderout):
         
             # Add weighted contribution
             total_weighted += (count_survey + count_cs) * weight
-    
-        brand_res = brand_res.append({'brand': b, 'weighted_count': total_weighted}, ignore_index=True)
+        
+        new_row = pd.DataFrame([{'brand': b, 'weighted_count': total_weighted}])
+        brand_res = pd.concat([brand_res, new_row], ignore_index=True) 
 
     # Sort by weighted count
     brand_res = brand_res.sort_values(by='weighted_count', ascending=False)
@@ -814,7 +836,7 @@ def overview_stats(folderin, folderout):
     
     brand_res.to_csv(folderout + 'brands.csv')
     
-    survey_results = survey_results.append({'survey_submisssions':total_all_survey,
+    new_row = pd.DataFrame([{'survey_submisssions':total_all_survey,
                 'total items removed':removed_items, 'weight removed':total_kg, 
                 'volume removed':total_cokecans, 'distance_kms':km_survey, 
                 'area kms2':area_survey,'most common material':most_type, 
@@ -833,10 +855,8 @@ def overview_stats(folderin, folderout):
                 'poo bags % of total items':bags_proportion,
                 'outdoor gear reported':outs_reported,'outdoor gear total items':outs_total,
                 'outdoor gear % of total items':outs_proportion,
-                'brand 1':brand1,'brand 2':brand2,'brand 3':brand3}, ignore_index=True)  
-    
-   
-
+                'brand 1':brand1,'brand 2':brand2,'brand 3':brand3}])
+    survey_results = pd.concat([survey_results, new_row], ignore_index=True) 
 
     survey_results.to_csv(folderout + '/survey.csv', index=False)  
     
@@ -991,15 +1011,15 @@ def overview_stats(folderin, folderout):
 #percent leaving contact details    
     perc_contacts = (contact_deets/subs_contact)*100
 
-
-    impacts_results = impacts_results.append({'Fauna Interaction':perc_AI, 
+    new_row = pd.DataFrame([{'Fauna Interaction':perc_AI, 
                     'Fauna Death':perc_death,'First Time':no_1st, 
                     'Repeat volunteers':beforers,'Felt proud':perc_proud,
                        'Felt more connected':perc_more_connected,
                        'met someone inspiring':perc_new_peeps, 
                        'went out after':perc_active,
                        'Would do again':perc_participate_again,
-                       'provided contact info':perc_contacts  }, ignore_index=True)     
+                       'provided contact info':perc_contacts}])
+    impacts_results = pd.concat([impacts_results, new_row], ignore_index=True)    
     
     impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
            

@@ -460,16 +460,6 @@ def survey_types_comparison_per_season(TFTin, folderout):
 
 
 
-
-
-
-
-
-
-
-
-
-
 def CS_standard_stats(folderin, folderout):
     """
     A function which takes clean monthly TFT survey data and produces monthly stats

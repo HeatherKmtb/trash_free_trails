@@ -2410,11 +2410,8 @@ def overview_stats_just_survey(folderin, folderout):
         
         survey_results = pd.concat([survey_results, survey_new_row], ignore_index=True)
     
-   
-
 
         survey_results.to_csv(folderout + '/survey.csv', index=False)
-    
 
         
         #animal interaction - how many (%) answered the question and checked

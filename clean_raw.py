@@ -376,8 +376,9 @@ def lite_clean_data(TFTin, TFTout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
-  
+    new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
+    results= pd.concat([results, new_row], ignore_index=True) 
+    
     #pocketful * 10
     df2 = clean[clean['Quantity - Pocketful'] == True]
     bag = 'pocketful'
@@ -391,8 +392,9 @@ def lite_clean_data(TFTin, TFTout):
  
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
-     
+    new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
+    results= pd.concat([results, new_row], ignore_index=True) 
+    
     #bread bag * 25
     df2 = clean[clean['Quantity - Bread Bag'] == True]
     bag = 'breadbag'
@@ -406,8 +408,9 @@ def lite_clean_data(TFTin, TFTout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
-     
+    new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
+    results= pd.concat([results, new_row], ignore_index=True) 
+    
     #carrier bag * 35
     df2 = clean[clean['Quantity - Carrier Bag'] == True]
     bag = 'carrierbag'
@@ -421,8 +424,9 @@ def lite_clean_data(TFTin, TFTout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
-
+    new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
+    results= pd.concat([results, new_row], ignore_index=True) 
+    
     #standard bin bag * 184.6
     df2 = clean[clean['Quantity - Generic Bin Bag'] == True]
     bag = 'binbag'
@@ -436,8 +440,8 @@ def lite_clean_data(TFTin, TFTout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
-        
+    new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
+    results= pd.concat([results, new_row], ignore_index=True)    
         
     #multiple standard bin bags * 184.6
     df2 = clean[clean['Quantity - Multiple Bin Bags'] == True]
@@ -453,7 +457,10 @@ def lite_clean_data(TFTin, TFTout):
         
     tot_items = sum(bag_total)
     tot_bags = sum(nobags)
-    results = results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}, ignore_index=True)  
+            
+    new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
+    results= pd.concat([results, new_row], ignore_index=True) 
+ 
     results.to_csv(TFTout + 'bag_res_lite.csv', index=False)
     
     
@@ -692,7 +699,7 @@ def add_to_existing_data(TFTout, year_folder):
              
     """
 
-    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite']
+    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite', 'TFR']
     #read csv file
     for file in forms:
         df_month = pd.read_csv(TFTout + file + '.csv')   

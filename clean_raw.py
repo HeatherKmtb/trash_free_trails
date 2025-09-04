@@ -379,14 +379,14 @@ def lite_clean_data(TFTin, TFTout):
     new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
     results= pd.concat([results, new_row], ignore_index=True) 
     
-    #pocketful * 10
+    #pocketful * 15
     df2 = clean[clean['Quantity - Pocketful'] == True]
     bag = 'pocketful'
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
         bags = 1
-        items = bags * 10
+        items = bags * 15
         bag_total.append(items) 
         nobags.append(bags)
  
@@ -411,14 +411,14 @@ def lite_clean_data(TFTin, TFTout):
     new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
     results= pd.concat([results, new_row], ignore_index=True) 
     
-    #carrier bag * 35
+    #carrier bag * 42
     df2 = clean[clean['Quantity - Carrier Bag'] == True]
     bag = 'carrierbag'
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
         bags = 1
-        items = bags * 35
+        items = bags * 42
         bag_total.append(items) 
         nobags.append(bags)
         
@@ -427,14 +427,14 @@ def lite_clean_data(TFTin, TFTout):
     new_row = pd.DataFrame([{'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags}])
     results= pd.concat([results, new_row], ignore_index=True) 
     
-    #standard bin bag * 184.6
+    #standard bin bag * 124
     df2 = clean[clean['Quantity - Generic Bin Bag'] == True]
     bag = 'binbag'
     nobags = []
     bag_total = []
     for index, i in df2.iterrows():
         bags = 1
-        items = bags * 184.6
+        items = bags * 124
         bag_total.append(items) 
         nobags.append(bags)
         

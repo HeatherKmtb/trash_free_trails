@@ -959,7 +959,9 @@ def overview_stats(folderin, folderout):
     
     lite_connects = lite['Increased Nature Connection - Yes'].sum()
     connection.append(lite_connects)
-    counts_connect.append(count_lite)
+    NCcols = [c for c in lite.columns if c.startswith("Increased Nature Connection")]
+    count_rows = (lite[NCcols] == True).any(axis=1).sum()
+    counts_connect.append(count_rows)
     
     total_answer_connect = sum(counts_connect)
     connects = sum(connection)

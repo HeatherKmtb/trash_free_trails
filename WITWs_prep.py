@@ -142,4 +142,72 @@ def bottle_tops(TFTin, folderout):
     plt.close    
     
     
+def covid_masks(TFTin, folderout):
+    """
+    A function which takes full TFT survey stats and produces some graphs
+   
     
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with all TFT data
+            
+    folderout: string
+           path to save all figures
+    """            
+            
+    df1 = pd.read_csv(TFTin)
+
+    
+    #need to get monthly bottle top values
+    years = df1['year'].unique()
+    months = df1['month'].unique()
+    
+    df = pd.DataFrame(columns=['month', 'year', 'masks', 'distance_km'])
+    
+    for y in years:
+        dfy = df1[df1['year']==y]
+        for m in months: 
+            dfmy = dfy[dfy['month']==m]
+            if dfmy.empty:
+                masks = 0
+                dist = 0
+            dfmy.loc[:, 'Value Single-Use Covid Masks'] = dfmy['Value Single-Use Covid Masks'].fillna(0)
+            dfmy.loc[:, 'Distance_km'] = dfmy['Distance_km'].fillna(0)
+            masks = sum(dfmy['Value Single-Use Covid Masks'])
+            dist = sum(dfmy['Distance_km'])
+            
+            new_row = pd.DataFrame([{'month':m, 'year':y, 'masks':masks, 'distance_km':dist}])
+            df = pd.concat([df, new_row], ignore_index=True)
+            
+            
+    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))         
+    
+    df['masks_per_km'] = df['masks'] / df['distance_km']
+    
+    date = df['date']
+    #reported_poo = df['poo bags reported']
+    #amount_poo = df['poo bags total items']
+    #perc_poo = df['poo bags % of total items']
+    total_tops = df['masks_per_km']
+    
+    #plot the result
+    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
+    plt.rcParams.update({'font.size':12})
+    #plots H_100 on x with I_CD on y
+    ax.scatter(date,total_tops,marker='.')
+    #sets title and axis labels
+    ax.set_title('Number of covid masks reported per kilometer')
+    ax.set_ylabel('Number of masks per km')
+    ax.set_xlabel('Date')
+    #ax.set_xlim([0, 600])
+    ax.set_ylim([0,0.5])  
+    #obtain m (slope) and b(intercept) of linear regression line
+    x = date.map(pd.Timestamp.toordinal)
+    m, b = np.polyfit(x, total_tops, 1)
+    #add linear regression line to scatterplot 
+    plt.plot(date, m * x + b, color='red')
+    plt.close  
+
+    plt.savefig(folderout + 'covid.png')      

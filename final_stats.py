@@ -103,8 +103,9 @@ def overview_stats(folderin, folderout):
     survey_area = survey_km * 0.006
     lite_area = lite_km * 0.006
     CSsurvey_area = CSsurvey['Area_km2'].sum()
+    count_area = count_km * 0.006
     
-    areas = [survey_area, CSsurvey_area, lite_area]
+    areas = [survey_area, count_area, lite_area]
 #area cleaned / surveyed
     area = sum(areas)   
     
@@ -167,42 +168,43 @@ def overview_stats(folderin, folderout):
     # Summation works the same
     reported_items = combined[all_items].sum(axis=0).to_list()
     
-    '''
-    combined = pd.concat([survey, CSsurvey], ignore_index=True)
-
-    # Convert to numeric, replace errors with NaN, then fill with 0 and cast to int
-    combined[all_items] = combined[all_items].apply(lambda col: pd.to_numeric(col, errors='coerce')).fillna(0).astype(int)
-
-    reported_items = combined[all_items].sum(axis=0).to_list()
-    '''
     total_reported_items = sum(reported_items)
     
     srvy_items = []
-    rmv_items = []       
+    rmv_items = [] 
+    cnt_items = []
+    full_srvy_items = []
         
     survey_items = survey['TotItems'].sum()   
     srvy_items.append(survey_items)
     rmv_items.append(survey_items)
+    full_srvy_items.append(survey_items)
     
     CSsurvey_items = CSsurvey['TotItems'].sum()   
     srvy_items.append(CSsurvey_items)
     rmv_items.append(CSsurvey_items)
+    full_srvy_items.append(CSsurvey_items)
     
     lite_items = bag_res_lite['TotItems'].sum() 
     rmv_items.append(lite_items)
     
     count_items = count['TotItems'].sum() 
     srvy_items.append(count_items)
+    cnt_items.append(count_items)
     
     CScount_items = CScount['TotItems'].sum() 
     srvy_items.append(CScount_items)
+    cnt_items.append(CScount_items)
     
     tfr_items = tfr['TotItems'].sum()
     srvy_items.append(tfr_items)
     rmv_items.append(tfr_items)
     
     removed_items = sum(rmv_items)
-    surveyed_items = sum(srvy_items)   
+    surveyed_items = sum(srvy_items) 
+    tot_count_items = sum(cnt_items)
+    fully_surveyed_items = sum(full_srvy_items)
+    
 #total removed items (reported)
     total_items = surveyed_items + lite_items
 
@@ -291,15 +293,11 @@ def overview_stats(folderin, folderout):
     
     
 
-    count_results = pd.DataFrame(columns = ['count_submisssions', 'prevalence', 'hotspots',
-                                      'worst_zone'])
+    count_results = pd.DataFrame(columns = ['count_submisssions', 'count_items',
+                                            'count_kms','prevalence', 'hotspots',
+                                            'worst_zone'])
     
-    #this will only work once dfs are the same 
-    #dfs = (count, CScount) 
-    #df = pd.concat(dfs, ignore_index = True) 
-    #km = df['Distance_km'].sum()
-    #items = df['TotItems'].sum()  
-    #prevalence = items/km
+
     count_df1 = count[count['TotItems'].notna()]
     count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
     CScount_df1 = CScount[CScount['TotItems'].notna()]
@@ -308,14 +306,12 @@ def overview_stats(folderin, folderout):
     count_kms = count_ms / 1000
     CScount_ms = CScount_df2['Total_distance(m)'].sum()
     CScount_kms = CScount_ms / 1000
-    count_itms = count_df2['TotItems'].sum()
-    CScount_itms = CScount_df2['TotItems'].sum()
-    
+ 
     
     distance = CScount_kms + count_kms
-    items = CScount_itms + count_itms
+
 #how much is out there per km
-    prevalence = items/distance
+    prevalence = tot_count_items/distance
     
 #hot spots????
     
@@ -349,6 +345,8 @@ def overview_stats(folderin, folderout):
     topzone = max(set(zonecounts), key=zonecounts.count)
 
     new_row = pd.DataFrame([{'count_submisssions':total_count, 
+                'count_items':tot_count_items,
+                'count_kms':distance,
                 'prevalence':prevalence,
                 'worst_zone':topzone}])
     count_results = pd.concat([count_results, new_row], ignore_index=True) 
@@ -356,8 +354,8 @@ def overview_stats(folderin, folderout):
 
     count_results.to_csv(folderout + '/count.csv',index=False)  
     
-    survey_results = pd.DataFrame(columns = ['survey_submisssions', 'total items removed', 
-                'weight removed', 'volume removed', 'distance_kms', 'area kms2',
+    survey_results = pd.DataFrame(columns = ['survey_submisssions', 'total items surveyed', 
+                'total composition items','weight removed', 'volume removed', 'distance_kms', 'area kms2',
                 'most common material', 'SUP reported','SUP calculated','most common category',
                 'DRS reported','DRS total items','DRS total glass','DRS % of total items',
                 'glass DRS % of DRS items','glass DRS % of total items','vapes reported',
@@ -372,15 +370,13 @@ def overview_stats(folderin, folderout):
 
 #Survey stats
     
-#first ones currently covered in overvies
-    values = [total_survey, count_lite]
-    total_all_survey = sum(values)
+#first ones currently covered in overviews
     
-    kms_survey = [survey_km, CSsurvey_km, lite_km] 
+    kms_survey = [survey_km, CSsurvey_km] 
 #distance covered    
     km_survey = sum(kms_survey)
     
-    areas_survey = [survey_area,  CSsurvey_area, lite_area]
+    areas_survey = [survey_area,  CSsurvey_area]
 #area directly protected - excludes Lite
     area_survey = sum(areas_survey)   
     
@@ -803,14 +799,13 @@ def overview_stats(folderin, folderout):
     outs_proportion = (outs_total/total_reported_items)*100        
         
         
-    
 
     #calculate brands
+#calculate brands
     brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
-              'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway','Other']
-    
+          'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway','Other']
 
-    brand_res = pd.DataFrame(columns=['brand', 'weighted_count'])
+    orig_brand_res = pd.DataFrame(columns=['brand', 'weighted_count'])
 
     # Weight mapping
     weights = {'B1': 3, 'B2': 2, 'B3': 1}
@@ -827,21 +822,57 @@ def overview_stats(folderin, folderout):
         
             # Add weighted contribution
             total_weighted += (count_survey + count_cs) * weight
-        
-        new_row = pd.DataFrame([{'brand': b, 'weighted_count': total_weighted}])
-        brand_res = pd.concat([brand_res, new_row], ignore_index=True) 
+    
+        orig_brand_res = orig_brand_res.append({'brand': b, 'weighted_count': total_weighted}, ignore_index=True)
 
     # Sort by weighted count
-    brand_res = brand_res.sort_values(by='weighted_count', ascending=False)
+    orig_brand_res = orig_brand_res.sort_values(by='weighted_count', ascending=False)
     #brands 1, 2 and 3    
-    brand1 = brand_res.iloc[0]['brand']
-    brand2 = brand_res.iloc[1]['brand']
-    brand3 = brand_res.iloc[2]['brand']
+    brand1 = orig_brand_res.iloc[0]['brand']
+    brand2 = orig_brand_res.iloc[1]['brand']
+    brand3 = orig_brand_res.iloc[2]['brand']
+                             
+    orig_brand_res.to_csv(folderout + 'brands.csv')
     
-    brand_res.to_csv(folderout + 'brands.csv')
+    # Alternative version to include other brands - Columns prefixes
+    col_prefixes = ['B1', 'B2', 'B3']
+
+    # Step 1: Extract unique "Other" brands from both survey and CSsurvey
+    other_brands_survey = survey[[f"{prefix}_Other" for prefix in col_prefixes]].stack().dropna().unique().tolist()
+    other_brands_CS = CSsurvey[[f"{prefix}_Other" for prefix in col_prefixes]].stack().dropna().unique().tolist()
+
+    # Merge new brands, remove duplicates
+    all_brands = list(set(brands[:-1] + other_brands_survey + other_brands_CS))  # exclude original 'Other'
+
+    # Step 2: Count occurrences of each brand across all positions
+    brand_counts = {}
+    for b in all_brands:
+        count = 0
+        for prefix in col_prefixes:
+            count += (survey[f"{prefix}_{b}"].notna().sum() if f"{prefix}_{b}" in survey.columns else 0)
+            count += (CSsurvey[f"{prefix}_{b}"].notna().sum() if f"{prefix}_{b}" in CSsurvey.columns else 0)
+        brand_counts[b] = count
+
+    # Step 3: Convert counts to DataFrame
+    brand_res = pd.DataFrame({
+        'brand': list(brand_counts.keys()),
+        'count': list(brand_counts.values())
+    })
+
+    # Step 4: Rank brands by count (lowest = 1, highest = max), ties get same score
+    brand_res['score'] = brand_res['count'].rank(method='dense', ascending=True).astype(int)
+
+    # Optional: sort by score
+    brand_res = brand_res.sort_values(by='score', ascending=True).reset_index(drop=True)
+
+    brand_res.to_csv(folderout + 'brands_all.csv')
+
     
-    new_row = pd.DataFrame([{'survey_submisssions':total_all_survey,
-                'total items removed':removed_items, 'weight removed':total_kg, 
+    
+    new_row = pd.DataFrame([{'survey_submisssions':total_survey,
+                'total items surveyed':fully_surveyed_items, 
+                'total composition items':total_reported_items, 
+                'weight removed':total_kg, 
                 'volume removed':total_cokecans, 'distance_kms':km_survey, 
                 'area kms2':area_survey,'most common material':most_type, 
                 'SUP reported':tot_percSUP,'SUP calculated':tot_calc_SUP,

@@ -1,4 +1,4 @@
-t#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Nov 18 14:37:41 2024
@@ -682,33 +682,7 @@ def citizen_science_count_clean_data(TFTin, TFTout):
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'CS_count.csv', index=False)
     
-def add_to_existing_data(TFTout, year_folder):
-    """
-    A function which takes the prepared monthly TFT data and adds it to the 
-    correct yearly file
-    
-    Parameters
-    ----------
-    
-    TFTout: string
-            path to folder with input csv files with cleaned raw monthly data
-            
-    yearin: string
-            path to folder with input csv files with cleaned raw yearly data and
-            for output files 
-             
-    """
 
-    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite', 'TFR']
-    #read csv file
-    for file in forms:
-        df_month = pd.read_csv(TFTout + file + '.csv')   
-        df_year = pd.read_csv(year_folder + file + '/' + file + '_2025.csv')
-        dfs = (df_month, df_year)
-        df_final = pd.concat(dfs, ignore_index = True) 
-        df_final.to_csv(year_folder + file + '/' + file + '_2025.csv', index=False)    
-        
-    
 
 def TFRaces_clean_data_v1(TFTin, TFTout):
     """
@@ -775,5 +749,31 @@ def TFRaces_clean_data_v1(TFTin, TFTout):
     df_clean.to_csv(TFTout + 'TFR.csv', index=False)
     
     
+def add_to_existing_data(TFTout, year_folder):
+    """
+    A function which takes the prepared monthly TFT data and adds it to the 
+    correct yearly file
     
+    Parameters
+    ----------
+    
+    TFTout: string
+            path to folder with input csv files with cleaned raw monthly data
+            
+    yearin: string
+            path to folder with input csv files with cleaned raw yearly data and
+            for output files 
+             
+    """
+
+    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite', 'TFR']
+    #read csv file
+    for file in forms:
+        df_month = pd.read_csv(TFTout + file + '.csv')   
+        df_year = pd.read_csv(year_folder + file + '/' + file + '_2025.csv')
+        dfs = (df_month, df_year)
+        df_final = pd.concat(dfs, ignore_index = True) 
+        df_final.to_csv(year_folder + file + '/' + file + '_2025.csv', index=False)    
+        
+        
     

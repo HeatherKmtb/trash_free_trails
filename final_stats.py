@@ -819,11 +819,14 @@ def overview_stats(folderin, folderout):
             count_survey = survey[col_name].notna().sum()
             # Count non-null for CSsurvey
             count_cs = CSsurvey[col_name].notna().sum()
+            # Count non-null for CSsurvey
+            count_tfr = tfr[col_name].notna().sum()
         
             # Add weighted contribution
-            total_weighted += (count_survey + count_cs) * weight
+            total_weighted += (count_survey + count_cs + count_tfr) * weight
     
-        orig_brand_res = orig_brand_res.append({'brand': b, 'weighted_count': total_weighted}, ignore_index=True)
+        new_row = pd.DataFrame({'brand': [b], 'weighted_count': [total_weighted]})
+        orig_brand_res = pd.concat([orig_brand_res, new_row], ignore_index=True)
 
     # Sort by weighted count
     orig_brand_res = orig_brand_res.sort_values(by='weighted_count', ascending=False)
@@ -840,18 +843,19 @@ def overview_stats(folderin, folderout):
     # Step 1: Extract unique "Other" brands from both survey and CSsurvey
     other_brands_survey = survey[[f"{prefix}_Other" for prefix in col_prefixes]].stack().dropna().unique().tolist()
     other_brands_CS = CSsurvey[[f"{prefix}_Other" for prefix in col_prefixes]].stack().dropna().unique().tolist()
+    other_brands_tfr = tfr[[f"{prefix}_Other" for prefix in col_prefixes]].stack().dropna().unique().tolist()
 
     # Merge new brands, remove duplicates
-    all_brands = list(set(brands[:-1] + other_brands_survey + other_brands_CS))  # exclude original 'Other'
+    all_brands = list(set(brands[:-1] + other_brands_survey + other_brands_CS + other_brands_tfr))  # exclude original 'Other'
 
     # Step 2: Count occurrences of each brand across all positions
     brand_counts = {}
     for b in all_brands:
-        count = 0
+        counting = 0
         for prefix in col_prefixes:
-            count += (survey[f"{prefix}_{b}"].notna().sum() if f"{prefix}_{b}" in survey.columns else 0)
-            count += (CSsurvey[f"{prefix}_{b}"].notna().sum() if f"{prefix}_{b}" in CSsurvey.columns else 0)
-        brand_counts[b] = count
+            counting += (survey[f"{prefix}_{b}"].notna().sum() if f"{prefix}_{b}" in survey.columns else 0)
+            counting += (CSsurvey[f"{prefix}_{b}"].notna().sum() if f"{prefix}_{b}" in CSsurvey.columns else 0)
+        brand_counts[b] = counting
 
     # Step 3: Convert counts to DataFrame
     brand_res = pd.DataFrame({

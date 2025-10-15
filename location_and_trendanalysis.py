@@ -135,3 +135,38 @@ plt.show()
     y3 = y4/y2
     
     y = y3
+
+
+##########TMT
+
+    df = pd.read_csv(TFTin)
+    
+    df['Trail Postcode'] = df['Trail Postcode'].astype(str)
+    
+    postcodes = []
+    for index,i in df.iterrows():
+         postcode = i['Trail Postcode']
+ 
+         first = postcode.upper()
+         new = first.replace(" ","")
+         start = new[:4]
+         postcodes.append(start)
+         
+    df['postcode_start'] = postcodes   
+    
+    codes = ['S117', 'CB41', 'TR50', 'LL41', 'LL26', 'TQ95', 'CF37', 'FK95', 'SY50']
+    
+    for code in codes:
+        new = df.loc[df['postcode_start']==code].copy() 
+        if new.empty:
+            continue
+        
+        new.loc[new['Quantity - Handful'] == True, 'Quantity from averages'] = 6
+        new.loc[new['Quantity - Pocketful'] == True, 'Quantity from averages'] = 15
+        new.loc[new['Quantity - Bread Bag'] == True, 'Quantity from averages'] = 25
+        new.loc[new['Quantity - Carrier Bag'] == True, 'Quantity from averages'] = 42
+        new.loc[new['Quantity - Generic Bin Bag'] == True, 'Quantity from averages'] = 182.6
+        new.loc[new['Quantity - Multiple Bin Bags'] == True, 'Quantity from averages'] = 182.6
+        new.to_csv(folderout + '/{}.csv'.format(code)) 
+            
+            

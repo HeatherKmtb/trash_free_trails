@@ -372,7 +372,7 @@ def overview_stats(folderin, folderout):
     
 #first ones currently covered in overviews
     
-    kms_survey = [survey_km, CSsurvey_km] 
+    kms_survey = [survey_km] 
 #distance covered    
     km_survey = sum(kms_survey)
     

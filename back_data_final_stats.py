@@ -62,8 +62,9 @@ def overview_stats(folderin, folderout):
                 'brand 3'])
     
     #create df for results - or could read in and append to overall stats sheet
-    results = pd.DataFrame(columns = ['month','total_submisssions', 'total_survey',
-                                      'no_people', 'area_km2', 'distance_km','duration_hours', 
+    results = pd.DataFrame(columns = ['month','total_submisssions', 'total_count', 
+                                      'total_survey', 'total_lite', 'trash_watch',
+                                      'no_people','area_km2','distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
@@ -310,7 +311,7 @@ def overview_stats(folderin, folderout):
 #Adjusted total items    
         ATI = ATI_next + ATI_lite + ATI_survey
     
-        new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':total_count,
+        new_row = pd.DataFrame([{'month':month, 'total_submisssions':total_CS, 'total_count':total_count,
                                   'total_survey':total_survey, 'total_lite': count_lite,
                                   'no_people':total_people, 
                                   'area_km2':area, 'distance_km':km,
@@ -386,7 +387,7 @@ def overview_stats(folderin, folderout):
 #Survey stats
     
 #first ones currently covered in overvies
-        kms_survey = [survey_km, CSsurvey_km] 
+        kms_survey = [survey_km] 
     #distance covered    
         km_survey = sum(kms_survey)
         
@@ -1068,7 +1069,7 @@ def overview_stats(folderin, folderout):
                
             
 
-def overview_stats_just_survey_and_count(folderin, folderout):
+def overview_stats_just_survey_and_count(month, folderin, folderout):
     """
     A function which takes clean monthly TFT survey data and produces monthly stats
     
@@ -1081,7 +1082,7 @@ def overview_stats_just_survey_and_count(folderin, folderout):
     folderout: string
            path for folder to save results in
     """
-    month = '07'
+    
     
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 'total_survey',
@@ -1749,7 +1750,7 @@ def overview_stats_just_survey_and_count(folderin, folderout):
         # Optional: sort by score
     brand_res = brand_res.sort_values(by='score', ascending=True).reset_index(drop=True)
         
-    brand_res.to_csv(folderout + '2020_' + month + '_brands_all.csv', index=False)
+    brand_res.to_csv(folderout + month + '_brands_all.csv', index=False)
     
         
     

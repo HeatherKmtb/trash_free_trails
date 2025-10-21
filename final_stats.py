@@ -75,15 +75,17 @@ def overview_stats(folderin, folderout):
     tot_people = []
     tot_time = []
 
+    survey['Time_hours'] = survey['Time_hours'].replace(0, 1.64).fillna(1.64)
+
+    survey['People'] = survey['People'].replace(0, 3.08).fillna(3.08)
+    
     for df in dfs: #survey, CSsurvey & CS count
         people = df['People'].sum()
-        hours = df['Time_hours'].sum()
-        #km = df['Distance_km'].sum()
-        #items = df['TotItems'].sum()
+        hours = (df['People'] * df['Time_hours']).sum()
+
         tot_people.append(people)
         tot_time.append(hours)
-        #tot_km.append(km)
-        #tot_items.append(items)
+
     
     #add to total people the number of lite and count submissions
     lite_people = count_lite * 3.08

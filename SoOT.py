@@ -131,9 +131,12 @@ def EPR_materials(TFTin, dataout):
 
     # Now they both have clean numeric columns
     combined = pd.concat([survey, CSsurvey], ignore_index=True)
+    
+    reported_items = combined[all_items].sum(axis=0).to_list()
+    
+    total_reported_items = sum(reported_items)
 
-    plastic = ['Value Full Dog Poo Bags',
-            'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
+    plastic = [
             'Value Plastic bottle, top',
             'Value Plastic energy gel sachet','Value Plastic energy gel end', 
             'Value Plastic straws',
@@ -141,11 +144,7 @@ def EPR_materials(TFTin, dataout):
             'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
             'Value Confectionary/sweet wrappers',
             'Value Wrapper "corners" / tear-offs',
-            'Value Crisps Packets','Value Disposable vapes',
-            'Value Salt/mineral lick buckets','Value Silage wrap',
-            'Value Tree guards','Value Cable ties','Value Industrial plastic wrap',
-            'Value Rubber/nitrile gloves','Value Face/ baby wipes',
-            'Value Normal balloons','Value Helium balloons','Value Plastic milk bottles',
+            'Value Crisps Packets','Value Plastic milk bottles',
             'Value Plastic food containers','Value Cleaning products containers']
     
     fibre_composite = ['Value Hot drinks cups', 'Value Hot drinks tops and stirrers',
@@ -153,18 +152,23 @@ def EPR_materials(TFTin, dataout):
                            'Value Food on the go (eg.salad boxes)']        
             
     aluminium = ['Value Glass bottle tops',
-             'Value Disposable BBQs and / or BBQ related items','Value BBQs and / or BBQ related items',]   
+             'Value Disposable BBQs and / or BBQ related items','Value BBQs and / or BBQ related items']   
 
     glass = ['Value Glass soft drink bottles','Value Glass alcoholic bottles',]     
     
     cardboard = ['Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
             'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
             'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
-            'Value Cardboard food containers',]
+            'Value Cardboard food containers']
     
     wood = ['Value Other confectionary (eg., Lollipop Sticks)']
     
-    other = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    other = ['Value Disposable vapes',
+    'Value Salt/mineral lick buckets','Value Silage wrap',
+    'Value Tree guards','Value Cable ties','Value Industrial plastic wrap',
+    'Value Rubber/nitrile gloves','Value Face/ baby wipes',
+    'Value Normal balloons','Value Helium balloons','Value Full Dog Poo Bags',
+            'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff','Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
     'Value Aluminium soft drink cans', 'Value Plastic energy drink bottles',
     'Value Aluminium energy drink can',
     'Value Used Chewing Gum','Value Fruit peel & cores','Value Cigarette Butts','Value Smoking related',
@@ -198,8 +202,8 @@ def EPR_materials(TFTin, dataout):
     totwo = sum(woods)
     tototh = sum(others)
 
-    df = pd.DataFrame({'type': ['plastic','fibre_composite','glass','aluminium','card','wood','other'],
-                           'quantity':[totpl, totfi, totgl, total, totca, totwo, tototh]})
+    df = pd.DataFrame({'type': ['all items', 'plastic','fibre_composite','glass','aluminium','card','wood','other'],
+                           'quantity':[total_reported_items, totpl, totfi, totgl, total, totca, totwo, tototh]})
     
     df.to_csv(dataout, index=False)
 
@@ -278,7 +282,7 @@ def branded_EPR_materials(TFTin, dataout):
 
     # Now they both have clean numeric columns
     #combined = pd.concat([survey, CSsurvey], ignore_index=True)
-    combined = survey
+    combined = pd.concat([survey, CSsurvey], ignore_index=True)
     
     # Summation works the same
     reported_items = combined[all_items].sum(axis=0).to_list()
@@ -287,6 +291,7 @@ def branded_EPR_materials(TFTin, dataout):
     
 
     plastic = ['Value Plastic energy gel sachet','Value Plastic energy gel end', 
+               'Value Plastic carrier bags',
             'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
             'Value Confectionary/sweet wrappers',
             'Value Wrapper "corners" / tear-offs',
@@ -299,11 +304,17 @@ def branded_EPR_materials(TFTin, dataout):
 
     cardboard = ['Value Cartons', 'Value Drinks cups (eg., McDonalds drinks)',
             'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-            'Value Cardboard food containers','Value Smoking related']
+            'Value Cardboard food containers','Value Vaping / E-Cigarette Paraphernalia',
+            'Value Smoking related', 'Value Cardboard food containers']
     
     #wood = ['Value Other confectionary (eg., Lollipop Sticks)']
+    #for EPR items that aren't usually branded
+    other = ['Value Plastic bottle, top', 'Value Plastic straws', 
+             'Value Hot drinks tops and stirrers', 'Value Drinks tops (eg., McDonalds drinks)',
+             'Value Glass bottle tops', 'Value Disposable BBQs and / or BBQ related items',
+             'Value BBQs and / or BBQ related items', 'Value Paper straws','Value Other confectionary (eg., Lollipop Sticks)']
     
-    #other = []
+    
     plasticDRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
             'Value Plastic bottle, top','Value Plastic energy drink bottles']
          
@@ -325,7 +336,7 @@ def branded_EPR_materials(TFTin, dataout):
     #glasses = combined[glass].sum(axis=0).to_list()
     card = combined[cardboard].sum(axis=0).to_list()       
     #woods = combined[wood].sum(axis=0).to_list()
-    #others = combined[other].sum(axis=0).to_list()
+    others = combined[other].sum(axis=0).to_list()
     plasticsDRS = combined[plasticDRS].sum(axis=0).to_list()
     allyDRS = combined[aluminiumDRS].sum(axis=0).to_list() 
     glassesDRS = combined[glassDRS].sum(axis=0).to_list()
@@ -338,15 +349,15 @@ def branded_EPR_materials(TFTin, dataout):
     total = sum(ally)    
     totca = sum(card)
     #totwo = sum(woods)
-    #tototh = sum(others)
+    tototh = sum(others)
     totplDRS = sum(plasticsDRS)
  
     totglDRS = sum(glassesDRS)
     totalDRS = sum(allyDRS)    
    
 
-    df = pd.DataFrame({'type': ['all items','plastic','fibre_composite','aluminium','card', 'plastic DRS','glass DRS', 'aluminium DRS'],
-                           'quantity':[total_reported_items, totpl, totfi, total, totca, totplDRS, totglDRS, totalDRS]})   
+    df = pd.DataFrame({'type': ['all items','plastic','fibre_composite','aluminium','card', 'other','plastic DRS','glass DRS', 'aluminium DRS'],
+                           'quantity':[total_reported_items, totpl, totfi, total, totca, tototh, totplDRS, totglDRS, totalDRS]})   
 
 
     df.to_csv(dataout)

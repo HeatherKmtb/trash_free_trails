@@ -116,13 +116,17 @@ def overview_stats(folderin, folderout):
             hours.append(hour)
         
         survey['Time_hours'] = hours    
+        survey['Time_hours'] = survey['Time_hours'].replace(0, 1.64).fillna(1.64)
+    
+        survey['People'] = survey['People'].replace(0, 3.08).fillna(3.08)
     
         tot_people = []
         tot_time = []
 
+        
         for df in dfs: #survey, CSsurvey & CS count
             people = df['People'].sum()
-            hours = df['Time_hours'].sum()
+            hours = (df['People'] * df['Time_hours']).sum()
         #km = df['Distance_km'].sum()
         #items = df['TotItems'].sum()
             tot_people.append(people)
@@ -1120,11 +1124,16 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
         hours.append(hour)
         
     survey['Time_hours'] = hours    
-    
-    people = survey['People'].sum()
-    hours = survey['Time_hours'].sum()
+    survey['Time_hours'] = survey['Time_hours'].replace(0, 1.64).fillna(1.64)
 
-    tot_people =[count_count, people]
+    survey['People'] = survey['People'].replace(0, 3.08).fillna(3.08)
+    
+    hours = (survey['People'] * survey['Time_hours']).sum()
+
+    peeps = survey['People'].sum()
+    
+
+    tot_people =[count_count, peeps]
  
 #volunteers
     total_people = sum(tot_people)
@@ -1252,7 +1261,7 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
     results= pd.concat([results, new_row], ignore_index=True) 
                                                 
     
-    results.to_csv(folderout + 'overview.csv',index=False)    
+    results.to_csv(folderout + month + '_overview.csv',index=False)    
     
     count = count.rename(columns={'ZMostonesAlmostHome':'MostZonesAlmostHome'})
     count = count.rename(columns={'MostZonesLunch':'MostZonesPicnic'})
@@ -1298,7 +1307,7 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
     count_results = pd.concat([count_results, new_row], ignore_index=True) 
   
 
-    count_results.to_csv(folderout + '/count.csv',index=False)  
+    count_results.to_csv(folderout + month + '_count.csv',index=False)  
     
     survey_results = pd.DataFrame(columns = ['survey_submisssions', 'total items surveyed', 
                 'total composition items', 'weight removed', 'volume removed', 'distance_kms', 'area kms2',
@@ -1779,7 +1788,7 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
     
     survey_results = pd.concat([survey_results, new_row], ignore_index=True)   
 
-    survey_results.to_csv(folderout + 'survey.csv', index=False)  
+    survey_results.to_csv(folderout + month + '_survey.csv', index=False)  
     
     impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 'Fauna Death',
                     'First Time', 'Repeat volunteers','Felt proud',
@@ -1911,7 +1920,7 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
                        'provided contact info':perc_contacts}])
     impacts_results = pd.concat([impacts_results, new_row], ignore_index=True)    
     
-    impacts_results.to_csv(folderout + '/impacts.csv', index=False) 
+    impacts_results.to_csv(folderout + month + '_impacts.csv', index=False) 
            
         
     
@@ -1985,14 +1994,16 @@ def overview_stats_just_survey(folderin, folderout):
             hours.append(hour)
         
         survey['Time_hours'] = hours    
+        survey['Time_hours'] = survey['Time_hours'].replace(0, 1.64).fillna(1.64)
     
-        people = survey['People'].sum()
-        hours = survey['Time_hours'].sum()
+        survey['People'] = survey['People'].replace(0, 3.08).fillna(3.08)
+        
+        hours = (survey['People'] * survey['Time_hours']).sum()
 
-        tot_people =[people]
+        tot_people = survey['People'].sum()
  
 #volunteers
-        total_people = sum(tot_people)
+        total_people = tot_people.sum()
     
         survey_km = survey['Distance_km'].sum()
 
@@ -2085,7 +2096,7 @@ def overview_stats_just_survey(folderin, folderout):
 #Adjusted total items    
         ATI = ATI_next + ATI_survey
     
-        new_row = pd.DataFrame([{'total_submisssions':total_CS,
+        new_row = pd.DataFrame([{'month':month,'total_submisssions':total_CS,
                                   'total_survey':total_survey, 
                                   'no_people':total_people, 
                                   'area_km2':area, 'distance_km':km,
@@ -2095,7 +2106,7 @@ def overview_stats_just_survey(folderin, folderout):
                                   'Adjusted Total Items':ATI}])
         results= pd.concat([results, new_row], ignore_index=True)                                          
     
-        results.to_csv(folderout + '2020_overview.csv',index=False)    
+        results.to_csv(folderout + 'overview.csv',index=False)    
     
 
 #Survey stats

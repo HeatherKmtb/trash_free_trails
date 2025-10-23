@@ -52,7 +52,8 @@ def overview_stats(folderin, folderout):
                 'total composition items','weight removed', 'volume removed', 'distance_kms', 'area kms2',
                 'most common material', 'SUP reported','SUP calculated','most common category',
                 'DRS reported','DRS total items','DRS total glass','DRS % of total items',
-                'glass DRS % of DRS items','glass DRS % of total items','vapes reported',
+                'glass DRS % of DRS items','glass DRS % of total items','EPR reported',
+                'EPR total items','EPR % of total items','vapes reported',
                 'vapes total items','vapes % of total items','vapes % of smoking related items',
                 'gel ends reported','gel ends total items','gel ends % of total items',
                 'gels reported','gels total items','gels % of total items',
@@ -665,6 +666,67 @@ def overview_stats(folderin, folderout):
         glass_DRS_proportion = (DRS_tot_glass/DRS_tot_items)*100
 #% of total items that are glass DRS
         glass_proportion = (DRS_tot_glass/total_reported_items)*100 
+        
+        sub_EPR =   ['Plastic bottle, top',
+        'Plastic energy gel sachet','Plastic energy gel end', 
+        'Plastic straws',
+        'Plastic carrier bags','Plastic bin bags',
+        'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+        'Confectionary/sweet wrappers',
+        'Wrapper "corners" / tear-offs',
+        'Crisps Packets','Plastic milk bottles',
+        'Plastic food containers','Cleaning products containers',
+        'Hot drinks cups', 'Hot drinks tops and stirrers',
+        'Drinks tops (eg., McDonalds drinks)',
+        'Food on the go (eg.salad boxes)','Glass bottle tops',
+        'Disposable BBQs and / or BBQ related items',
+        'BBQs and / or BBQ related items', 'Cartons','Paper straws', 
+        'Drinks cups (eg., McDonalds drinks)',
+        'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+        'Vaping / E-Cigarette Paraphernalia','Toilet tissue',
+        'Cardboard food containers',
+        'Other confectionary (eg., Lollipop Sticks)']
+        
+        EPR = ['Value Plastic bottle, top',
+        'Value Plastic energy gel sachet','Value Plastic energy gel end', 
+        'Value Plastic straws',
+        'Value Plastic carrier bags','Value Plastic bin bags',
+        'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+        'Value Confectionary/sweet wrappers',
+        'Value Wrapper "corners" / tear-offs',
+        'Value Crisps Packets','Value Plastic milk bottles',
+        'Value Plastic food containers','Value Cleaning products containers',
+        'Value Hot drinks cups', 'Value Hot drinks tops and stirrers',
+        'Value Drinks tops (eg., McDonalds drinks)',
+        'Value Food on the go (eg.salad boxes)','Value Glass bottle tops',
+        'Value Disposable BBQs and / or BBQ related items',
+        'Value BBQs and / or BBQ related items', 'Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
+        'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+        'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
+        'Value Cardboard food containers',
+        'Value Other confectionary (eg., Lollipop Sticks)']
+         
+        df_EPR_subs = survey[sub_EPR]    
+        subs_EPR_indy = df_EPR_subs.any(axis=1).sum()
+        df_CSEPR_subs = CSsurvey[EPR]
+        subs_EPR_CS = df_CSEPR_subs.any(axis=1).sum()
+            
+        EPR_items = combined[EPR].sum(axis=0).to_list()   
+      
+        tot_EPR_subs = subs_EPR_indy + subs_EPR_CS  
+          
+        subs_for_EPR = [count_survey, count_CSsurvey]
+        subs_EPR = sum(subs_for_EPR)
+            
+        
+    #% Submissions reporting EPR                
+        EPR_reported = (tot_EPR_subs/subs_EPR)*100
+    #EPR total items
+        EPR_tot_items = sum(EPR_items)
+        
+    #% of total items that are EPR - from those reporting breakdown
+        EPR_proportion = (EPR_tot_items/total_reported_items)*100
+        
     
     
         vapes_indy = ['Disposable vapes','Value Disposable vapes']   
@@ -898,7 +960,8 @@ def overview_stats(folderin, folderout):
                     'most common category':most_cat,'DRS reported':DRS_reported,
                     'DRS total items':DRS_tot_items,'DRS total glass':DRS_tot_glass,
                     'DRS % of total items':DRS_proportion,'glass DRS % of DRS items':glass_DRS_proportion,
-                    'glass DRS % of total items':glass_proportion,
+                    'glass DRS % of total items':glass_proportion,'EPR reported':EPR_reported,
+                    'EPR total items':EPR_tot_items,'EPR % of total items':EPR_proportion,
                     'vapes reported':vapes_reported,'vapes total items':vapes_total,
                     'vapes % of total items':vapes_proportion,
                     'vapes % of smoking related items':vapes_in_smoke,
@@ -1313,7 +1376,8 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
                 'total composition items', 'weight removed', 'volume removed', 'distance_kms', 'area kms2',
                 'most common material', 'SUP reported','SUP calculated','most common category',
                 'DRS reported','DRS total items','DRS total glass','DRS % of total items',
-                'glass DRS % of DRS items','glass DRS % of total items','vapes reported',
+                'glass DRS % of DRS items','glass DRS % of total items','EPR reported',
+                'EPR total items','EPR % of total items','vapes reported',
                 'vapes total items','vapes % of total items','vapes % of smoking related items',
                 'gel ends reported','gel ends total items','gel ends % of total items',
                 'gels reported','gels total items','gels % of total items',
@@ -1575,6 +1639,60 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
 #% of total items that are glass DRS
     glass_proportion = (DRS_tot_glass/total_reported_items)*100 
     
+    sub_EPR =   ['Plastic bottle, top',
+    'Plastic energy gel sachet','Plastic energy gel end', 
+    'Plastic straws',
+    'Plastic carrier bags','Plastic bin bags',
+    'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+    'Confectionary/sweet wrappers',
+    'Wrapper "corners" / tear-offs',
+    'Crisps Packets','Plastic milk bottles',
+    'Plastic food containers','Cleaning products containers',
+    'Hot drinks cups', 'Hot drinks tops and stirrers',
+    'Drinks tops (eg., McDonalds drinks)',
+    'Food on the go (eg.salad boxes)','Glass bottle tops',
+    'Disposable BBQs and / or BBQ related items',
+    'BBQs and / or BBQ related items', 'Cartons','Paper straws', 
+    'Drinks cups (eg., McDonalds drinks)',
+    'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+    'Vaping / E-Cigarette Paraphernalia','Toilet tissue',
+    'Cardboard food containers',
+    'Other confectionary (eg., Lollipop Sticks)']
+    
+    EPR = ['Value Plastic bottle, top',
+    'Value Plastic energy gel sachet','Value Plastic energy gel end', 
+    'Value Plastic straws',
+    'Value Plastic carrier bags','Value Plastic bin bags',
+    'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+    'Value Confectionary/sweet wrappers',
+    'Value Wrapper "corners" / tear-offs',
+    'Value Crisps Packets','Value Plastic milk bottles',
+    'Value Plastic food containers','Value Cleaning products containers',
+    'Value Hot drinks cups', 'Value Hot drinks tops and stirrers',
+    'Value Drinks tops (eg., McDonalds drinks)',
+    'Value Food on the go (eg.salad boxes)','Value Glass bottle tops',
+    'Value Disposable BBQs and / or BBQ related items',
+    'Value BBQs and / or BBQ related items', 'Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
+    'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+    'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
+    'Value Cardboard food containers',
+    'Value Other confectionary (eg., Lollipop Sticks)']
+     
+    df_EPR_subs = survey[sub_EPR]    
+    subs_EPR_indy = df_EPR_subs.any(axis=1).sum()
+        
+    EPR_items = survey[EPR].sum(axis=0).to_list()   
+  
+    
+#% Submissions reporting EPR                
+    EPR_reported = (subs_EPR_indy/count_survey)*100
+#EPR total items
+    EPR_tot_items = sum(EPR_items)
+    
+#% of total items that are EPR - from those reporting breakdown
+    EPR_proportion = (EPR_tot_items/total_reported_items)*100
+    
+    
     
     vapes_indy = ['Disposable vapes','Value Disposable vapes']   
     vape_items_indy = survey[vapes_indy].sum(axis=0).to_list() 
@@ -1773,7 +1891,8 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
                 'most common category':most_cat,'DRS reported':DRS_reported,
                 'DRS total items':DRS_tot_items,'DRS total glass':DRS_tot_glass,
                 'DRS % of total items':DRS_proportion,'glass DRS % of DRS items':glass_DRS_proportion,
-                'glass DRS % of total items':glass_proportion,
+                'glass DRS % of total items':glass_proportion,'EPR reported':EPR_reported,
+                'EPR total items':EPR_tot_items,'EPR % of total items':EPR_proportion,
                 'vapes reported':vapes_reported,'vapes total items':vapes_total,
                 'vapes % of total items':vapes_proportion,
                 'vapes % of smoking related items':vapes_in_smoke,
@@ -1945,7 +2064,8 @@ def overview_stats_just_survey(folderin, folderout):
                 'total composition items','weight removed', 'volume removed', 'distance_kms', 'area kms2',
                 'most common material', 'SUP reported','SUP calculated','most common category',
                 'DRS reported','DRS total items','DRS total glass','DRS % of total items',
-                'glass DRS % of DRS items','glass DRS % of total items','vapes reported',
+                'glass DRS % of DRS items','glass DRS % of total items','EPR reported',
+                'EPR total items','EPR % of total items','vapes reported',
                 'vapes total items','vapes % of total items','vapes % of smoking related items',
                 'gel ends reported','gel ends total items','gel ends % of total items',
                 'gels reported','gels total items','gels % of total items',
@@ -2372,7 +2492,60 @@ def overview_stats_just_survey(folderin, folderout):
             glass_DRS_proportion = (DRS_tot_glass/DRS_tot_items)*100
 #% of total items that are glass DRS
         glass_proportion = (DRS_tot_glass/total_reported_items)*100 
-    
+        
+        sub_EPR =   ['Plastic bottle, top',
+        'Plastic energy gel sachet','Plastic energy gel end', 
+        'Plastic straws',
+        'Plastic carrier bags','Plastic bin bags',
+        'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+        'Confectionary/sweet wrappers',
+        'Wrapper "corners" / tear-offs',
+        'Crisps Packets','Plastic milk bottles',
+        'Plastic food containers','Cleaning products containers',
+        'Hot drinks cups', 'Hot drinks tops and stirrers',
+        'Drinks tops (eg., McDonalds drinks)',
+        'Food on the go (eg.salad boxes)','Glass bottle tops',
+        'Disposable BBQs and / or BBQ related items',
+        'BBQs and / or BBQ related items', 'Cartons','Paper straws', 
+        'Drinks cups (eg., McDonalds drinks)',
+        'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+        'Vaping / E-Cigarette Paraphernalia','Toilet tissue',
+        'Cardboard food containers',
+        'Other confectionary (eg., Lollipop Sticks)']
+        
+        EPR = ['Value Plastic bottle, top',
+        'Value Plastic energy gel sachet','Value Plastic energy gel end', 
+        'Value Plastic straws',
+        'Value Plastic carrier bags','Value Plastic bin bags',
+        'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+        'Value Confectionary/sweet wrappers',
+        'Value Wrapper "corners" / tear-offs',
+        'Value Crisps Packets','Value Plastic milk bottles',
+        'Value Plastic food containers','Value Cleaning products containers',
+        'Value Hot drinks cups', 'Value Hot drinks tops and stirrers',
+        'Value Drinks tops (eg., McDonalds drinks)',
+        'Value Food on the go (eg.salad boxes)','Value Glass bottle tops',
+        'Value Disposable BBQs and / or BBQ related items',
+        'Value BBQs and / or BBQ related items', 'Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
+        'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+        'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
+        'Value Cardboard food containers',
+        'Value Other confectionary (eg., Lollipop Sticks)']
+         
+        df_EPR_subs = survey[sub_EPR]    
+        subs_EPR_indy = df_EPR_subs.any(axis=1).sum()
+            
+        EPR_items = survey[EPR].sum(axis=0).to_list()   
+      
+        
+    #% Submissions reporting EPR                
+        EPR_reported = (subs_EPR_indy/count_survey)*100
+    #EPR total items
+        EPR_tot_items = sum(EPR_items)
+        
+    #% of total items that are EPR - from those reporting breakdown
+        EPR_proportion = (EPR_tot_items/total_reported_items)*100
+        
     
         vapes_indy = ['Disposable vapes','Value Disposable vapes']  
         survey[vapes_indy] = survey[vapes_indy].apply(pd.to_numeric, errors="coerce")
@@ -2571,7 +2744,8 @@ def overview_stats_just_survey(folderin, folderout):
                     'most common category':most_cat,'DRS reported':DRS_reported,
                     'DRS total items':DRS_tot_items,'DRS total glass':DRS_tot_glass,
                     'DRS % of total items':DRS_proportion,'glass DRS % of DRS items':glass_DRS_proportion,
-                    'glass DRS % of total items':glass_proportion,
+                    'glass DRS % of total items':glass_proportion,'EPR reported':EPR_reported,
+                    'EPR total items':EPR_tot_items,'EPR % of total items':EPR_proportion,
                     'vapes reported':vapes_reported,'vapes total items':vapes_total,
                     'vapes % of total items':vapes_proportion,
                     'vapes % of smoking related items':vapes_in_smoke,

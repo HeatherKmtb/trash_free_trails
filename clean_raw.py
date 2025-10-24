@@ -46,9 +46,9 @@ def survey_clean_data(TFTin, TFTout):
         'TypeOtherTrails','TypeAccess','TypeCar','TypeOther','MostTypeTrails',
         'MostTypeFootpaths','MostTypeUnofficial','MostTypePump','MostTypeUrban',
         'MostTypeOtherTrails','MostTypeAccess','MostTypeCar','MostTypeOther',
-        'Time_min','Distance_km','TotItems',
-        #'AdjTotItems',
-        'BinBags','Full Dog Poo Bags',
+        'Time_min','Distance_km','TotItems','Handful','Pocketful','Bread bag',
+        'Carrier bag', 'Bin bag', 'Multiple Bin Bags', 
+        'Full Dog Poo Bags',
         'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
         'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
         'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
@@ -136,6 +136,7 @@ def survey_clean_data(TFTin, TFTout):
     df_clean = df_clean.drop('GR?', axis=1)
     df_clean = df_clean.drop('GS?', axis=1)
     df_clean = df_clean.drop('GT?', axis=1)
+    df_clean.insert(36, 'Binbags', '')
     
     df_clean = df_clean[~df_clean['TrailName'].str.contains(r'\btest\b', case=False, na=False)]
     
@@ -167,7 +168,8 @@ def survey_clean_data(TFTin, TFTout):
     #df3 = df2[df2['AdjTotItems'].notna()]
     
     #change data in presence(composition) data to TRUE
-    change_cols = ['BinBags','Full Dog Poo Bags',
+    change_cols = ['Handful','Pocketful','Bread bag',
+            'Carrier bag', 'Bin bag', 'Full Dog Poo Bags',
             'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
             'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
             'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',

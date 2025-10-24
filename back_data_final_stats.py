@@ -202,6 +202,34 @@ def overview_stats(folderin, folderout):
     'Value Plastic milk bottles','Value Plastic food containers','Value Cardboard food containers',
     'Value Cleaning products containers','Value Miscellaneous','Value Too small/dirty to ID',
     'Value Weird/Retro']
+        
+        all_presence = ['Full Dog Poo Bags',
+        'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+        'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
+        'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
+        'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
+        'Aluminium alcoholic drink cans','Glass alcoholic bottles','Glass bottle tops',
+        'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
+        'Drinks tops (eg., McDonalds drinks)','Cartons','Plastic straws','Paper straws',
+        'Plastic carrier bags','Plastic bin bags','Confectionary/sweet wrappers',
+        'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
+        'Crisps Packets','Used Chewing Gum',
+        'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+        'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+        'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',
+        'Food on the go (eg.salad boxes)','Homemade lunch (eg., aluminium foil, cling film)',
+        'Fruit peel & cores','Cigarette Butts','Smoking related','Disposable vapes',
+        'Vaping / E-Cigarette Paraphernalia','Drugs related','Farming',
+        'Salt/mineral lick buckets','Silage wrap','Forestry','Tree guards','Industrial',
+        'Cable ties','Industrial plastic wrap','Toilet tissue','Face/ baby wipes',
+        'Nappies','Single-Use Period products','Single-Use Covid Masks','Rubber/nitrile gloves',
+        'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
+        'Normal balloons','Helium balloons','MTB related (e.g. inner tubes, water bottles etc)',
+        'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
+        'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
+        'Plastic milk bottles','Plastic food containers','Cardboard food containers',
+        'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
+        'Weird/Retro']
     
         #Reslove nan issue
         for df in [survey, CSsurvey]:
@@ -483,7 +511,9 @@ def overview_stats(folderin, folderout):
         srvy_tot = df2['TotItems'].sum()
         CSsrvy_tot = df3['TotItems'].sum()
         tot_items_surveys = srvy_tot + CSsrvy_tot
-        tot_SUP = sum(SUP) 
+        sup = [x for x in SUP if pd.notna(x)]
+        
+        tot_SUP = sum(sup) 
     #calcualte percentage
 #SUP proportion % reported    
         tot_percSUP = tot_SUP/tot_items_surveys *100   
@@ -515,7 +545,8 @@ def overview_stats(folderin, folderout):
     'Value Cleaning products containers']
      
         calc_perc_SUP = []
-        df2 = survey[survey['MoreInfoY'].notna()]
+        df_new = survey[all_items]
+        df2 = df_new[df_new.any(axis=1)]
         for index, i in df2.iterrows():
             SUP_items = i[col_list_SUP].sum()   
             tot_items = i[all_items].sum()
@@ -649,12 +680,19 @@ def overview_stats(folderin, folderout):
             
         tot_DRS_subs = subs_indy + subs_CS + DRS_lite   
       
-        subs_for_DRS = [count_survey, count_CSsurvey, count_lite]
-        subs = sum(subs_for_DRS)
+        subs_presence = survey[all_presence]
+        CSs_subs_items = CSsurvey[all_items]
+        s_subs_report_presence = subs_presence.any(axis=1).sum()
+        CSs_subs_report_presence = CSs_subs_items.any(axis=1).sum()
+        subs_reporting_presence_withLITE = [s_subs_report_presence, CSs_subs_report_presence, count_lite]
+        subs_reporting_presence = [s_subs_report_presence, CSs_subs_report_presence]
+        
+        subs_for_presence_wLITE = sum(subs_reporting_presence_withLITE)
+        subs_for_presence = sum(subs_reporting_presence)
         
     
 #% Submissions reporting DRS                
-        DRS_reported = (tot_DRS_subs/subs)*100
+        DRS_reported = (tot_DRS_subs/subs_for_presence_wLITE)*100
 #DRS total items
         DRS_tot_items = sum(DRS_items)
 #DRS total glass items
@@ -683,7 +721,7 @@ def overview_stats(folderin, folderout):
         'BBQs and / or BBQ related items', 'Cartons','Paper straws', 
         'Drinks cups (eg., McDonalds drinks)',
         'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-        'Vaping / E-Cigarette Paraphernalia','Toilet tissue',
+        'Smoking related','Vaping / E-Cigarette Paraphernalia',
         'Cardboard food containers',
         'Other confectionary (eg., Lollipop Sticks)']
         
@@ -702,7 +740,7 @@ def overview_stats(folderin, folderout):
         'Value Disposable BBQs and / or BBQ related items',
         'Value BBQs and / or BBQ related items', 'Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
         'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-        'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
+        'Value Smoking related','Value Vaping / E-Cigarette Paraphernalia',
         'Value Cardboard food containers',
         'Value Other confectionary (eg., Lollipop Sticks)']
          
@@ -714,13 +752,10 @@ def overview_stats(folderin, folderout):
         EPR_items = combined[EPR].sum(axis=0).to_list()   
       
         tot_EPR_subs = subs_EPR_indy + subs_EPR_CS  
-          
-        subs_for_EPR = [count_survey, count_CSsurvey]
-        subs_EPR = sum(subs_for_EPR)
             
         
     #% Submissions reporting EPR                
-        EPR_reported = (tot_EPR_subs/subs_EPR)*100
+        EPR_reported = (tot_EPR_subs/subs_for_presence)*100
     #EPR total items
         EPR_tot_items = sum(EPR_items)
         
@@ -874,7 +909,7 @@ def overview_stats(folderin, folderout):
         out_lite = sum(lite_outs)
         tot_out_subs = tot_subs + out_lite 
 #% submissions reporting outdoor gear    
-        outs_reported = (tot_out_subs/subs)*100
+        outs_reported = (tot_out_subs/subs_for_presence)*100
 #outdoor gear_total_items    
         outs_total = sum(out)   
 #% of total items that are outdoor gear
@@ -915,7 +950,7 @@ def overview_stats(folderin, folderout):
         brand2 = orig_brand_res.iloc[1]['brand']
         brand3 = orig_brand_res.iloc[2]['brand']
                                  
-        orig_brand_res.to_csv(folderout + month + '_brands.csv')
+        orig_brand_res.to_csv(folderout + month + '_brands.csv', index=False)
         
         # Alternative version to include other brands - Columns prefixes
         col_prefixes = ['B1', 'B2', 'B3']
@@ -948,7 +983,7 @@ def overview_stats(folderin, folderout):
         # Optional: sort by score
         brand_res = brand_res.sort_values(by='score', ascending=True).reset_index(drop=True)
 
-        brand_res.to_csv(folderout + month + '_brands_all.csv')
+        brand_res.to_csv(folderout + month + '_brands_all.csv', index=False)
     
         new_row = pd.DataFrame([{'survey_submisssions':total_survey,
                     'total items surveyed':fully_surveyed_items, 
@@ -1255,6 +1290,34 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
     'Value Plastic milk bottles','Value Plastic food containers','Value Cardboard food containers',
     'Value Cleaning products containers','Value Miscellaneous','Value Too small/dirty to ID',
     'Value Weird/Retro']
+    
+    all_presence = ['Full Dog Poo Bags',
+    'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+    'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
+    'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
+    'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
+    'Aluminium alcoholic drink cans','Glass alcoholic bottles','Glass bottle tops',
+    'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
+    'Drinks tops (eg., McDonalds drinks)','Cartons','Plastic straws','Paper straws',
+    'Plastic carrier bags','Plastic bin bags','Confectionary/sweet wrappers',
+    'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
+    'Crisps Packets','Used Chewing Gum',
+    'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+    'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+    'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',
+    'Food on the go (eg.salad boxes)','Homemade lunch (eg., aluminium foil, cling film)',
+    'Fruit peel & cores','Cigarette Butts','Smoking related','Disposable vapes',
+    'Vaping / E-Cigarette Paraphernalia','Drugs related','Farming',
+    'Salt/mineral lick buckets','Silage wrap','Forestry','Tree guards','Industrial',
+    'Cable ties','Industrial plastic wrap','Toilet tissue','Face/ baby wipes',
+    'Nappies','Single-Use Period products','Single-Use Covid Masks','Rubber/nitrile gloves',
+    'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
+    'Normal balloons','Helium balloons','MTB related (e.g. inner tubes, water bottles etc)',
+    'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
+    'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
+    'Plastic milk bottles','Plastic food containers','Cardboard food containers',
+    'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
+    'Weird/Retro']
 
     reported_items = survey[all_items].sum()
     
@@ -1471,7 +1534,9 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
     srvy_tot = df2['TotItems'].sum()
 
     tot_items_surveys = srvy_tot
-    tot_SUP = sum(SUP) 
+    sup = [x for x in SUP if pd.notna(x)]
+    
+    tot_SUP = sum(sup) 
     #calcualte percentage
 #SUP proportion % reported    
     tot_percSUP = tot_SUP/tot_items_surveys *100   
@@ -1503,7 +1568,8 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
     'Value Cleaning products containers']
      
     calc_perc_SUP = []
-    df2 = survey[survey['MoreInfoY'].notna()]
+    df_new = survey[all_items]
+    df2 = df_new[df_new.any(axis=1)]
     for index, i in df2.iterrows():
         SUP_items = i[col_list_SUP].sum()   
         tot_items = i[all_items].sum()
@@ -1621,12 +1687,14 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
 
     tot_DRS_subs = subs_indy  
       
-    subs_for_DRS = [count_survey]
-    subs = sum(subs_for_DRS)
+    subs_presence = survey[all_presence] 
+    subs_reporting_presence = subs_presence.any(axis=1).sum()
+
+    subs_for_presence = sum(subs_reporting_presence)
         
     
 #% Submissions reporting DRS                
-    DRS_reported = (tot_DRS_subs/subs)*100
+    DRS_reported = (tot_DRS_subs/subs_for_presence)*100
 #DRS total items
     DRS_tot_items = sum(DRS_items)
 #DRS total glass items
@@ -1655,7 +1723,7 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
     'BBQs and / or BBQ related items', 'Cartons','Paper straws', 
     'Drinks cups (eg., McDonalds drinks)',
     'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-    'Vaping / E-Cigarette Paraphernalia','Toilet tissue',
+    'Smoking related','Vaping / E-Cigarette Paraphernalia',
     'Cardboard food containers',
     'Other confectionary (eg., Lollipop Sticks)']
     
@@ -1674,7 +1742,7 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
     'Value Disposable BBQs and / or BBQ related items',
     'Value BBQs and / or BBQ related items', 'Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
     'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-    'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
+    'Value Smoking related','Value Vaping / E-Cigarette Paraphernalia',
     'Value Cardboard food containers',
     'Value Other confectionary (eg., Lollipop Sticks)']
      
@@ -1685,7 +1753,7 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
   
     
 #% Submissions reporting EPR                
-    EPR_reported = (subs_EPR_indy/count_survey)*100
+    EPR_reported = (subs_EPR_indy/subs_for_presence)*100
 #EPR total items
     EPR_tot_items = sum(EPR_items)
     
@@ -1804,7 +1872,7 @@ def overview_stats_just_survey_and_count(month, folderin, folderout):
 
     tot_out_subs = tot_subs 
 #% submissions reporting outdoor gear    
-    outs_reported = (tot_out_subs/subs)*100
+    outs_reported = (tot_out_subs/subs_for_presence)*100
 #outdoor gear_total_items    
     outs_total = sum(out)   
 #% of total items that are outdoor gear
@@ -2175,6 +2243,34 @@ def overview_stats_just_survey(folderin, folderout):
                      'Value Plastic milk bottles','Value Plastic food containers','Value Cardboard food containers',
                      'Value Cleaning products containers','Value Miscellaneous','Value Too small/dirty to ID',
                      'Value Weird/Retro']
+        
+        all_presence = ['Full Dog Poo Bags',
+        'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+        'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
+        'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
+        'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
+        'Aluminium alcoholic drink cans','Glass alcoholic bottles','Glass bottle tops',
+        'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
+        'Drinks tops (eg., McDonalds drinks)','Cartons','Plastic straws','Paper straws',
+        'Plastic carrier bags','Plastic bin bags','Confectionary/sweet wrappers',
+        'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
+        'Crisps Packets','Used Chewing Gum',
+        'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
+        'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
+        'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',
+        'Food on the go (eg.salad boxes)','Homemade lunch (eg., aluminium foil, cling film)',
+        'Fruit peel & cores','Cigarette Butts','Smoking related','Disposable vapes',
+        'Vaping / E-Cigarette Paraphernalia','Drugs related','Farming',
+        'Salt/mineral lick buckets','Silage wrap','Forestry','Tree guards','Industrial',
+        'Cable ties','Industrial plastic wrap','Toilet tissue','Face/ baby wipes',
+        'Nappies','Single-Use Period products','Single-Use Covid Masks','Rubber/nitrile gloves',
+        'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
+        'Normal balloons','Helium balloons','MTB related (e.g. inner tubes, water bottles etc)',
+        'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
+        'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
+        'Plastic milk bottles','Plastic food containers','Cardboard food containers',
+        'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
+        'Weird/Retro']
     
         survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
 
@@ -2350,7 +2446,8 @@ def overview_stats_just_survey(folderin, folderout):
                         'Value Cleaning products containers']
         
         calc_perc_SUP = []
-        df2 = survey
+        df_new = survey[all_items]
+        df2 = df_new[df_new.any(axis=1)]
         for index, i in df2.iterrows():
             SUP_items = i[col_list_SUP].sum()   
             tot_items = i[all_items].sum()
@@ -2472,12 +2569,13 @@ def overview_stats_just_survey(folderin, folderout):
         
         tot_DRS_subs = subs_indy  
           
-        subs_for_DRS = [count_survey]
-        subs = sum(subs_for_DRS)
+        subs_presence = survey[all_presence]
+        subs_reporting_presence = subs_presence.any(axis=1).sum()
+        subs_for_presence = sum(subs_reporting_presence)
         
     
 #% Submissions reporting DRS                
-        DRS_reported = (tot_DRS_subs/subs)*100
+        DRS_reported = (tot_DRS_subs/subs_for_presence)*100
 #DRS total items
         DRS_tot_items = sum(DRS_items)
 #DRS total glass items
@@ -2509,7 +2607,7 @@ def overview_stats_just_survey(folderin, folderout):
         'BBQs and / or BBQ related items', 'Cartons','Paper straws', 
         'Drinks cups (eg., McDonalds drinks)',
         'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-        'Vaping / E-Cigarette Paraphernalia','Toilet tissue',
+        'Smoking related','Vaping / E-Cigarette Paraphernalia',
         'Cardboard food containers',
         'Other confectionary (eg., Lollipop Sticks)']
         
@@ -2528,7 +2626,7 @@ def overview_stats_just_survey(folderin, folderout):
         'Value Disposable BBQs and / or BBQ related items',
         'Value BBQs and / or BBQ related items', 'Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
         'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-        'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
+        'Value Smoking related','Value Vaping / E-Cigarette Paraphernalia',
         'Value Cardboard food containers',
         'Value Other confectionary (eg., Lollipop Sticks)']
          
@@ -2539,7 +2637,7 @@ def overview_stats_just_survey(folderin, folderout):
       
         
     #% Submissions reporting EPR                
-        EPR_reported = (subs_EPR_indy/count_survey)*100
+        EPR_reported = (subs_EPR_indy/subs_for_presence)*100
     #EPR total items
         EPR_tot_items = sum(EPR_items)
         
@@ -2659,7 +2757,7 @@ def overview_stats_just_survey(folderin, folderout):
 
         tot_out_subs = tot_subs 
 #% submissions reporting outdoor gear    
-        outs_reported = (tot_out_subs/subs)*100
+        outs_reported = (tot_out_subs/subs_for_presence)*100
 #outdoor gear_total_items    
         outs_total = sum(out)   
 #% of total items that are outdoor gear

@@ -158,7 +158,7 @@ def EPR_materials(TFTin, dataout):
     
     cardboard = ['Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
             'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-            'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
+            'Value Smoking related','Value Vaping / E-Cigarette Paraphernalia',
             'Value Cardboard food containers']
     
     wood = ['Value Other confectionary (eg., Lollipop Sticks)']
@@ -174,7 +174,7 @@ def EPR_materials(TFTin, dataout):
     'Value Used Chewing Gum','Value Fruit peel & cores','Value Cigarette Butts','Value Smoking related',
     'Value Aluminium alcoholic drink cans','Value Drugs related','Value Farming',
              'Value Forestry','Value Industrial','Value Homemade lunch (eg., aluminium foil, cling film)',
-             
+             'Value Toilet tissue',
              'Value Nappies','Value Single-Use Period products','Value Single-Use Covid Masks',
              'Value Outdoor event (eg Festival)','Value Camping','Value Halloween & Fireworks',
              'Value Seasonal (Christmas and/or Easter)',

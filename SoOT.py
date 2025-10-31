@@ -287,7 +287,7 @@ def EPR_materials(TFTin, dataout):
                        'Value Drinks tops (eg., McDonalds drinks)']        
             
     aluminium = ['Value Disposable BBQs and / or BBQ related items',
-             'Value BBQs and / or BBQ related items','Value Glass bottle tops','Value Glass bottle tops']   
+             'Value BBQs and / or BBQ related items','Value Glass bottle tops']   
 
     cardboard = ['Value Paper straws','Value Cartons', 'Value Drinks cups (eg., McDonalds drinks)',
             'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
@@ -295,6 +295,8 @@ def EPR_materials(TFTin, dataout):
             'Value Smoking related', 'Value Cardboard food containers']
     
     wood = ['Value Other confectionary (eg., Lollipop Sticks)']
+    
+    glass = ['Value Glass soft drink bottles','Value Glass alcoholic bottles']
     #for EPR items that aren't usually branded
     
     
@@ -316,7 +318,7 @@ def EPR_materials(TFTin, dataout):
     plastics = combined[plastic].sum(axis=0).to_list()
     fibres = combined[fibre_composite].sum(axis=0).to_list()
     ally = combined[aluminium].sum(axis=0).to_list() 
-    #glasses = combined[glass].sum(axis=0).to_list()
+    glasses = combined[glass].sum(axis=0).to_list()
     card = combined[cardboard].sum(axis=0).to_list()       
     woods = combined[wood].sum(axis=0).to_list()
     #others = combined[other].sum(axis=0).to_list()
@@ -328,7 +330,7 @@ def EPR_materials(TFTin, dataout):
     
     totpl = sum(plastics)
     totfi = sum(fibres)
-    #totgl = sum(glasses)
+    totgl = sum(glasses)
     total = sum(ally)    
     totca = sum(card)
     totwo = sum(woods)
@@ -339,8 +341,8 @@ def EPR_materials(TFTin, dataout):
     totalDRS = sum(allyDRS)    
    
 
-    df = pd.DataFrame({'type': ['all items','plastic','fibre_composite','aluminium','card', 'wood', 'plastic DRS','glass DRS', 'aluminium DRS'],
-                           'quantity':[total_reported_items, totpl, totfi, total, totca, totwo, totplDRS, totglDRS, totalDRS]})   
+    df = pd.DataFrame({'type': ['all items','plastic','fibre_composite', 'glass','aluminium','card', 'wood', 'plastic DRS','glass DRS', 'aluminium DRS'],
+                           'quantity':[total_reported_items, totpl, totfi, totgl, total, totca, totwo, totplDRS, totglDRS, totalDRS]})   
 
 
     df.to_csv(dataout)

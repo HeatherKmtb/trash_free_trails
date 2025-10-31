@@ -778,18 +778,18 @@ def add_to_existing_data(TFTout, year_folder):
         alltime = (df_month, df_all_time)
         df_final = pd.concat(dfs, ignore_index = True) 
         df_alltime = pd.concat(alltime, ignore_index = True) 
-        df_final.to_csv(year_folder + file + '/' + file + '_2025_new.csv', index=False) 
-        df_alltime.to_csv(year_folder + file + '/all_' + file + '_new.csv', index=False)
+        df_final.to_csv(year_folder + file + '/' + file + '_2025.csv', index=False) 
+        df_alltime.to_csv(year_folder + file + '/all_' + file + '.csv', index=False)
         
     bag_res = pd.read_csv(TFTout + 'bag_res_lite.csv') 
     y_bag_res = pd.read_csv(year_folder + 'lite/bag_res_lite_2025.csv')
     all_bagres = pd.read_csv(year_folder + 'lite/all_bag_res_lite.csv')
     dfs = [bag_res, y_bag_res]
     alltime = [bag_res, all_bagres]
-    bag_res_dfy = pd.conact(dfs, ignore_index = True) 
+    bag_res_dfy = pd.concat(dfs, ignore_index = True) 
     df_alltime = pd.concat(alltime, ignore_index = True) 
-    bag_res_dfy.to_csv(year_folder + 'lite/bag_res_lite_2025_new.csv', index=False) 
-    df_alltime.to_csv(year_folder + 'lite/all_bag_res_lite_new.csv', index=False)
+    bag_res_dfy.to_csv(year_folder + 'lite/bag_res_lite_2025.csv', index=False) 
+    df_alltime.to_csv(year_folder + 'lite/all_bag_res_lite.csv', index=False)
     
         
         

@@ -329,69 +329,52 @@ def lite_clean_data(TFTin, TFTout, averages_path):
         Path to CSV containing average items per bag type (columns: 'bag', 'avg_items').
     """
     
-    # --- 1. Load data ---
     df = pd.read_csv(os.path.join(TFTin, 'lite.csv'))
     averages = pd.read_csv(averages_path)
-    
+
     avg_map = dict(zip(averages['bag'], averages['avg_items']))
-    
-    # --- 2. Extract year/month from Created Date ---
-    df[['year', 'month']] = df['Created Date'].str.split('-', n=2, expand=True)[[0, 1]]
-    
-    # --- 3. Remove rows with more than one TRUE ---
-    trash_cols = [
-        'Quantity - Handful', 'Quantity - Pocketful', 'Quantity - Bread Bag',
-        'Quantity - Carrier Bag', 'Quantity - Generic Bin Bag',
-        'Quantity - Multiple Bin Bags'
-    ]
-    
-    df = df[df[trash_cols].sum(axis=1) == 1]
-    
-    # Save cleaned version
-    df.to_csv(os.path.join(TFTout, 'lite.csv'), index=False)
-    
-    # --- 4. Compute totals ---
-    results = []
 
     # Define mapping between readable names and DataFrame column names
-    bag_column_map = {
-        'handful': 'Quantity - Handful',
+    bag_column_map = {'handful': 'Quantity - Handful',
         'pocketful': 'Quantity - Pocketful',
         'breadbag': 'Quantity - Bread Bag',
         'carrierbag': 'Quantity - Carrier Bag',
         'binbag': 'Quantity - Generic Bin Bag',
-        'multiplebinbags': 'Quantity - Multiple Bin Bags'
-    }
+        'multiplebinbags': 'Quantity - Multiple Bin Bags'}
 
+    # --- 2. Extract year/month from Created Date ---
+    df[['year', 'month']] = df['Created Date'].str.split('-', n=2, expand=True)[[0, 1]]
+
+    # --- 3. Remove rows with more than one TRUE ---
+    trash_cols = list(bag_column_map.values())
+    df = df[df[trash_cols].sum(axis=1) == 1]
+
+    # --- 3a. Add TotItems column ---
+    def get_tot_items(row):
+        for bag, col in bag_column_map.items():
+            if row[col] == True:
+                avg_items = avg_map.get(bag, 0)
+                num_bags = row['How many bags?'] if (bag == 'multiplebinbags' and not pd.isna(row['How many bags?'])) else 1
+                return num_bags * avg_items
+        return 0
+
+    df['TotItems'] = df.apply(get_tot_items, axis=1)
+
+    # Save cleaned version with TotItems
+    df.to_csv(os.path.join(TFTout, 'lite.csv'), index=False)
+
+    # --- 4. Compute totals using TotItems ---
+    results = []
     for bag, col in bag_column_map.items():
         df_subset = df[df[col] == True]
-
-        # If it's "multiple bin bags", account for number of bags per row
-        if bag == 'multiplebinbags':
-            df_subset['How many bags?'] = df_subset['How many bags?'].fillna(1)
-            df_subset['bags'] = df_subset['How many bags?']
-        else:
-            df_subset['bags'] = 1
-
-        # Get average items per bag from the averages CSV
-        avg_items = avg_map.get(bag, None)
-        if avg_items is None:
-            print(f"⚠️ Warning: no average found for '{bag}', skipping.")
-            continue
-
-        # Calculate total items
-        df_subset['items'] = df_subset['bags'] * avg_items
-
-        tot_items = df_subset['items'].sum()
-        tot_bags = df_subset['bags'].sum()
-
+        tot_items = df_subset['TotItems'].sum()
+        tot_bags = df_subset['How many bags?'].fillna(1).sum() if bag == 'multiplebinbags' else len(df_subset)
+    
         results.append({'bag': bag, 'TotItems': tot_items, 'no. of bags': tot_bags})
 
     # --- 5. Save results ---
     results_df = pd.DataFrame(results)
     results_df.to_csv(os.path.join(TFTout, 'bag_res_lite.csv'), index=False)
-    
-
 
     
     
@@ -654,7 +637,8 @@ def TFRaces_clean_data_v1(TFTin, TFTout):
         'Merch_hoodyXL', 'Mech_glasscoffee', 'Merch_KBCcoffee', 'Merch_Hydroflask',
         'Merch_Stanleyflask', 'Merch_Patch_TFTlogo', 'Merch_Patch_PAlogo', 
         'Merch_Patch_PAwhitesquare', 'Merch_Patch_Trashmob', 'Merch_woodmarker',
-        'Merch_steelmarker', 'survey', 'count', 'TotItems', 'include_Y', 'include_N',
+        'Merch_steelmarker', 'Merch_NCcards + tin', 'Merch_NCcards no tin',
+        'survey', 'count', 'TotItems', 'include_Y', 'include_N',
         'include_some', 'Item1', 'Item2', 'Item3', 'Item4', 'Item5', 'Item1_Quantity', 
         'Item2_Quantity', 'Item3_Quantity', 'Item4_Quantity', 'Item5_Quantity', 
         'B1_Lucozade','B1_Coke','B1_RedBull','B1_Monster','B1_Cadbury',
@@ -750,6 +734,10 @@ def update_lite_averages(year_folder, TFTin):
 
     # Clean bag names if needed
     averages_df['bag'] = averages_df['bag'].str.lower().str.replace(' ', '')
+    
+    binbag_avg = averages_df.loc[averages_df['bag'] == 'binbag', 'avg_items'].values[0]
+    averages_df = pd.concat([averages_df, pd.DataFrame([{'bag': 'multiplebinbags', 
+                'avg_items': binbag_avg}])], ignore_index=True)
 
     averages_df.to_csv(year_folder + 'bag_averages_calc.csv', index=False)
     df_updated.to_csv(year_folder + 'bag_averages_raw.csv', index=False)

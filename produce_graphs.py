@@ -210,3 +210,36 @@ def redbullvmonster(filein, figout):
     plt.show()
 
     fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
+    
+    
+    
+    
+    df = pd.read_csv(TFTin)
+    
+    df['date'] = pd.to_datetime(df[['year', 'month','day']])
+    #df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
+    
+    date = df['date']
+    items = df['TotItems']
+    items_km = df['items per km']
+  
+    
+    #plot the result
+    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
+    plt.rcParams.update({'font.size':12})
+    #plots H_100 on x with I_CD on y
+    ax.scatter(date,items,marker='.')
+    #sets title and axis labels
+    ax.set_title('Number of items at Loughrigg Fell and Rydal Caves')
+    ax.set_ylabel('Number of items')
+    ax.set_xlabel('Date')
+    plt.xticks(rotation=45)
+    #ax.set_xlim([0, 600])
+    #ax.set_ylim([0,6])  
+    #obtain m (slope) and b(intercept) of linear regression line
+    x = date.map(pd.Timestamp.toordinal)
+    m, b = np.polyfit(x, items, 1)
+    #add linear regression line to scatterplot 
+    plt.plot(date, m * x + b, color='red')
+    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
+    plt.close    

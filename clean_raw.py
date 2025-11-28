@@ -312,12 +312,92 @@ def count_clean_data(TFTin, TFTout):
             
     df3.to_csv(TFTout + 'count.csv', index=False)
     
+def update_lite_averages(year_folder, TFTin):
+    """
+    A function which takes the bag averages data and the survey data, it uses the 
+    survey data to update the averages (whilst ignoring outliers) and then writes out 
+    an averages .csv to read into lite_clean_data and an updated averages.csv
     
+    Parameters
+    ----------
+    
+    TFTout: string
+            path to folder with input csv files with cleaned raw monthly data
+            
+    yearin: string
+            path to folder with input csv files with cleaned raw yearly data and
+            for output files 
+             
+    """
+    
+    df = pd.read_csv(year_folder + 'bag_averages_raw.csv')
+    survey = pd.read_csv(TFTin + 'survey.csv')
+
+
+    bag_types = ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag']
+
+    # make a copy so we don't modify df directly
+    df_updated = df.copy()
+
+    for _, row in survey.iterrows():
+        # Identify which column is filled
+        for col in ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag', 'Multiple Bin Bags']:
+            val = row[col]
+            if pd.notna(val) and (val is True or isinstance(val, (int, float))):
+                
+                # Determine bag type and items per bag
+                if col == 'Multiple Bin Bags':
+                    bag_type = 'Bin bag'
+                    tot_per_bag = row['TotItems'] / val  # divide by number of bags
+                else:
+                    bag_type = col
+                    tot_per_bag = row['TotItems']
+
+                # Get outlier limits using IQR
+                series = df_updated[bag_type].dropna()
+                if len(series) >= 4:  # need enough data to get quartiles
+                    Q1 = series.quantile(0.25)
+                    Q3 = series.quantile(0.75)
+                    IQR = Q3 - Q1
+                    lower = Q1 - 1.5 * IQR
+                    upper = Q3 + 1.5 * IQR
+                else:
+                    # if too few data points, skip outlier filtering
+                    lower, upper = -float("inf"), float("inf")
+
+                # Append if within range
+                if lower <= tot_per_bag <= upper:
+                    # Append to df (add a new row with only that column filled)
+                    new_row = {c: None for c in bag_types}
+                    new_row[bag_type] = tot_per_bag
+                    df_updated = pd.concat([df_updated, pd.DataFrame([new_row])], ignore_index=True)
+                break  # only one type per row
+
+    for col in bag_types:
+        df_updated[col] = pd.to_numeric(df_updated[col], errors='coerce')
+
+    # Now compute numeric mean
+    averages = df_updated.mean(numeric_only=True)
+    averages_df = averages.reset_index()
+    averages_df.columns = ['bag', 'avg_items']
+
+    # Clean bag names if needed
+    averages_df['bag'] = averages_df['bag'].str.lower().str.replace(' ', '')
+    
+    binbag_avg = averages_df.loc[averages_df['bag'] == 'binbag', 'avg_items'].values[0]
+    averages_df = pd.concat([averages_df, pd.DataFrame([{'bag': 'multiplebinbags', 
+                'avg_items': binbag_avg}])], ignore_index=True)
+
+    averages_df.to_csv(year_folder + 'bag_averages_calc.csv', index=False)
+    df_updated.to_csv(year_folder + 'bag_averages_raw.csv', index=False)
+
+
+        
     
 def lite_clean_data(TFTin, TFTout, averages_path):
     """
     Cleans TFT lite data and calculates total items per bag type using
-    dynamically imported average item counts per bag.
+    imported average item counts per bag.
 
     Parameters
     ----------
@@ -663,87 +743,7 @@ def TFRaces_clean_data_v1(TFTin, TFTout):
     #exporting the cleaned monthly data 
     df_clean.to_csv(TFTout + 'TFR.csv', index=False)
     
-def update_lite_averages(year_folder, TFTin):
-    """
-    A function which takes the bag averages data and the survey data, it uses the 
-    survey data to update the averages (whilst ignoring outliers) and then writes out 
-    an averages .csv to read into lite_clean_data and an updated averages.csv
-    
-    Parameters
-    ----------
-    
-    TFTout: string
-            path to folder with input csv files with cleaned raw monthly data
-            
-    yearin: string
-            path to folder with input csv files with cleaned raw yearly data and
-            for output files 
-             
-    """
-    
-    df = pd.read_csv(year_folder + 'bag_averages_raw.csv')
-    survey = pd.read_csv(TFTin + 'survey.csv')
 
-
-    bag_types = ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag']
-
-    # make a copy so we don't modify df directly
-    df_updated = df.copy()
-
-    for _, row in survey.iterrows():
-        # Identify which column is filled
-        for col in ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag', 'Multiple Bin Bags']:
-            val = row[col]
-            if pd.notna(val) and (val is True or isinstance(val, (int, float))):
-                
-                # Determine bag type and items per bag
-                if col == 'Multiple Bin Bags':
-                    bag_type = 'Bin bag'
-                    tot_per_bag = row['TotItems'] / val  # divide by number of bags
-                else:
-                    bag_type = col
-                    tot_per_bag = row['TotItems']
-
-                # Get outlier limits using IQR
-                series = df_updated[bag_type].dropna()
-                if len(series) >= 4:  # need enough data to get quartiles
-                    Q1 = series.quantile(0.25)
-                    Q3 = series.quantile(0.75)
-                    IQR = Q3 - Q1
-                    lower = Q1 - 1.5 * IQR
-                    upper = Q3 + 1.5 * IQR
-                else:
-                    # if too few data points, skip outlier filtering
-                    lower, upper = -float("inf"), float("inf")
-
-                # Append if within range
-                if lower <= tot_per_bag <= upper:
-                    # Append to df (add a new row with only that column filled)
-                    new_row = {c: None for c in bag_types}
-                    new_row[bag_type] = tot_per_bag
-                    df_updated = pd.concat([df_updated, pd.DataFrame([new_row])], ignore_index=True)
-                break  # only one type per row
-
-    for col in bag_types:
-        df_updated[col] = pd.to_numeric(df_updated[col], errors='coerce')
-
-    # Now compute numeric mean
-    averages = df_updated.mean(numeric_only=True)
-    averages_df = averages.reset_index()
-    averages_df.columns = ['bag', 'avg_items']
-
-    # Clean bag names if needed
-    averages_df['bag'] = averages_df['bag'].str.lower().str.replace(' ', '')
-    
-    binbag_avg = averages_df.loc[averages_df['bag'] == 'binbag', 'avg_items'].values[0]
-    averages_df = pd.concat([averages_df, pd.DataFrame([{'bag': 'multiplebinbags', 
-                'avg_items': binbag_avg}])], ignore_index=True)
-
-    averages_df.to_csv(year_folder + 'bag_averages_calc.csv', index=False)
-    df_updated.to_csv(year_folder + 'bag_averages_raw.csv', index=False)
-
-
-    
     
 def add_to_existing_data(TFTout, year_folder):
     """

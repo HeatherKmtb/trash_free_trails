@@ -12,7 +12,7 @@ import pandas as pd
 
 
 folderin = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Monthly_stats/'
-folderout = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Misc_data_requests/SoOT_2025/'
+folderout = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_requests/'
 
 def grouping_all_brand_data(folderin, folderout):
     '''

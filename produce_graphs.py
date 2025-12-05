@@ -78,8 +78,8 @@ def mach_power_hour(figout):
            path to save figure
     """            
        
-    x = [2021, 2022, 2023, 2024]
-    y = [1400, 876, 604, 579]
+    x = [2021, 2022, 2023, 2024, 2025]
+    y = [1400, 876, 604, 579, 584]
 
 
     #plt.style.use('ggplot')
@@ -110,7 +110,7 @@ def mach_power_hour(figout):
     # Add axis labels and title, tweak fonts
     ax.set_xlabel('Year', fontsize=12, fontweight='bold')
     ax.set_ylabel('Items', fontsize=12, fontweight='bold')
-    ax.set_title('Items found at Machynlleth Pump Track per year', fontsize=14, fontweight='bold')
+    ax.set_title('Items found at Machynlleth Power Hour per year', fontsize=14, fontweight='bold')
 
     # Optional: horizontal grid for readability
     #ax.yaxis.grid(True, linestyle='--', color='black', alpha=0.7)
@@ -213,25 +213,46 @@ def redbullvmonster(filein, figout):
     
     
     
+def graph_with_trend(TFTin, data_col, title, y_label, figout):
+    """
+    A function which takes a df of any data and produces a scatterplot with 
+    trendline for a column of data with date on the x axis
     
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with data
+             
+    data_col: string
+             name of data column for y axis
+             
+    title: string
+             title of figure
+             
+    y_label: string
+             text for y axis label
+            
+    figut: string
+           path to save the figure
+    """    
     df = pd.read_csv(TFTin)
     
-    df['date'] = pd.to_datetime(df[['year', 'month','day']])
+    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
     #df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
     
     date = df['date']
-    items = df['TotItems']
-    items_km = df['items per km']
-  
-    
+    items = df[data_col]
+
     #plot the result
     fig = plt.figure(); ax = fig.add_subplot(1,1,1)
     plt.rcParams.update({'font.size':12})
     #plots H_100 on x with I_CD on y
-    ax.scatter(date,items,marker='.')
+    ax.scatter(date,items,marker='.', color='blue')
+    
     #sets title and axis labels
-    ax.set_title('Number of items at Loughrigg Fell and Rydal Caves')
-    ax.set_ylabel('Number of items')
+    ax.set_title(title)
+    ax.set_ylabel(y_label)
     ax.set_xlabel('Date')
     plt.xticks(rotation=45)
     #ax.set_xlim([0, 600])
@@ -241,5 +262,72 @@ def redbullvmonster(filein, figout):
     m, b = np.polyfit(x, items, 1)
     #add linear regression line to scatterplot 
     plt.plot(date, m * x + b, color='red')
+    
     fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
     plt.close    
+    
+    
+    
+def RB_v_Monster_with_trend(TFTin, figout):
+    """
+    Scrappy function for editing
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with data
+             
+    data_col: string
+             name of data column for y axis
+             
+    title: string
+             title of figure
+             
+    y_label: string
+             text for y axis label
+            
+    figut: string
+           path to save the figure
+    """       
+    
+    
+    
+    df = pd.read_csv(TFTin)
+    
+    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
+    #df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
+    
+    date = df['date']
+    items_rb = df['rb_perc']
+    items_mons = df['monster_perc']
+    #items_km = df['items per km']
+  
+    
+    #plot the result
+    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
+    plt.rcParams.update({'font.size':12})
+    #plots H_100 on x with I_CD on y
+    ax.scatter(date,items_rb,marker='.', color='blue')
+    ax.scatter(date,items_mons,marker='.', color='black')
+    
+    #sets title and axis labels
+    ax.set_title('Percentage submissions reporting Red Bull or Monster')
+    ax.set_ylabel('Percentage')
+    ax.set_xlabel('Date')
+    plt.xticks(rotation=45)
+    #ax.set_xlim([0, 600])
+    #ax.set_ylim([0,6])  
+    #obtain m (slope) and b(intercept) of linear regression line
+    x = date.map(pd.Timestamp.toordinal)
+    m, b = np.polyfit(x, items_rb, 1)
+    #add linear regression line to scatterplot 
+    plt.plot(date, m * x + b, color='red')
+    x = date.map(pd.Timestamp.toordinal)
+    m, b = np.polyfit(x, items_mons, 1)
+    #add linear regression line to scatterplot 
+    plt.plot(date, m * x + b, color='green')
+    
+    
+    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
+    plt.close  

@@ -145,6 +145,7 @@ def date_and_location_stats(folderin, start_date, end_date, postcode):
                        (df['date_dt'] <= end) &
                        (df['postcode'].str.startswith(postcode, na=False))]  
         itms = dfs[name]['TotItems']
+        #peeps = dfs[name]['People']
         clean_items = []
         for x in itms:
             if x == x:

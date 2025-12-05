@@ -312,7 +312,7 @@ def count_clean_data(TFTin, TFTout):
             
     df3.to_csv(TFTout + 'count.csv', index=False)
     
-def update_lite_averages(year_folder, TFTin):
+def update_lite_averages(year_folder, TFTout):
     """
     A function which takes the bag averages data and the survey data, it uses the 
     survey data to update the averages (whilst ignoring outliers) and then writes out 
@@ -331,7 +331,7 @@ def update_lite_averages(year_folder, TFTin):
     """
     
     df = pd.read_csv(year_folder + 'bag_averages_raw.csv')
-    survey = pd.read_csv(TFTin + 'survey.csv')
+    survey = pd.read_csv(TFTout + 'survey.csv')
 
 
     bag_types = ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag']
@@ -394,7 +394,7 @@ def update_lite_averages(year_folder, TFTin):
 
         
     
-def lite_clean_data(TFTin, TFTout, averages_path):
+def lite_clean_data(TFTin, TFTout, year_folder):
     """
     Cleans TFT lite data and calculates total items per bag type using
     imported average item counts per bag.
@@ -410,7 +410,7 @@ def lite_clean_data(TFTin, TFTout, averages_path):
     """
     
     df = pd.read_csv(os.path.join(TFTin, 'lite.csv'))
-    averages = pd.read_csv(averages_path)
+    averages = pd.read_csv(year_folder + 'bag_averages_calc.csv')
 
     avg_map = dict(zip(averages['bag'], averages['avg_items']))
 

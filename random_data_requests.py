@@ -1360,7 +1360,7 @@ def ateam_weekender_alt(folderin,  folderout):
     final_counts.to_csv(folderout + 'subs_per_person.csv')
 
   #get distance, items removed and surveyed per person 
-    results = pd.DataFrame(columns = ['name', 'distance_km','total_items'])
+    results_rows = []
     for name in Names:
         s_name = survey[survey['matched_name']==name]
         l_name = lite[lite['matched_name']==name]
@@ -1395,10 +1395,14 @@ def ateam_weekender_alt(folderin,  folderout):
         l_items = sum(sum_items)
         tot_items = l_items + s_items
   
-        results = results.append({'name':name, 'distance_km':dist,
-                                   'total_items':tot_items, 'surveyed':s_items}, ignore_index=True) 
+        results_rows.append({
+            'name': name,
+            'distance_km': dist,
+            'total_items': tot_items,
+            'surveyed': s_items})
         
-    results.to_csv(folderout + 'per_person.csv')  
+    results = pd.DataFrame(results_rows)
+    results.to_csv(folderout + 'per_person.csv', index=False) 
     
   #get kms cleaned. removed and surveyed items, top 3 items, top 3 brands, %DRS
     dfA_s = survey[survey['matched_name'].isin(Names)]

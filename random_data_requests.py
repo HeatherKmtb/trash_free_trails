@@ -93,6 +93,20 @@ def average_hours_per_person(datain):
     people = df2['People']
     total_people = sum(people)
     average = total_hours / total_people
+    
+def get_schools(TFTin, TFTout):
+    
+    df = pd.read_csv(TFTin)
+    
+    cols = ['TrailName']
+
+    mask = df[cols].astype(str).agg(
+        lambda row: row.str.contains("mob", case=False).any(),
+        axis=1)
+
+    result = df[mask]
+    
+    result.to_csv(TFTout)
             
 
 

@@ -30,7 +30,10 @@ def overview_stats(folderin, folderout):
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
-      
+    lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/s_test.csv',
+                          index_col=0).iloc[:, 0]
+    lite_dict = lite_dt.to_dict()  
+    
     survey = pd.read_csv(folderin + 'survey.csv')
     lite = pd.read_csv(folderin + 'lite.csv')
     count = pd.read_csv(folderin + 'count.csv')
@@ -88,7 +91,7 @@ def overview_stats(folderin, folderout):
 
     
     #add to total people the number of lite and count submissions
-    lite_people = count_lite * 3.08
+    lite_people = count_lite * lite_dict['People']
     tot_people.append(lite_people)
     tot_people.append(count_count)
  
@@ -100,25 +103,17 @@ def overview_stats(folderin, folderout):
     count_km = count_m / 1000
     CScount_m = CScount['Total_distance(m)'].sum()
     CScount_km = CScount_m / 1000
-    lite_km = count_lite * 6.77
-    
-    survey_area = survey_km * 0.006
-    lite_area = lite_km * 0.006
-    CSsurvey_area = CSsurvey['Area_km2'].sum()
-    count_area = count_km * 0.006
-    
-    areas = [survey_area, count_area, lite_area]
-#area cleaned / surveyed
-    area = sum(areas)   
-    
-    CSsurvey_km = CSsurvey_area / 0.006
+    lite_km = count_lite * lite_dict['Distance_km']
+      
     kms = [survey_km, count_km, CScount_km, lite_km]
 #distance cleaned / surveyed 
     km = sum(kms)
         
     #method to estimate time spent on count
-    count_time = count_count * 1.38
-    lite_time = count_lite * 1.64
+    minutes = lite_dict['Time_min']
+    time = minutes/60
+    count_time = count_count * time
+    lite_time = count_lite * time
     tot_time.append(count_time)
     tot_time.append(lite_time)
 #time 
@@ -405,11 +400,7 @@ def overview_stats(folderin, folderout):
     kms_survey = [survey_km] 
 #distance covered    
     km_survey = sum(kms_survey)
-    
-    areas_survey = [survey_area,  CSsurvey_area]
-#area directly protected - excludes Lite
-    area_survey = sum(areas_survey)   
-    
+
     plastic = ['Value Full Dog Poo Bags',
             'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
             'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
@@ -974,7 +965,7 @@ def overview_stats(folderin, folderout):
                 'total composition items':total_reported_items, 
                 'weight removed':total_kg, 
                 'volume removed':total_cokecans, 'distance_kms':km_survey, 
-                'area kms2':area_survey,'most common material':most_type, 
+                'most common material':most_type, 
                 'SUP reported':tot_percSUP,'SUP calculated':tot_calc_SUP,
                 'most common category':most_cat,'DRS reported':DRS_reported,
                 'DRS total items':DRS_tot_items,'DRS total glass':DRS_tot_glass,

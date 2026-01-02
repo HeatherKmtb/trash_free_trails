@@ -330,14 +330,14 @@ def update_lite_averages(year_folder, TFTout):
              
     """
     
-    df = pd.read_csv(year_folder + 'bag_averages_raw.csv')
+    bag_df = pd.read_csv(year_folder + 'bag_averages_raw.csv')
     survey = pd.read_csv(TFTout + 'survey.csv')
 
 
     bag_types = ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag']
 
     # make a copy so we don't modify df directly
-    df_updated = df.copy()
+    df_updated = bag_df.copy()
 
     for _, row in survey.iterrows():
         # Identify which column is filled
@@ -391,7 +391,19 @@ def update_lite_averages(year_folder, TFTout):
     averages_df.to_csv(year_folder + 'bag_averages_calc.csv', index=False)
     df_updated.to_csv(year_folder + 'bag_averages_raw.csv', index=False)
 
-
+    #now for people, distance and time
+    other_df = pd.read_csv(year_folder + 'other_averages_raw.csv') 
+    av_df = survey[['People', 'Time_min', 'Distance_km']].copy()
+    av_df = av_df[av_df['People'] < 7]
+    
+    dfs=[other_df, av_df]
+    new_averages_df = pd.concat(dfs, ignore_index=True)
+    
+    av = new_averages_df.mean(numeric_only=True)
+    av.to_csv(year_folder + 'other_averages_calc.csv')
+    new_averages_df.to_csv(year_folder + 'other_averages_raw.csv')
+    
+    
         
     
 def lite_clean_data(TFTin, TFTout, year_folder):

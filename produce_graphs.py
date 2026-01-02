@@ -79,7 +79,7 @@ def mach_power_hour(figout):
     """            
        
     x = [2021, 2022, 2023, 2024, 2025]
-    y = [1400, 876, 604, 579, 584]
+    y = [126, 1451, 402, 1256, 1222]
 
 
     #plt.style.use('ggplot')
@@ -110,7 +110,7 @@ def mach_power_hour(figout):
     # Add axis labels and title, tweak fonts
     ax.set_xlabel('Year', fontsize=12, fontweight='bold')
     ax.set_ylabel('Items', fontsize=12, fontweight='bold')
-    ax.set_title('Items found at Machynlleth Power Hour per year', fontsize=14, fontweight='bold')
+    ax.set_title('Items found during Hardline by volunteers', fontsize=14, fontweight='bold')
 
     # Optional: horizontal grid for readability
     #ax.yaxis.grid(True, linestyle='--', color='black', alpha=0.7)

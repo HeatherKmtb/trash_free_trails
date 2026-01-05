@@ -76,6 +76,10 @@ def overview_stats(folderin, folderout):
                         'First Time', 'Repeat volunteers','Felt proud',
                         'Felt more connected','met someone inspiring', 'went out after',
                         'Would do again','provided contact info'])
+    
+    lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
+                          index_col=0).iloc[:, 0]
+    lite_dict = lite_dt.to_dict()  
 
     
     for month in months:
@@ -117,9 +121,11 @@ def overview_stats(folderin, folderout):
             hours.append(hour)
         
         survey['Time_hours'] = hours    
-        survey['Time_hours'] = survey['Time_hours'].replace(0, 1.64).fillna(1.64)
-    
-        survey['People'] = survey['People'].replace(0, 3.08).fillna(3.08)
+        minutes = lite_dict['Time_min']
+        time = minutes/60
+
+        survey['Time_hours'] = survey['Time_hours'].replace(0, time).fillna(time)
+        survey['People'] = survey['People'].replace(0, lite_dict['People']).fillna(lite_dict['People'])
     
         tot_people = []
         tot_time = []
@@ -136,7 +142,7 @@ def overview_stats(folderin, folderout):
         #tot_items.append(items)
     
     #add to total people the number of lite and count submissions
-        lite_people = count_lite * 3.08
+        lite_people = count_lite * lite_dict['People']
         tot_people.append(lite_people)
         tot_people.append(count_count)
  
@@ -148,25 +154,15 @@ def overview_stats(folderin, folderout):
         count_km = count_m / 1000
         CScount_m = CScount['Total_distance(m)'].sum()
         CScount_km = CScount_m / 1000
-        lite_km = count_lite * 5.47
-    
-        survey_area = survey_km * 0.006
-        lite_area = lite_km * 0.006
-        #CScount_area = CScount_km * 0.006
-        CSsurvey_area = CSsurvey['Area_km2'].sum()
-    
-        areas = [survey_area, CSsurvey_area, lite_area]
-#area cleaned / surveyed - excludes Lite
-        area = sum(areas)   
-    
-        CSsurvey_km = CSsurvey_area / 0.006
+        lite_km = count_lite * lite_dict['Distance_km']
+
         kms = [survey_km, count_km, CScount_km, lite_km]
 #distance cleaned / surveyed 
         km = sum(kms)
         
     #method to estimate time spent on count
-        count_time = count_count * 1.38
-        lite_time = count_lite * 1.64
+        count_time = count_count * time
+        lite_time = count_lite * time
         tot_time.append(count_time)
         tot_time.append(lite_time)
 #time 
@@ -406,7 +402,7 @@ def overview_stats(folderin, folderout):
 #mostpolluted trail zone
         topzone = max(set(zonecounts), key=zonecounts.count)
 
-        new_row = pd.DataFrame([{'count_submisssions':total_count, 
+        new_row = pd.DataFrame([{'month':month,'count_submisssions':total_count, 
                     'count_items':tot_count_items,
                     'count_kms':distance,
                     'prevalence':prevalence,
@@ -424,10 +420,6 @@ def overview_stats(folderin, folderout):
     #distance covered    
         km_survey = sum(kms_survey)
         
-        areas_survey = [survey_area,  CSsurvey_area]
-    #area directly protected - excludes Lite
-        area_survey = sum(areas_survey)     
-    
         plastic = ['Value Full Dog Poo Bags',
             'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
             'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
@@ -985,12 +977,12 @@ def overview_stats(folderin, folderout):
 
         brand_res.to_csv(folderout + month + '_brands_all.csv', index=False)
     
-        new_row = pd.DataFrame([{'survey_submisssions':total_survey,
+        new_row = pd.DataFrame([{'month':month,'survey_submisssions':total_survey,
                     'total items surveyed':fully_surveyed_items, 
                     'total composition items':total_reported_items, 
                     'weight removed':total_kg, 
                     'volume removed':total_cokecans, 'distance_kms':km_survey, 
-                    'area kms2':area_survey,'most common material':most_type, 
+                    'most common material':most_type, 
                     'SUP reported':tot_percSUP,'SUP calculated':tot_calc_SUP,
                     'most common category':most_cat,'DRS reported':DRS_reported,
                     'DRS total items':DRS_tot_items,'DRS total glass':DRS_tot_glass,
@@ -1157,7 +1149,7 @@ def overview_stats(folderin, folderout):
         perc_contacts = (contact_deets/subs_contact)*100
 
 
-        new_row = pd.DataFrame([{'Fauna Interaction':perc_AI, 
+        new_row = pd.DataFrame([{'month':month,'Fauna Interaction':perc_AI, 
                         'Fauna Death':perc_death,
                         'Repeat volunteers':beforers,'Felt proud':perc_proud,
                            'Felt more connected':perc_more_connected,

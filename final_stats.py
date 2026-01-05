@@ -30,7 +30,7 @@ def overview_stats(folderin, folderout):
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
-    lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/s_test.csv',
+    lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
                           index_col=0).iloc[:, 0]
     lite_dict = lite_dt.to_dict()  
     
@@ -77,10 +77,12 @@ def overview_stats(folderin, folderout):
     
     tot_people = []
     tot_time = []
+    
+    minutes = lite_dict['Time_min']
+    time = minutes/60
 
-    survey['Time_hours'] = survey['Time_hours'].replace(0, 1.64).fillna(1.64)
-
-    survey['People'] = survey['People'].replace(0, 3.08).fillna(3.08)
+    survey['Time_hours'] = survey['Time_hours'].replace(0, time).fillna(time)
+    survey['People'] = survey['People'].replace(0, lite_dict['People']).fillna(lite_dict['People'])
     
     for df in dfs: #survey, CSsurvey & CS count
         people = df['People'].sum()
@@ -110,8 +112,7 @@ def overview_stats(folderin, folderout):
     km = sum(kms)
         
     #method to estimate time spent on count
-    minutes = lite_dict['Time_min']
-    time = minutes/60
+
     count_time = count_count * time
     lite_time = count_lite * time
     tot_time.append(count_time)
@@ -335,6 +336,7 @@ def overview_stats(folderin, folderout):
     distance = CScount_kms + count_kms
 
 #how much is out there per km
+wrong - distance is only based on df2s filtered above...
     prevalence = tot_count_items/distance
     
 #hot spots????

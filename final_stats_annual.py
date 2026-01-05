@@ -7,7 +7,7 @@ Created on Thu Oct 23 11:52:46 2025
 """
 
 import pandas as pd
-import os
+
 
 def overview_stats_per_year(folderin, folderout, year):
     """
@@ -31,7 +31,10 @@ def overview_stats_per_year(folderin, folderout, year):
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
-      
+    lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
+                          index_col=0).iloc[:, 0]
+    lite_dict = lite_dt.to_dict() 
+    
     survey = pd.read_csv(folderin + 'survey/survey_' + year + '.csv')
     lite = pd.read_csv(folderin + 'lite/lite_' + year + '.csv')
     count = pd.read_csv(folderin + 'count/count_' + year +'.csv')
@@ -75,10 +78,13 @@ def overview_stats_per_year(folderin, folderout, year):
     
     tot_people = []
     tot_time = []
+    
+    minutes = lite_dict['Time_min']
+    time = minutes/60
 
-    survey['Time_hours'] = survey['Time_hours'].replace(0, 1.64).fillna(1.64)
-
-    survey['People'] = survey['People'].replace(0, 3.08).fillna(3.08)
+    survey['Time_hours'] = survey['Time_hours'].replace(0, time).fillna(time)
+    survey['People'] = survey['People'].replace(0, lite_dict['People']).fillna(lite_dict['People'])
+        
     
     for df in dfs: #survey, CSsurvey & CS count
     
@@ -94,7 +100,7 @@ def overview_stats_per_year(folderin, folderout, year):
 
     
     #add to total people the number of lite and count submissions
-    lite_people = count_lite * 3.08
+    lite_people = count_lite * lite_dict['People']
     tot_people.append(lite_people)
     tot_people.append(count_count)
  
@@ -106,25 +112,16 @@ def overview_stats_per_year(folderin, folderout, year):
     count_km = count_m / 1000
     CScount_m = CScount['Total_distance(m)'].sum()
     CScount_km = CScount_m / 1000
-    lite_km = count_lite * 6.77
+    lite_km = count_lite * lite_dict['Distance_km']
     
-    survey_area = survey_km * 0.006
-    lite_area = lite_km * 0.006
-    CSsurvey_area = CSsurvey['Area_km2'].sum()
-    count_area = count_km * 0.006
     
-    areas = [survey_area, count_area, lite_area]
-#area cleaned / surveyed
-    area = sum(areas)   
-    
-    CSsurvey_km = CSsurvey_area / 0.006
     kms = [survey_km, count_km, CScount_km, lite_km]
 #distance cleaned / surveyed 
     km = sum(kms)
         
     #method to estimate time spent on count
-    count_time = count_count * 1.38
-    lite_time = count_lite * 1.64
+    count_time = count_count * time
+    lite_time = count_lite * time
     tot_time.append(count_time)
     tot_time.append(lite_time)
 #time 
@@ -268,7 +265,7 @@ def overview_stats_per_year(folderin, folderout, year):
     new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':total_count,
                               'total_survey':total_survey, 'total_lite': count_lite,
                               'no_people':total_people, 
-                              'area_km2':area, 'distance_km':km,
+                              'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
                               'items_surveyed':surveyed_items, 'total_items':total_items,
                               'total_kg':total_kg,'total_cokecans':total_cokecans,
@@ -372,10 +369,6 @@ def overview_stats_per_year(folderin, folderout, year):
     kms_survey = [survey_km] 
 #distance covered    
     km_survey = sum(kms_survey)
-    
-    areas_survey = [survey_area,  CSsurvey_area]
-#area directly protected - excludes Lite
-    area_survey = sum(areas_survey)   
     
     plastic = ['Value Full Dog Poo Bags',
             'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
@@ -947,7 +940,7 @@ def overview_stats_per_year(folderin, folderout, year):
                 'total composition items':total_reported_items, 
                 'weight removed':total_kg, 
                 'volume removed':total_cokecans, 'distance_kms':km_survey, 
-                'area kms2':area_survey,'most common material':most_type, 
+                'most common material':most_type, 
                 'SUP reported':tot_percSUP,'SUP calculated':tot_calc_SUP,
                 'most common category':most_cat,'DRS reported':DRS_reported,
                 'DRS total items':DRS_tot_items,'DRS total glass':DRS_tot_glass,

@@ -76,6 +76,10 @@ label_map = {'Confectionary/sweet wrappers':'confectionary',
 
 df_plot = df.set_index('TrailName')[cols]
 
+hex_colors = ['#e5582e', '#C51718', '#072340', '#009F98',
+              '#96C11E', '#BCA25D', '#F8C70E', 
+              '#F1910A', '#DB2768', '#B55F9E']
+
 # Transpose so columns become x-axis
 df_plot = df_plot.T
 
@@ -83,14 +87,15 @@ df_plot = df_plot.T
 df_plot.index = [label_map.get(c, c) for c in df_plot.index]
 
 # Plot stacked bars
-ax = df_plot.plot(kind='bar', stacked=True, figsize=(10,6))
+ax = df_plot.plot(kind='bar', color=hex_colors, stacked=True, figsize=(10,6))
 
 # Rotate x labels
 plt.xticks(rotation=45, ha='right')
 plt.ylabel("Total number of items")
 plt.xlabel("Big (S)hitter")
-plt.title("Overall Big (S)hitters by event")
+plt.title("Overall Big (S)hitters by Trash Free Races event")
 plt.tight_layout()
+plt.savefig('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_requests/TFR/2025_round_up/event_shitters.png')
 plt.savefig('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_requests/TFR/2025_round_up/event_shitters.svg')
 plt.show()
 
@@ -108,6 +113,8 @@ cols = ['Confectionary/sweet wrappers','Toilet tissue',
         'Aluminium energy drink can','Plastic Water Bottles']
 
 df_grouped = df.groupby('Event')[cols].mean()
+
+
 
 # Transpose so columns become x-axis
 df_plot = df_grouped.T
@@ -135,7 +142,7 @@ plt.show()
 numeric_cols = df.select_dtypes(include='number').columns
 df_grouped = df.groupby('Event')[numeric_cols].mean()
 
-
+hex_colors = ['#e5582e', '#f4a71c', '#072340', '#faf9ef']
 
 top_cols_per_event = {}
 
@@ -148,11 +155,11 @@ top_cols_all = list({col for cols in top_cols_per_event.values() for col in cols
 
 df_plot = df.groupby('Event')[top_cols_all].mean().T 
 
-ax = df_plot.plot(kind='bar', stacked=True, figsize=(10,6))
+ax = df_plot.plot(kind='bar', color=hex_colors, edgecolor='black', stacked=True, figsize=(10,6))
 plt.xticks(rotation=45, ha='right')
-plt.ylabel("Average number of items per trail")
+plt.ylabel("Average number of items per type of event")
 plt.xlabel("Big (S)hitter")
-plt.title("Top 5 Big (S)hitters per Event Type")
+plt.title("Top 5 Big (S)hitters per Type of Event")
 plt.tight_layout()
 ax.figure.savefig('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_requests/TFR/2025_round_up/top5_event_shitters.svg')
 ax.figure.savefig('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_requests/TFR/2025_round_up/top5_event_shitters.png')

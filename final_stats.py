@@ -100,6 +100,14 @@ def overview_stats(folderin, folderout):
 #volunteers
     total_people = sum(tot_people)
     
+    #removing empty rows before next steps so prevalance calc is correct
+    count_df1 = count[count['TotItems'].notna()]
+    count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
+    CScount_df1 = CScount[CScount['TotItems'].notna()]
+    CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()] 
+    count = count_df2
+    CScount = CScount_df2
+    
     survey_km = survey['Distance_km'].sum()
     count_m = count['Total_distance(m)'].sum()
     count_km = count_m / 1000
@@ -183,16 +191,14 @@ def overview_stats(folderin, folderout):
     'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
     'Weird/Retro']
     
-    # Apply conversion to both DataFrames individually
+    #Resolve nan issues
     for df in [survey, CSsurvey]:
         df[all_items] = df[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
 
-    # Now they both have clean numeric columns
     combined = pd.concat([survey, CSsurvey], ignore_index=True)
 
     # Summation works the same
     reported_items = combined[all_items].sum(axis=0).to_list()
-    
     total_reported_items = sum(reported_items)
     
     srvy_items = []
@@ -237,7 +243,7 @@ def overview_stats(folderin, folderout):
     total_kg = removed_items / 57  
 #volume of removed items as number of coke cans
     total_cokecans = removed_items / 1.04
-    
+    '''
     ATI_srvy = survey['AdjTotItems']
     ATI_srvy_correct_itms = [x for x in ATI_srvy if str(x) != '#DIV/0!']
     ATI_srvy_correct = [float(i) for i in ATI_srvy_correct_itms]
@@ -299,15 +305,15 @@ def overview_stats(folderin, folderout):
     ATI_next = sum(ATIs)
 #Adjusted total items    
     ATI = ATI_next + ATI_lite + ATI_survey
-    
+    '''
     new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':total_count,
                               'total_survey':total_survey, 'total_lite': count_lite,
                               'no_people':total_people, 
-                              'area_km2':area, 'distance_km':km,
+                              'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
                               'items_surveyed':surveyed_items, 'total_items':total_items,
-                              'total_kg':total_kg,'total_cokecans':total_cokecans,
-                              'Adjusted Total Items':ATI}])
+                              'total_kg':total_kg,'total_cokecans':total_cokecans}])
+    
     results= pd.concat([results, new_row], ignore_index=True) 
                                         
     
@@ -322,21 +328,9 @@ def overview_stats(folderin, folderout):
                                             'count_kms','prevalence', 'hotspots',
                                             'worst_zone'])
     
-
-    count_df1 = count[count['TotItems'].notna()]
-    count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
-    CScount_df1 = CScount[CScount['TotItems'].notna()]
-    CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()]   
-    count_ms = count_df2['Total_distance(m)'].sum()
-    count_kms = count_ms / 1000
-    CScount_ms = CScount_df2['Total_distance(m)'].sum()
-    CScount_kms = CScount_ms / 1000
- 
-    
-    distance = CScount_kms + count_kms
+    distance = CScount_km + count_km
 
 #how much is out there per km
-wrong - distance is only based on df2s filtered above...
     prevalence = tot_count_items/distance
     
 #hot spots????

@@ -37,6 +37,12 @@ def overview_stats(folderin, folderout):
     """
     A function which takes clean monthly TFT survey data and produces monthly stats
     
+    BEWARE - this currently reads in the current averages .csv if you want to use 
+    the averages for the month in question this needs rewriting to read those 
+    .csvs in (this is only possible from January 2026 onwards)
+    
+    BEWARE - this does not include Trash Free Races data
+    
     Parameters
     ----------
     
@@ -77,6 +83,7 @@ def overview_stats(folderin, folderout):
                         'Felt more connected','met someone inspiring', 'went out after',
                         'Would do again','provided contact info'])
     
+
     lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
                           index_col=0).iloc[:, 0]
     lite_dict = lite_dt.to_dict()  
@@ -148,6 +155,14 @@ def overview_stats(folderin, folderout):
  
 #volunteers
         total_people = sum(tot_people)
+        
+        #removing empty rows before next steps so prevalence calc is correct
+        count_df1 = count[count['TotItems'].notna()]
+        count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
+        CScount_df1 = CScount[CScount['TotItems'].notna()]
+        CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()]
+        count = count_df2
+        CScount = CScount_df2
     
         survey_km = survey['Distance_km'].sum()
         count_m = count['Total_distance(m)'].sum()
@@ -231,7 +246,6 @@ def overview_stats(folderin, folderout):
         for df in [survey, CSsurvey]:
             df[all_items] = df[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
 
-        # Now they both have clean numeric columns
         combined = pd.concat([survey, CSsurvey], ignore_index=True)
 
         reported_items = combined[all_items].sum(axis=0).to_list()
@@ -277,7 +291,7 @@ def overview_stats(folderin, folderout):
         total_kg = removed_items / 57  
 #volume of removed items as number of coke cans
         total_cokecans = removed_items / 1.04
-        
+        '''
         ATI_srvy = survey['AdjTotItems']
         ATI_srvy_correct_itms = [x for x in ATI_srvy if str(x) != '#DIV/0!']
         ATI_srvy_correct = [float(i) for i in ATI_srvy_correct_itms]
@@ -339,15 +353,15 @@ def overview_stats(folderin, folderout):
         ATI_next = sum(ATIs)
 #Adjusted total items    
         ATI = ATI_next + ATI_lite + ATI_survey
-    
+        '''
         new_row = pd.DataFrame([{'month':month, 'total_submisssions':total_CS, 'total_count':total_count,
                                   'total_survey':total_survey, 'total_lite': count_lite,
                                   'no_people':total_people, 
-                                  'area_km2':area, 'distance_km':km,
+                                  'distance_km':km,
                                   'duration_hours':total_time, 'items_removed':removed_items,
                                   'items_surveyed':surveyed_items, 'total_items':total_items,
-                                  'total_kg':total_kg,'total_cokecans':total_cokecans,
-                                  'Adjusted Total Items':ATI}])
+                                  'total_kg':total_kg,'total_cokecans':total_cokecans}])
+        
         results= pd.concat([results, new_row], ignore_index=True) 
                                             
         results.to_csv(folderout + 'overview.csv',index=False)    
@@ -355,17 +369,7 @@ def overview_stats(folderin, folderout):
         count = count.rename(columns={'ZMostonesAlmostHome':'MostZonesAlmostHome'})
         count = count.rename(columns={'MostZonesLunch':'MostZonesPicnic'})
     
-        count_df1 = count[count['TotItems'].notna()]
-        count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
-        CScount_df1 = CScount[CScount['TotItems'].notna()]
-        CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()]   
-        count_ms = count_df2['Total_distance(m)'].sum()
-        count_kms = count_ms / 1000
-        CScount_ms = CScount_df2['Total_distance(m)'].sum()
-        CScount_kms = CScount_ms / 1000
- 
-    
-        distance = CScount_kms + count_kms
+        distance = CScount_km + count_km
 
 #how much is out there per km
         prevalence = tot_count_items/distance

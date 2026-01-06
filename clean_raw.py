@@ -403,6 +403,8 @@ def update_lite_averages(year_folder, TFTout):
     av.to_csv(year_folder + 'other_averages_calc.csv')
     new_averages_df.to_csv(year_folder + 'other_averages_raw.csv')
     
+    av.to_csv(TFTout + 'other_averages_calc.csv')
+    averages_df.to_csv(TFTout + 'bag_averages_calc.csv', index=False)
     
         
     

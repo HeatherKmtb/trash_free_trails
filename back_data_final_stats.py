@@ -673,7 +673,6 @@ def overview_stats(folderin, folderout):
                 lite_DRS.append(1)
             
         DRS_lite = sum(lite_DRS)
-            
         tot_DRS_subs = subs_indy + subs_CS + DRS_lite   
       
         subs_presence = survey[all_presence]

@@ -6,22 +6,31 @@ Created on Thu Jan  8 12:42:27 2026
 @author: heatherkay
 """
 
-import pandas as pd    
+import pandas as pd 
+import re   
     
-ateam = ['alistair hair', 'andy lund', 'chloe parker', 'dan jarvis', 
-             'dom barry', 'ed roberts', 'emma johnson', 'gill houlsby', 
-             'hannah lowther', 'hari milburn', 'harry wood', 'ian white', 
-             'ian lean', 'jake rainford', 'james mackeddie', 'jane chisholm', 
-             'jay schreiber', 'jo shwe', 'john bellis', 'kyle harvey', 
-             'lauren munro-bennet', 'leon rosser', 'mario presi', 'mark wilson', 
-             'marv davies', 'matt kennelly', 'monet adams', 'neil hudson', 
-             'nush lee', 'pete scullion', 'ram gurung', 'rosie holdsworth', 
-             'ross lambie', 'sam piper', 'tom laws', 'will atkinson', 
-             'victoria herbert', 'ollie cain', 'laurance ward', 'tim bowden', 
-             'kristina vackova', 'helen wilson', 'lauren cattell']
+def get_CH_data(TFTin, TFTout):
+    """
+    A function which extracts (as best possible) Community Hub submissions
+    from the different data streams. Based on presence of the surname of the 
+    contact person, the contact email address or a key word from the hub name
+    being present in the data.
+
+    Parameters
+    ----------
+    TFTin : string
+             path to input folder with TFT data you want to search
+            
+    TFTout : string
+           path for folder to save filtered .csvs in
+
+    Returns
+    -------
+    None.
+
+    """
     
-    
-ch_contact = ['Berry', 'Scholfield', 'Gwynedd', 'Munroe', 'Radford', 
+    ch_contact = ['Berry', 'Scholfield', 'Gwynedd', 'Munroe', 'Radford', 
               'Downing', 'Fielding', 'McKnight', 'McNicol', 'MacDonald', 
               'Kavanagh', 'Elliot-Jones', "O'Brien", 'Wilkinson', 'Copeman',
               'Caddy', 'Davies', 'Holloway', 'Greaves', 'Scott', 'Herbert',
@@ -44,7 +53,7 @@ ch_contact = ['Berry', 'Scholfield', 'Gwynedd', 'Munroe', 'Radford',
               'Griffiths', 'Escott', 'Elsworth', 'Harrison', 'Glover', 'Finney', 
               'Burke', 'Bulois', 'Irwin', 'Lee', 'Maturin-Bird']    
 
-ch_email = ['info@thebikingexplorers.co.uk', 'info@cycleisletrax.co.uk', 
+    ch_email = ['info@thebikingexplorers.co.uk', 'info@cycleisletrax.co.uk', 
             'info@cycleworksyorkshire.co.uk', 'sara.radford@gmail.com', 
             'hello@drosibikes.org', 'enquiries@ponnekrunning.co.uk', 
             'dyfiadventurecampsite@gmail.com', 'joe@energisecycles.co.uk', 
@@ -99,9 +108,9 @@ ch_email = ['info@thebikingexplorers.co.uk', 'info@cycleisletrax.co.uk',
             'nicolas.bulois@gmail.com', 'workshop@bikegarage.co.uk', 
             'jonathon.lee@denbighshire.gov.uk', 'adventure@femaleexplorers.co.uk']
 
-ch_name = ['Biosphere', 'Coffi', 'TraX', 'Yorkshire', 'Dean','Drosi',
+    ch_name = ['Biosphere', 'Coffi', 'TraX', 'Works', 'Dean','Drosi',
            'Dusty','Dyfi','Energise','Evolution','GRVL','Nood',
-           'Outside','Rapha','Scoop','Stif','Swinley','Green',
+           'Outside','Rapha','Scoop','Stif','Swinley','Green House',
            'Room','Sheffield','Gwyrdd','Bethel','Poblado','RunCyB',
            'Àban','Adaptive','Tours','Alyth','Sidings','Bear','Tek',
            'Boat', 'Caban', 'Brenin', 'Comrie', 'Whinlatter', 'Dalby', 
@@ -123,43 +132,78 @@ ch_name = ['Biosphere', 'Coffi', 'TraX', 'Yorkshire', 'Dean','Drosi',
            'Denbighshire', 'Explorers']
 
 
-survey = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/survey/all_survey.csv')
-lite = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/lite/all_lite.csv')
+    survey = pd.read_csv(TFTin + 'survey/all_survey.csv')
+    lite = pd.read_csv(TFTin + 'lite/all_lite.csv')
+    count = pd.read_csv(TFTin + 'count/all_count.csv')
 
-import re
 
-# --- normalize columns ---
-email_col   = survey['Email'].str.strip().str.lower().fillna('')
-surname_col = survey['Surname'].str.lower().fillna('')
-hub_col     = survey['Community Hub'].str.lower().fillna('')
-trail_col   = survey['TrailName'].str.lower().fillna('')
+    #survey - normalize cols
+    email_col   = survey['Email'].str.strip().str.lower().fillna('')
+    surname_col = survey['Surname'].str.lower().fillna('')
+    hub_col     = survey['Community Hub'].str.lower().fillna('')
+    trail_col   = survey['TrailName'].str.lower().fillna('')
 
-# --- normalize lists ---
-emails_lower   = [e.strip().lower() for e in ch_email]
-names_lower    = [n.lower() for n in ch_name]
-contacts_lower = [c.lower() for c in ch_contact]
+    #lite normalize cols
+    lite_col = lite['Title'].str.strip().str.lower().fillna('')
+    
 
-# --- build regex patterns for names/contacts ---
-name_pattern    = '|'.join(re.escape(n) for n in names_lower)
-contact_pattern = '|'.join(re.escape(c) for c in contacts_lower)
+    #normalize lists
+    emails_lower   = [e.strip().lower() for e in ch_email]
+    names_lower    = [n.lower() for n in ch_name]
+    contacts_lower = [c.lower() for c in ch_contact]
 
-# --- combine filters ---
-filtered_survey = survey[
-    # email exact match
-    email_col.isin(emails_lower)
-    # OR name appears in email, hub, or trail
-    | email_col.str.contains(name_pattern)
-    | hub_col.str.contains(name_pattern)
-    | trail_col.str.contains(name_pattern)
-    # OR contact appears in email or surname
-    | email_col.str.contains(contact_pattern)
-    | surname_col.str.contains(contact_pattern)
-    ]
+    #build regex patterns for names/contacts
+    name_pattern    = '|'.join(re.escape(n) for n in names_lower)
+    contact_pattern = '|'.join(re.escape(c) for c in contacts_lower)
 
-# --- normalize columns ---
-lite_col = lite['Title'].str.strip().str.lower().fillna('')
+    #survey combine filters
+    filtered_survey = survey[
+        # email exact match
+        email_col.isin(emails_lower)
+        # OR name appears in email, hub, or trail
+        | email_col.str.contains(name_pattern)
+        | hub_col.str.contains(name_pattern)
+        | trail_col.str.contains(name_pattern)
+        # OR contact appears in email or surname
+        | email_col.str.contains(contact_pattern)
+        | surname_col.str.contains(contact_pattern)
+        ]
 
-filtered_lite = lite[
-    lite_col.str.contains(name_pattern)
-    | lite_col.str.contains(contact_pattern)
-    ]
+    #lite combine filters
+    filtered_lite = lite[
+        lite_col.str.contains(name_pattern)
+        | lite_col.str.contains(contact_pattern)
+        ]
+
+    #count - normalize cols
+    email_col   = count['email'].str.strip().str.lower().fillna('')
+    surname_col = count['LastName'].str.lower().fillna('')
+    hub_col     = count['Community Hub'].str.lower().fillna('')
+    trail_col   = count['TrailName'].str.lower().fillna('')
+    
+    #count combine filters
+    filtered_count = count[
+        # email exact match
+        email_col.isin(emails_lower)
+        # OR name appears in email, hub, or trail
+        | email_col.str.contains(name_pattern)
+        | hub_col.str.contains(name_pattern)
+        | trail_col.str.contains(name_pattern)
+        # OR contact appears in email or surname
+        | email_col.str.contains(contact_pattern)
+        | surname_col.str.contains(contact_pattern)
+        ]
+  
+    """
+    dfs = {
+    "survey": filtered_survey,
+    "count": filtered_count
+    }
+
+    for name, df in dfs.items():
+        new_df = df[df['People'] != 1]
+        new_df.to_csv(TFTout + name + '.csv', index=False)
+    """    
+    filtered_lite.to_csv(TFTout + 'lite.csv', index=False)
+    filtered_survey.to_csv(TFTout + 'survey.csv', index=False)
+    filtered_count.to_csv(TFTout + 'count.csv', index=False)

@@ -139,6 +139,10 @@ def overview_stats(folderin, folderout):
 
         
         for df in dfs: #survey, CSsurvey & CS count
+            if df.empty:
+                tot_people.append(0)
+                tot_time.append(0)
+                continue
             people = df['People'].sum()
             hours = (df['People'] * df['Time_hours']).sum()
         #km = df['Distance_km'].sum()
@@ -372,8 +376,10 @@ def overview_stats(folderin, folderout):
         distance = CScount_km + count_km
 
 #how much is out there per km
-        prevalence = tot_count_items/distance
-    
+        if distance == 0:
+            prevalence = 0
+        else:
+            prevalence = tot_count_items/distance
     
 #hot spots????
     
@@ -404,7 +410,10 @@ def overview_stats(folderin, folderout):
                 zonecounts.append(z)        
 
 #mostpolluted trail zone
-        topzone = max(set(zonecounts), key=zonecounts.count)
+        if len(zonecounts) == 0:
+            topzone = 'none'
+        else:
+            topzone = max(set(zonecounts), key=zonecounts.count)
 
         new_row = pd.DataFrame([{'month':month,'count_submisssions':total_count, 
                     'count_items':tot_count_items,
@@ -779,7 +788,10 @@ def overview_stats(folderin, folderout):
 #% of total items that are vapes
         vapes_proportion = (vapes_total/total_reported_items)*100
 #% of smoking items that are vapes    
-        vapes_in_smoke = (vapes_total/totsm)*100
+        if totsm == 0:
+            vapes_in_smoke = 0
+        else:
+            vapes_in_smoke = (vapes_total/totsm)*100
      
         gel_end_subs_indy = []
         no_gelends_indy = []
@@ -1036,8 +1048,11 @@ def overview_stats(folderin, folderout):
         dfs = [CSsurvey, survey]
         deaths = []
         for df in dfs:
-            death = df['AnimalsInfo'].str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
-            deaths.append(death)
+            if 'AnimalsInfo' in df.columns and df['AnimalsInfo'].notna().any():
+                death = df['AnimalsInfo'].astype(str).str.contains(r'\b(death|dead|meth|drown|smell|remains|entrapment)\b', case=False, na=False).sum()
+            else:
+                death = 0
+                deaths.append(death)
 
         lite_death = lite['Animal Interaction - Death'].sum()
         deaths.append(lite_death)
@@ -1061,10 +1076,17 @@ def overview_stats(folderin, folderout):
     #number submitting for first time - not lite    
         no_1st = sum(subs_for_1st)
         
-        multiple_cols = ['Volunteer','A-Team','Community Hub']
+        if 'Community Hub' not in count.columns:
+            count.rename(columns={'CH': 'Community Hub'}, inplace=True)    
+        
         dfs = [count, survey]
+        
         befores = []
-        for df in dfs:
+        for df in dfs:        
+            if 'A-Team' not in survey.columns:
+                survey.rename(columns={'A-Team ': 'A-Team'}, inplace=True)
+                
+            multiple_cols = ['Volunteer','A-Team','Community Hub']
             before = df[multiple_cols].notna().sum()
             before_tot = sum(before)
             befores.append(before_tot)
@@ -1087,6 +1109,13 @@ def overview_stats(folderin, folderout):
         count_nas = sum(nas)
     #percent feeling proud after taking action 
         perc_proud = (prouds/count_nas) * 100
+        
+        if 'Connection_ConnectionY' not in count.columns:
+           count.rename(columns={'Connect_ConnectY': 'Connection_ConnectionY'}, inplace=True) 
+           count.rename(columns={'Connect_ConnectN': 'Connection_ConnectionN'}, inplace=True)
+           count.rename(columns={'Connect_ConnectSame': 'Connection_ConnectionSame'}, inplace=True)
+           count.rename(columns={'Connect_ConnectNotSure': 'Connection_Unsure'}, inplace=True)
+     
 
         dfs = [survey, count, CSsurvey]
         connection = []
@@ -1101,7 +1130,9 @@ def overview_stats(folderin, folderout):
         
         lite_connects = lite['Increased Nature Connection - Yes'].sum()
         connection.append(lite_connects)
-        counts_connect.append(count_lite)
+        NCcols = [c for c in lite.columns if c.startswith("Increased Nature Connection")]
+        count_rows = (lite[NCcols] == True).any(axis=1).sum()
+        counts_connect.append(count_rows)
         
         total_answer_connect = sum(counts_connect)
         connects = sum(connection)
@@ -1113,11 +1144,13 @@ def overview_stats(folderin, folderout):
         answered_p = []
         activity = []
         answered_a = []
+        people_cols = ['Connection_NewPeopleY', 'Connection_NewPeopleN']
+        activity_cols = ['Connection_ActivityAfterY', 'Connection_ActivityAfterN']
         for df in dfs:
             new_people = df['Connection_NewPeopleY'].value_counts().get('Yes', 0)
-            answered_people = df['Connection_NewPeopleY'].notnull().sum()
+            answered_people = df[people_cols].notnull().any(axis=1).sum()
             activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0)
-            answered_activity = df['Connection_ActivityAfterY'].notnull().sum()
+            answered_activity = df[activity_cols].notnull().any(axis=1).sum()
             people.append(new_people)
             answered_p.append(answered_people)
             activity.append(activity_after)
@@ -1140,6 +1173,8 @@ def overview_stats(folderin, folderout):
         perc_participate_again = (again/answered_again)*100
 
         dfs = [count, survey, lite]
+        if 'Email' not in count.columns:
+            count.rename(columns={'email': 'Email'}, inplace=True)     
         contacts = []
         for df in dfs:
             contact = df['Email'].notnull().sum()

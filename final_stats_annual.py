@@ -87,7 +87,6 @@ def overview_stats_per_year(folderin, folderout, year):
         
     
     for df in dfs: #survey, CSsurvey & CS count
-    
         if df.empty:
             tot_people.append(0)
             tot_time.append(0)
@@ -107,6 +106,14 @@ def overview_stats_per_year(folderin, folderout, year):
 #volunteers
     total_people = sum(tot_people)
     
+    #removing empty rows before next steps so prevalance calc is correct
+    count_df1 = count[count['TotItems'].notna()]
+    count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
+    CScount_df1 = CScount[CScount['TotItems'].notna()]
+    CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()] 
+    count = count_df2
+    CScount = CScount_df2
+        
     survey_km = survey['Distance_km'].sum()
     count_m = count['Total_distance(m)'].sum()
     count_km = count_m / 1000
@@ -200,7 +207,6 @@ def overview_stats_per_year(folderin, folderout, year):
 
     # Summation works the same
     reported_items = combined[all_items].sum(axis=0).to_list()
-    
     total_reported_items = sum(reported_items)
     
     srvy_items = []
@@ -245,7 +251,7 @@ def overview_stats_per_year(folderin, folderout, year):
     total_kg = removed_items / 57  
 #volume of removed items as number of coke cans
     total_cokecans = removed_items / 1.04
-    
+    '''
     ATI_srvy = survey['AdjTotItems']
     ATI_srvy_correct_itms = [x for x in ATI_srvy if str(x) != '#DIV/0!']
     ATI_srvy_correct = [float(i) for i in ATI_srvy_correct_itms]
@@ -261,6 +267,7 @@ def overview_stats_per_year(folderin, folderout, year):
     ATI_next = 0
 #Adjusted total items    
     ATI = ATI_next + ATI_lite + ATI_survey
+    '''
     
     new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':total_count,
                               'total_survey':total_survey, 'total_lite': count_lite,
@@ -269,7 +276,8 @@ def overview_stats_per_year(folderin, folderout, year):
                               'duration_hours':total_time, 'items_removed':removed_items,
                               'items_surveyed':surveyed_items, 'total_items':total_items,
                               'total_kg':total_kg,'total_cokecans':total_cokecans,
-                              'Adjusted Total Items':ATI}])
+                              }])
+    
     results= pd.concat([results, new_row], ignore_index=True) 
                                         
     
@@ -284,18 +292,8 @@ def overview_stats_per_year(folderin, folderout, year):
                                             'count_kms','prevalence', 'hotspots',
                                             'worst_zone'])
     
-
-    count_df1 = count[count['TotItems'].notna()]
-    count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
-    CScount_df1 = CScount[CScount['TotItems'].notna()]
-    CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()]   
-    count_ms = count_df2['Total_distance(m)'].sum()
-    count_kms = count_ms / 1000
-    CScount_ms = CScount_df2['Total_distance(m)'].sum()
-    CScount_kms = CScount_ms / 1000
  
-    
-    distance = CScount_kms + count_kms
+    distance = CScount_km + count_km
 
 #how much is out there per km
     if distance == 0:
@@ -506,9 +504,6 @@ def overview_stats_per_year(folderin, folderout, year):
         calc_perc_SUP.append(calculated_SUP)        
     SUPs = sum(calc_perc_SUP)     
 #SUP proportion % calculated   
-    #if len(calc_perc_SUP) == 0:
-     #   tot_calc_SUP = 0
-    #else:
     tot_calc_SUP = SUPs/len(calc_perc_SUP)     
     
     pet_stuff = ['Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
@@ -995,7 +990,7 @@ def overview_stats_per_year(folderin, folderout, year):
     deaths = []
     for df in dfs:
         if 'AnimalsInfo' in df.columns and df['AnimalsInfo'].notna().any():
-            death = df['AnimalsInfo'].astype(str).str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
+            death = df['AnimalsInfo'].astype(str).str.contains(r'\b(death|dead|meth|drown|smell|remains|entrapment)\b', case=False, na=False).sum()
         else:
             death = 0
         deaths.append(death)

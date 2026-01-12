@@ -101,7 +101,8 @@ def overview_stats_per_year(folderin, folderout, year):
     #add to total people the number of lite and count submissions
     lite_people = count_lite * lite_dict['People']
     tot_people.append(lite_people)
-    tot_people.append(count_count)
+    count_people = count['People'].sum()
+    tot_people.append(count_people)
  
 #volunteers
     total_people = sum(tot_people)
@@ -1230,7 +1231,8 @@ def overview_stats_overall(folderin, folderout):
     #add to total people the number of lite and count submissions
     lite_people = count_lite * lite_dict['People']
     tot_people.append(lite_people)
-    tot_people.append(count_count)
+    count_people = count['People'].sum()
+    tot_people.append(count_people)
  
 #volunteers
     total_people = sum(tot_people)
@@ -1255,8 +1257,8 @@ def overview_stats_overall(folderin, folderout):
     km = sum(kms)
         
     #method to estimate time spent on count
-    count_time = count_count * 1.38
-    lite_time = count_lite * 1.64
+    count_time = count_count * time
+    lite_time = count_lite * time
     tot_time.append(count_time)
     tot_time.append(lite_time)
 #time 

@@ -99,7 +99,8 @@ def overview_stats(folderin, folderout):
     #add to total people the number of lite and count submissions
     lite_people = count_lite * lite_dict['People']
     tot_people.append(lite_people)
-    tot_people.append(count_count)
+    count_people = count['People'].sum()
+    tot_people.append(count_people)
  
 #volunteers
     total_people = sum(tot_people)

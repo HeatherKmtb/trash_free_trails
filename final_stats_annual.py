@@ -1161,6 +1161,9 @@ def overview_stats_overall(folderin, folderout):
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
+    lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
+                          index_col=0).iloc[:, 0]
+    lite_dict = lite_dt.to_dict()  
       
     survey = pd.read_csv(folderin + 'survey/all_survey.csv')
     lite = pd.read_csv(folderin + 'lite/all_lite.csv')
@@ -1206,12 +1209,13 @@ def overview_stats_overall(folderin, folderout):
     tot_people = []
     tot_time = []
 
-    survey['Time_hours'] = survey['Time_hours'].replace(0, 1.64).fillna(1.64)
-
-    survey['People'] = survey['People'].replace(0, 3.08).fillna(3.08)
+    minutes = lite_dict['Time_min']
+    time = minutes/60
+    
+    survey['Time_hours'] = survey['Time_hours'].replace(0, time).fillna(time)
+    survey['People'] = survey['People'].replace(0, lite_dict['People']).fillna(lite_dict['People'])
     
     for df in dfs: #survey, CSsurvey & CS count
-    
         if df.empty:
             tot_people.append(0)
             tot_time.append(0)
@@ -1224,30 +1228,28 @@ def overview_stats_overall(folderin, folderout):
 
     
     #add to total people the number of lite and count submissions
-    lite_people = count_lite * 3.08
+    lite_people = count_lite * lite_dict['People']
     tot_people.append(lite_people)
     tot_people.append(count_count)
  
 #volunteers
     total_people = sum(tot_people)
     
+    #removing empty rows before next steps so prevalance calc is correct
+    count_df1 = count[count['TotItems'].notna()]
+    count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
+    CScount_df1 = CScount[CScount['TotItems'].notna()]
+    CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()] 
+    count = count_df2
+    CScount = CScount_df2
+    
     survey_km = survey['Distance_km'].sum()
     count_m = count['Total_distance(m)'].sum()
     count_km = count_m / 1000
     CScount_m = CScount['Total_distance(m)'].sum()
     CScount_km = CScount_m / 1000
-    lite_km = count_lite * 6.77
-    
-    survey_area = survey_km * 0.006
-    lite_area = lite_km * 0.006
-    CSsurvey_area = CSsurvey['Area_km2'].sum()
-    count_area = count_km * 0.006
-    
-    areas = [survey_area, count_area, lite_area]
-#area cleaned / surveyed
-    area = sum(areas)   
-    
-    CSsurvey_km = CSsurvey_area / 0.006
+    lite_km = count_lite * lite_dict['Distance_km']
+      
     kms = [survey_km, count_km, CScount_km, lite_km]
 #distance cleaned / surveyed 
     km = sum(kms)
@@ -1333,7 +1335,6 @@ def overview_stats_overall(folderin, folderout):
 
     # Summation works the same
     reported_items = combined[all_items].sum(axis=0).to_list()
-    
     total_reported_items = sum(reported_items)
     
     srvy_items = []
@@ -1378,7 +1379,7 @@ def overview_stats_overall(folderin, folderout):
     total_kg = removed_items / 57  
 #volume of removed items as number of coke cans
     total_cokecans = removed_items / 1.04
-    
+    '''
     ATI_srvy = survey['AdjTotItems']
     ATI_srvy_correct_itms = [x for x in ATI_srvy if str(x) != '#DIV/0!']
     ATI_srvy_correct = [float(i) for i in ATI_srvy_correct_itms]
@@ -1394,15 +1395,15 @@ def overview_stats_overall(folderin, folderout):
     ATI_next = 0
 #Adjusted total items    
     ATI = ATI_next + ATI_lite + ATI_survey
-    
+    '''
     new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':total_count,
                               'total_survey':total_survey, 'total_lite': count_lite,
                               'no_people':total_people, 
-                              'area_km2':area, 'distance_km':km,
+                              'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
                               'items_surveyed':surveyed_items, 'total_items':total_items,
-                              'total_kg':total_kg,'total_cokecans':total_cokecans,
-                              'Adjusted Total Items':ATI}])
+                              'total_kg':total_kg,'total_cokecans':total_cokecans}])
+    
     results= pd.concat([results, new_row], ignore_index=True) 
                                         
     
@@ -1417,18 +1418,8 @@ def overview_stats_overall(folderin, folderout):
                                             'count_kms','prevalence', 'hotspots',
                                             'worst_zone'])
     
-
-    count_df1 = count[count['TotItems'].notna()]
-    count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
-    CScount_df1 = CScount[CScount['TotItems'].notna()]
-    CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()]   
-    count_ms = count_df2['Total_distance(m)'].sum()
-    count_kms = count_ms / 1000
-    CScount_ms = CScount_df2['Total_distance(m)'].sum()
-    CScount_kms = CScount_ms / 1000
- 
     
-    distance = CScount_kms + count_kms
+    distance = CScount_km + count_km
 
 #how much is out there per km
     if distance == 0:
@@ -1502,10 +1493,6 @@ def overview_stats_overall(folderin, folderout):
     kms_survey = [survey_km] 
 #distance covered    
     km_survey = sum(kms_survey)
-    
-    areas_survey = [survey_area,  CSsurvey_area]
-#area directly protected - excludes Lite
-    area_survey = sum(areas_survey)   
     
     plastic = ['Value Full Dog Poo Bags',
             'Value Unused Dog Poo Bags','Value Toys (eg., tennis balls)','Value Other Pet Related Stuff',
@@ -2078,7 +2065,7 @@ def overview_stats_overall(folderin, folderout):
                 'total composition items':total_reported_items, 
                 'weight removed':total_kg, 
                 'volume removed':total_cokecans, 'distance_kms':km_survey, 
-                'area kms2':area_survey,'most common material':most_type, 
+                'most common material':most_type, 
                 'SUP reported':tot_percSUP,'SUP calculated':tot_calc_SUP,
                 'most common category':most_cat,'DRS reported':DRS_reported,
                 'DRS total items':DRS_tot_items,'DRS total glass':DRS_tot_glass,
@@ -2133,7 +2120,7 @@ def overview_stats_overall(folderin, folderout):
     deaths = []
     for df in dfs:
         if 'AnimalsInfo' in df.columns and df['AnimalsInfo'].notna().any():
-            death = df['AnimalsInfo'].astype(str).str.contains(r'\b(death|dead)\b', case=False, na=False).sum()
+            death = df['AnimalsInfo'].astype(str).str.contains(r'\b(death|dead|meth|drown|smell|remains|entrapment)\b', case=False, na=False).sum()
         else:
             death = 0
         deaths.append(death)

@@ -2405,7 +2405,7 @@ def overview_stats_just_survey(folderin, folderout):
              'Value Forestry','Value Industrial','Value Homemade lunch (eg., aluminium foil, cling film)',
              'Value Face/ baby wipes',
              'Value Nappies','Value Single-Use Period products','Value Single-Use Covid Masks',
-             'Value utdoor event (eg Festival)','Value Camping','Value Halloween & Fireworks','Value Seasonal (Christmas and/or Easter)',
+             'Value Outdoor event (eg Festival)','Value Camping','Value Halloween & Fireworks','Value Seasonal (Christmas and/or Easter)',
              'Value MTB related (e.g. inner tubes, water bottles etc)',
              'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
              'Value Outdoor sports event related (e.g.race)','Value Textiles','Value Clothes & Footwear',
@@ -2607,7 +2607,7 @@ def overview_stats_just_survey(folderin, folderout):
           
         subs_presence = survey[all_presence]
         subs_reporting_presence = subs_presence.any(axis=1).sum()
-        subs_for_presence = sum(subs_reporting_presence)
+        subs_for_presence = subs_reporting_presence.sum()
         
     
 #% Submissions reporting DRS                
@@ -2928,7 +2928,10 @@ def overview_stats_just_survey(folderin, folderout):
 
     #number submitting for first time - not lite           
         survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
-        no_1st = sum(survey_1st)
+        if survey_1st == 0:
+            no_1st = 0
+        else:
+            no_1st = survey_1st.sum()
         
         multiple_cols = ['Volunteer','A-Team ','Community Hub']
 

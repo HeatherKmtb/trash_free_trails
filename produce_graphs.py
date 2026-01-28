@@ -1,4 +1,4 @@
-a#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Dec 19 15:22:31 2024
@@ -30,6 +30,119 @@ def monthly_histogram(TFTin, fileout):
     
 
 
+
+    
+    
+    
+def date_graph_with_trend(TFTin, data_col, title, y_label, figout):
+    """
+    A function which takes a df of any data and produces a scatterplot with 
+    trendline for a column of data with date on the x axis
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with data
+             
+    data_col: string
+             name of data column for y axis
+             
+    title: string
+             title of figure
+             
+    y_label: string
+             text for y axis label
+            
+    figut: string
+           path to save the figure
+    """    
+    df = pd.read_csv(TFTin)
+    
+    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
+    #df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
+    
+    date = df['date']
+    items = df[data_col]
+
+    #plot the result
+    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
+    plt.rcParams.update({'font.size':12})
+    #plots H_100 on x with I_CD on y
+    ax.scatter(date,items,marker='.', color='blue')
+    
+    #sets title and axis labels
+    ax.set_title(title)
+    ax.set_ylabel(y_label)
+    ax.set_xlabel('Date')
+    plt.xticks(rotation=45)
+    #ax.set_xlim([0, 600])
+    #ax.set_ylim([0,6])  
+    #obtain m (slope) and b(intercept) of linear regression line
+    x = date.map(pd.Timestamp.toordinal)
+    m, b = np.polyfit(x, items, 1)
+    #add linear regression line to scatterplot 
+    plt.plot(date, m * x + b, color='red')
+    
+    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
+    plt.close    
+    
+    
+ 
+    
+def scatter_no_trend(TFTin, x_col, y_col, title, x_label, y_label, figout):
+    """
+    A function which takes a df of any data and produces a scatterplot with 
+    trendline for a column of data with date on the x axis
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with data
+             
+    data_col: string
+             name of data column for y axis
+             
+    title: string
+             title of figure
+             
+    y_label: string
+             text for y axis label
+            
+    figut: string
+           path to save the figure
+    """    
+    df = pd.read_csv(TFTin)
+    
+    #df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
+    #df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
+    
+    x = df[x_col]
+    y = df[y_col]
+
+    #plot the result
+    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
+    plt.rcParams.update({'font.size':12})
+    #plots H_100 on x with I_CD on y
+    ax.scatter(x,y,marker='.', color='blue')
+    
+    #sets title and axis labels
+    ax.set_title(title)
+    ax.set_ylabel(y_label)
+    ax.set_xlabel(x_label)
+    plt.xticks(rotation=45)
+    ax.set_xlim([0, 150])
+    #ax.set_ylim([0,6])  
+    #obtain m (slope) and b(intercept) of linear regression line
+    #x = date.map(pd.Timestamp.toordinal)
+    #m, b = np.polyfit(x, items, 1)
+    #add linear regression line to scatterplot 
+    #plt.plot(date, m * x + b, color='red')
+    
+    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
+    plt.close    
+    
 
 def get_some_graphics(TFTin, folderout):
     """
@@ -68,6 +181,73 @@ def get_some_graphics(TFTin, folderout):
     plt.plot(items, m*items+b)
     plt.close
 
+
+    
+def RB_v_Monster_with_trend(TFTin, figout):
+    """
+    Scrappy function for editing
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv file with data
+             
+    data_col: string
+             name of data column for y axis
+             
+    title: string
+             title of figure
+             
+    y_label: string
+             text for y axis label
+            
+    figut: string
+           path to save the figure
+    """       
+    
+    
+    
+    df = pd.read_csv(TFTin)
+    
+    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
+    #df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
+    
+    date = df['date']
+    items_rb = df['rb_perc']
+    items_mons = df['monster_perc']
+    #items_km = df['items per km']
+  
+    
+    #plot the result
+    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
+    plt.rcParams.update({'font.size':12})
+    #plots H_100 on x with I_CD on y
+    ax.scatter(date,items_rb,marker='.', color='blue')
+    ax.scatter(date,items_mons,marker='.', color='black')
+    
+    #sets title and axis labels
+    ax.set_title('Percentage submissions reporting Red Bull or Monster')
+    ax.set_ylabel('Percentage')
+    ax.set_xlabel('Date')
+    plt.xticks(rotation=45)
+    #ax.set_xlim([0, 600])
+    #ax.set_ylim([0,6])  
+    #obtain m (slope) and b(intercept) of linear regression line
+    x = date.map(pd.Timestamp.toordinal)
+    m, b = np.polyfit(x, items_rb, 1)
+    #add linear regression line to scatterplot 
+    plt.plot(date, m * x + b, color='red')
+    x = date.map(pd.Timestamp.toordinal)
+    m, b = np.polyfit(x, items_mons, 1)
+    #add linear regression line to scatterplot 
+    plt.plot(date, m * x + b, color='green')
+    
+    
+    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
+    plt.close 
+    
+    
 def mach_power_hour(figout):
     """
     A function you put your own data into and plot abarchart
@@ -209,125 +389,4 @@ def redbullvmonster(filein, figout):
     plt.tight_layout()
     plt.show()
 
-    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
-    
-    
-    
-def graph_with_trend(TFTin, data_col, title, y_label, figout):
-    """
-    A function which takes a df of any data and produces a scatterplot with 
-    trendline for a column of data with date on the x axis
-    
-    Parameters
-    ----------
-    
-    TFTin: string
-             path to input csv file with data
-             
-    data_col: string
-             name of data column for y axis
-             
-    title: string
-             title of figure
-             
-    y_label: string
-             text for y axis label
-            
-    figut: string
-           path to save the figure
-    """    
-    df = pd.read_csv(TFTin)
-    
-    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
-    #df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
-    
-    date = df['date']
-    items = df[data_col]
-
-    #plot the result
-    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
-    plt.rcParams.update({'font.size':12})
-    #plots H_100 on x with I_CD on y
-    ax.scatter(date,items,marker='.', color='blue')
-    
-    #sets title and axis labels
-    ax.set_title(title)
-    ax.set_ylabel(y_label)
-    ax.set_xlabel('Date')
-    plt.xticks(rotation=45)
-    #ax.set_xlim([0, 600])
-    #ax.set_ylim([0,6])  
-    #obtain m (slope) and b(intercept) of linear regression line
-    x = date.map(pd.Timestamp.toordinal)
-    m, b = np.polyfit(x, items, 1)
-    #add linear regression line to scatterplot 
-    plt.plot(date, m * x + b, color='red')
-    
-    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
-    plt.close    
-    
-    
-    
-def RB_v_Monster_with_trend(TFTin, figout):
-    """
-    Scrappy function for editing
-    
-    Parameters
-    ----------
-    
-    TFTin: string
-             path to input csv file with data
-             
-    data_col: string
-             name of data column for y axis
-             
-    title: string
-             title of figure
-             
-    y_label: string
-             text for y axis label
-            
-    figut: string
-           path to save the figure
-    """       
-    
-    
-    
-    df = pd.read_csv(TFTin)
-    
-    df['date'] = pd.to_datetime(df[['year', 'month']].assign(day=1))
-    #df['bags_per_km'] = df['poo bags total items'] / df['distance_kms']
-    
-    date = df['date']
-    items_rb = df['rb_perc']
-    items_mons = df['monster_perc']
-    #items_km = df['items per km']
-  
-    
-    #plot the result
-    fig = plt.figure(); ax = fig.add_subplot(1,1,1)
-    plt.rcParams.update({'font.size':12})
-    #plots H_100 on x with I_CD on y
-    ax.scatter(date,items_rb,marker='.', color='blue')
-    ax.scatter(date,items_mons,marker='.', color='black')
-    
-    #sets title and axis labels
-    ax.set_title('Percentage submissions reporting Red Bull or Monster')
-    ax.set_ylabel('Percentage')
-    ax.set_xlabel('Date')
-    plt.xticks(rotation=45)
-    #ax.set_xlim([0, 600])
-    #ax.set_ylim([0,6])  
-    #obtain m (slope) and b(intercept) of linear regression line
-    x = date.map(pd.Timestamp.toordinal)
-    m, b = np.polyfit(x, items_rb, 1)
-    #add linear regression line to scatterplot 
-    plt.plot(date, m * x + b, color='red')
-    x = date.map(pd.Timestamp.toordinal)
-    m, b = np.polyfit(x, items_mons, 1)
-    #add linear regression line to scatterplot 
-    plt.plot(date, m * x + b, color='green')
-    
-    
-    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)
-    plt.close  
+    fig.savefig(figout, dpi=300, bbox_inches='tight', transparent=False)    

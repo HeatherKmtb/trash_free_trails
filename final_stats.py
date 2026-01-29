@@ -1076,10 +1076,10 @@ def overview_stats(folderin, folderout):
     p_survey4 = survey['Connection_Action'].value_counts().get(4, 0)
     p_CSsurvey4 = CSsurvey['Connection_Action'].value_counts().get(4, 0)
     p_CScount4 = CScount['Connect_Feel'].value_counts().get(4, 0)
-    p_survey5 = survey['Connection_Action'].value_counts().get(5, 0)
-    p_CSsurvey5 = CSsurvey['Connection_Action'].value_counts().get(5, 0)
-    p_CScount5 = CScount['Connect_Feel'].value_counts().get(5, 0)
-    proud = [p_survey4, p_CSsurvey4, p_CScount4, p_survey5, p_CSsurvey5, p_CScount5]     
+    p_survey3 = survey['Connection_Action'].value_counts().get(3, 0)
+    p_CSsurvey3 = CSsurvey['Connection_Action'].value_counts().get(3, 0)
+    p_CScount3 = CScount['Connect_Feel'].value_counts().get(3, 0)
+    proud = [p_survey4, p_CSsurvey4, p_CScount4, p_survey3, p_CSsurvey3, p_CScount3]     
     prouds = sum(proud)
     na_survey = survey['Connection_Action'].notna().sum()
     na_CSsurvey = CSsurvey['Connection_Action'].notna().sum()

@@ -164,3 +164,45 @@ plt.tight_layout()
 ax.figure.savefig('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_requests/TFR/2025_round_up/top5_event_shitters.svg')
 ax.figure.savefig('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_requests/TFR/2025_round_up/top5_event_shitters.png')
 plt.show()
+
+
+
+
+
+
+#looking at emails collected vs data submissions
+
+
+import pandas as pd
+
+df_emails = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/TFR/Eventemails_2025.csv')
+df_emails = df_emails.apply(lambda col: col.drop_duplicates().reset_index(drop=True))
+
+emails_long = (
+    df_emails
+    .melt(var_name="Event", value_name="Email")
+    .dropna()
+    )
+
+folderin = '/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/'
+
+survey = pd.read_csv(folderin + 'survey/survey_2025.csv')
+lite = pd.read_csv(folderin + 'lite/lite_2025.csv')
+count = pd.read_csv(folderin + 'count/count_2025.csv')
+
+dfs = [survey, lite, count]
+
+matches = []
+
+for i, df in enumerate(dfs):
+    merged = df.merge(
+        emails_long,
+        on="Email",
+        how="inner"
+    )
+    
+    if not merged.empty:
+        merged["Source_DF"] = f"df_{i}"
+        matches.append(merged[["Email", "Event", "Source_DF"]])
+
+result_df = pd.concat(matches, ignore_index=True)

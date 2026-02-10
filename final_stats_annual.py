@@ -27,7 +27,7 @@ def overview_stats_per_year(folderin, folderout, year):
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 
                                       'total_survey', 'total_lite', 'trash_watch',
-                                      'no_people','area_km2','distance_km','duration_hours', 
+                                      'no_people','distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
@@ -1158,7 +1158,7 @@ def overview_stats_overall(folderin, folderout):
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 
                                       'total_survey', 'total_lite', 'trash_watch',
-                                      'no_people','area_km2','distance_km','duration_hours', 
+                                      'no_people','distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     

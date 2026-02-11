@@ -222,7 +222,29 @@ def survey_clean_data(TFTin, TFTout):
         
     df3['month'] = m
     df3['year'] = y
-                  
+    
+    email_ref_df = pd.read_csv(TFTin + 'email_reference.csv')  
+    
+    df3['Email'] = (df3['Email'].str.strip().str.lower())
+    new_emails = df3[~df3['Email'].isin(email_ref_df['email'])]['Email'].dropna().unique()
+    
+    if len(new_emails) > 0:
+        current_max_id = email_ref_df['email_id'].max()
+    
+        new_rows = pd.DataFrame({
+            'email': new_emails,
+            'email_id': range(current_max_id + 1, current_max_id + 1 + len(new_emails))
+            })
+
+        email_ref_df = pd.concat([email_ref_df, new_rows], ignore_index=True)
+    
+        email_ref_df.to_csv(TFTin + 'email_reference.csv', index=False)
+        
+    df3 = df3.merge(email_ref_df, left_on='Email', right_on='email', how='left')
+    
+    df3.drop(columns=['Email'], inplace=True)
+    df3.drop(columns=['email'], inplace=True)
+             
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'survey.csv', index=False)
     
@@ -309,6 +331,28 @@ def count_clean_data(TFTin, TFTout):
         
     df3['month'] = m
     df3['year'] = y
+    
+    email_ref_df = pd.read_csv(TFTin + 'email_reference.csv')  
+    
+    df3['Email'] = (df3['Email'].str.strip().str.lower())
+    new_emails = df3[~df3['Email'].isin(email_ref_df['email'])]['Email'].dropna().unique()
+    
+    if len(new_emails) > 0:
+        current_max_id = email_ref_df['email_id'].max()
+    
+        new_rows = pd.DataFrame({
+            'email': new_emails,
+            'email_id': range(current_max_id + 1, current_max_id + 1 + len(new_emails))
+            })
+
+        email_ref_df = pd.concat([email_ref_df, new_rows], ignore_index=True)
+    
+        email_ref_df.to_csv(TFTin + 'email_reference.csv', index=False)
+        
+    df3 = df3.merge(email_ref_df, left_on='Email', right_on='email', how='left')
+    
+    df3.drop(columns=['Email'], inplace=True)
+    df3.drop(columns=['email'], inplace=True)
             
     df3.to_csv(TFTout + 'count.csv', index=False)
     
@@ -454,7 +498,29 @@ def lite_clean_data(TFTin, TFTout, year_folder):
 
     df['TotItems'] = df.apply(get_tot_items, axis=1)
 
-    # Save cleaned version with TotItems
+    email_ref_df = pd.read_csv(TFTin + 'email_reference.csv')  
+    
+    df['Email'] = (df['Email'].str.strip().str.lower())
+    new_emails = df[~df['Email'].isin(email_ref_df['email'])]['Email'].dropna().unique()
+    
+    if len(new_emails) > 0:
+        current_max_id = email_ref_df['email_id'].max()
+    
+        new_rows = pd.DataFrame({
+            'email': new_emails,
+            'email_id': range(current_max_id + 1, current_max_id + 1 + len(new_emails))
+            })
+
+        email_ref_df = pd.concat([email_ref_df, new_rows], ignore_index=True)
+    
+        email_ref_df.to_csv(TFTin + 'email_reference.csv', index=False)
+        
+    df = df.merge(email_ref_df, left_on='Email', right_on='email', how='left')
+    
+    df.drop(columns=['Email'], inplace=True)
+    df.drop(columns=['email'], inplace=True)
+    
+    # Save cleaned version with TotItems and email_id
     df.to_csv(os.path.join(TFTout, 'lite.csv'), index=False)
 
     # --- 4. Compute totals using TotItems ---

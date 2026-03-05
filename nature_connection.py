@@ -9,6 +9,7 @@ Created on Fri Jan 30 09:20:37 2026
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 df = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/survey/all_survey.csv')
 df['NC'] = df[['Connection_ConnectionY', 'Connection_ConnectionN', 
@@ -95,4 +96,51 @@ sns.heatmap(ct, annot=True, fmt='d', cmap='Greens')
 plt.xlabel('Connection_LitterFeel (4=disappointed)')
 plt.ylabel('Connection_LitterAmount (4=more)')
 plt.title('How did you feel about the amount of litter you saw (4=disappointed)')
+plt.show()
+
+
+#NC v trail type
+trail_cols = ['TypeMrkdTrails','TypeRoW','TypeUnofficial','TypePump','TypeUrban',
+'TypeOtherTrails','TypeAccess','TypeCar','TypeOther']
+
+df_clean = df.copy()
+df_clean[trail_cols] = df_clean[trail_cols].replace('', np.nan)
+
+# 2. Count non-null entries per row across those columns
+# Keep only rows where exactly 1 column has a string
+single_answer_mask = df_clean[trail_cols].count(axis=1) == 1
+df_single = df_clean[single_answer_mask].copy()
+
+df_single['Trail_Type'] = df_single[trail_cols].bfill(axis=1).iloc[:, 0]
+
+
+ct = pd.crosstab(df_single['NC'], df_single['Trail_Type'])
+
+sns.heatmap(ct, annot=True, fmt='d', cmap='Greens')
+plt.xlabel('Trail Type')
+plt.ylabel('Nature Connection')
+plt.title('Nature Connection based on trail type (where only one type of trail)')
+plt.show()
+
+#NC v activity type
+df['Activity'] = df[['ActivityBike','ActivityRun','ActivityWalk','ActivityCombo',
+                     'ActivityOther']].bfill(axis=1).iloc[:, 0]
+
+ct = pd.crosstab(df['NC'], df['Activity'])
+
+sns.heatmap(ct, annot=True, fmt='d', cmap='Greens')
+plt.xlabel('Activity')
+plt.ylabel('Nature Connection')
+plt.title('Activity v Nature Connection')
+plt.show()
+
+#NC v animal interaction
+df['Animals'] = df[['AnimalsY','AnimalsN']].bfill(axis=1).iloc[:, 0]
+
+ct = pd.crosstab(df['NC'], df['Animals'])
+
+sns.heatmap(ct, annot=True, fmt='d', cmap='Greens')
+plt.xlabel('Animal Interaction')
+plt.ylabel('Nature Connection')
+plt.title('Animal Interaction v Nature Connection')
 plt.show()

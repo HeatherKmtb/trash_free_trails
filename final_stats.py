@@ -26,7 +26,7 @@ def overview_stats(folderin, folderout):
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 
                                       'total_survey', 'total_lite', 'trash_watch',
-                                      'no_people','area_km2','distance_km','duration_hours', 
+                                      'no_people','distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
@@ -39,7 +39,7 @@ def overview_stats(folderin, folderout):
     count = pd.read_csv(folderin + 'count.csv')
     CSsurvey = pd.read_csv(folderin + 'CS_survey.csv')
     CScount = pd.read_csv(folderin + 'CS_count.csv')
-    bag_res_lite = pd.read_csv(folderin + 'bag_res_lite.csv')
+    #bag_res_lite = pd.read_csv(folderin + 'bag_res_lite.csv')
     tfr = pd.read_csv(folderin + 'TFR.csv')
     
     dfs = [survey, CSsurvey, CScount]
@@ -221,7 +221,7 @@ def overview_stats(folderin, folderout):
     rmv_items.append(CSsurvey_items)
     full_srvy_items.append(CSsurvey_items)
     
-    lite_items = bag_res_lite['TotItems'].sum() 
+    lite_items = lite['TotItems'].sum() 
     rmv_items.append(lite_items)
     
     count_items = count['TotItems'].sum() 
@@ -1157,7 +1157,7 @@ def overview_stats(folderin, folderout):
         
     contacts = []
     for df in dfs:
-        contact = df['Email'].notnull().sum()
+        contact = df['email_id'].notnull().sum()
         contacts.append(contact)
     
     no_subs = [count_count, count_survey, count_lite]

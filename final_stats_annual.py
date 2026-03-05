@@ -17,10 +17,13 @@ def overview_stats_per_year(folderin, folderout, year):
     ----------
     
     folderin: string
-             path to input folder with csv files with monthly TFT data
+             path to input folder with yearly TFT data
             
     folderout: string
            path for folder to save results in
+           
+    year: string
+           the year in question
     """
 
     
@@ -1113,12 +1116,10 @@ def overview_stats_per_year(folderin, folderout, year):
     perc_participate_again = (again/answered_again)*100
 
     dfs = [count, survey, lite]
-    if 'Email' not in count.columns:
-        count.rename(columns={'email': 'Email'}, inplace=True) 
 
     contacts = []
     for df in dfs:
-        contact = df['Email'].notnull().sum()
+        contact = df['email_id'].notnull().sum()
         contacts.append(contact)
     
     no_subs = [count_count, count_survey, count_lite]
@@ -2244,12 +2245,10 @@ def overview_stats_overall(folderin, folderout):
     perc_participate_again = (again/answered_again)*100
 
     dfs = [count, survey, lite]
-    if 'Email' not in count.columns:
-        count.rename(columns={'email': 'Email'}, inplace=True) 
-
+ 
     contacts = []
     for df in dfs:
-        contact = df['Email'].notnull().sum()
+        contact = df['email_id'].notnull().sum()
         contacts.append(contact)
     
     no_subs = [count_count, count_survey, count_lite]

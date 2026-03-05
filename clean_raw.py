@@ -223,7 +223,7 @@ def survey_clean_data(TFTin, TFTout):
     df3['month'] = m
     df3['year'] = y
     
-    email_ref_df = pd.read_csv(TFTin + 'email_reference.csv')  
+    email_ref_df = pd.read_csv(TFTin + 'email_reference.csv', encoding='cp1252')  
     
     df3['Email'] = (df3['Email'].str.strip().str.lower())
     new_emails = df3[~df3['Email'].isin(email_ref_df['email'])]['Email'].dropna().unique()
@@ -244,6 +244,7 @@ def survey_clean_data(TFTin, TFTout):
     
     df3.drop(columns=['Email'], inplace=True)
     df3.drop(columns=['email'], inplace=True)
+    df3.drop(columns=['Phone'], inplace=True)
              
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'survey.csv', index=False)
@@ -304,7 +305,8 @@ def count_clean_data(TFTin, TFTout):
         'Count_UnnaturalY','Count_UnnaturalN',
         'Count_UnnaturalNotSure','Participate_CleanY','Participate_CleanN',
         'Participate_CleanNotSure','First_time','Volunteer','A-Team','Community Hub',
-        'FirstName','LastName','Email','phone','email','SMS']
+        'FirstName','LastName','Email','phone','Receive_email','SMS']
+    
     
     #rename columns
     df.columns=cols
@@ -353,6 +355,7 @@ def count_clean_data(TFTin, TFTout):
     
     df3.drop(columns=['Email'], inplace=True)
     df3.drop(columns=['email'], inplace=True)
+    df3.drop(columns=['phone'], inplace=True)
             
     df3.to_csv(TFTout + 'count.csv', index=False)
     
@@ -519,6 +522,7 @@ def lite_clean_data(TFTin, TFTout, year_folder):
     
     df.drop(columns=['Email'], inplace=True)
     df.drop(columns=['email'], inplace=True)
+
     
     # Save cleaned version with TotItems and email_id
     df.to_csv(os.path.join(TFTout, 'lite.csv'), index=False)

@@ -225,7 +225,7 @@ def get_ATeam_data(TFTin, TFTout, rawin):
 
     """ 
     
-    email_ref_df = email_ref_df = pd.read_csv(rawin + 'email_reference.csv')
+    email_ref_df = email_ref_df = pd.read_csv(rawin + 'email_reference.csv', encoding='cp1252')
     ch_email = email_ref_df.loc[email_ref_df['community'].isin(['AT', 'both']), 'email_id'].astype(str).tolist()
 
     ch_name = ['Wilson','Munro','Ward','Lush','Herbert','Lambie','Chisholm',
@@ -315,7 +315,7 @@ def get_ATeam_data(TFTin, TFTout, rawin):
 
     # --- 1. Process Survey Data ---
     df_survey = pd.DataFrame({
-    'Date': pd.to_datetime(filtered_survey['Date_TrailClean']).dt.strftime('%Y-%m-%d'),
+    'Date': pd.to_datetime(filtered_survey['Date_TrailClean'], dayfirst=True).dt.strftime('%Y-%m-%d'),
     'A-Teamer': filtered_survey['email_id'].map(hub_map).fillna(filtered_survey['Surname']),
     'no_people': filtered_survey['People'],
     'distance_km': filtered_survey['Distance_km'],
@@ -324,7 +324,7 @@ def get_ATeam_data(TFTin, TFTout, rawin):
 
     # --- 2. Process Count Data ---
     df_count = pd.DataFrame({
-    'Date': pd.to_datetime(filtered_count['Date_Count']).dt.strftime('%Y-%m-%d'),
+    'Date': pd.to_datetime(filtered_count['Date_Count'], dayfirst=True).dt.strftime('%Y-%m-%d'),
     'A-Teamer': filtered_count['email_id'].map(hub_map).fillna(filtered_count['LastName']),
     'no_people': filtered_count['People'],
     'distance_km': filtered_count['Total_distance(m)'] / 1000, 
@@ -352,7 +352,7 @@ def get_ATeam_data(TFTin, TFTout, rawin):
     results = results[['Date', 'A-Teamer', 'no_people', 'distance_km', 
                        'total_items', 'Submission Type']]
     
-    results.to_csv(TFTout + 'A-Team.csv')
+    results.to_csv(TFTout + 'A-Team.csv', index=False)
     
 
 def original_email_extraction():

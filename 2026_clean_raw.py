@@ -134,26 +134,34 @@ def survey_clean_data(TFTin, TFTout):
         'Value Miscellaneous card or wood','Value Miscellaneous metal',
         'Value Too small/dirty to ID','Value Oter Miscellaneous',
     
-    
-    
-        'B1_Lucozade','B1_Coke','B1_RedBull','B1_Monster','B1_Cadbury',
-        'B1_McDonalds','B1_Walkers','B1_Mars','B1_StellaArtois','B1_Strongbow','B1_Costa',
-        'B1_Budweiser','B1_Haribo','B1_SIS','B1_Carling','B1_Fosters','B1_Thatchers',
-        'B1_Pepsi','B1_Nestle','B1_Subway','B1_Other','B2_Lucozade','B2_Coke','B2_RedBull',
-        'B2_Monster','B2_Cadbury','B2_McDonalds','B2_Walkers','B2_Mars','B2_StellaArtois',
-        'B2_Strongbow','B2_Costa','B2_Budweiser','B2_Haribo','B2_SIS','B2_Carling',
-        'B2_Fosters','B2_Thatchers','B2_Pepsi','B2_Nestle','B2_Subway','B2_Other',
-        'B3_Lucozade','B3_Coke','B3_RedBull','B3_Monster','B3_Cadbury','B3_McDonalds',
-        'B3_Walkers','B3_Mars','B3_StellaArtois','B3_Strongbow','B3_Costa','B3_Budweiser',
-        'B3_Haribo','B3_SIS','B3_Carling','B3_Fosters','B3_Thatchers','B3_Pepsi',
-        'B3_Nestle','B3_Subway','B3_Other','AnimalsY','AnimalsN','AnimalsInfo',
+        #to do
+        'Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone',
+        'Coke','Costa','Pepsi','Walkers','Mars','Nestle','Mondelez','Cadbury',
+        'Magnum','Haribo','AB InBev1','Corona','Molson Corrs','Thatchers',
+        'Heineken','Fosters','Bulmers','Burger King','Greggs','KFC','McDonalds',
+        'Subway','Aldi','Co-op','Euro Shopper','LiDL','Tesco','Other',
+        
+        
+        
+        'AnimalsY','AnimalsN','AnimalsNotChecked','AIDeath','AIChew','AINesting',
+        'AIOther',
+        
+        #to do
         'Connection_LitterFeel','Connection_LitterAmount','Connection_Action',
         'Connection_ConnectionY','Connection_ConnectionN','Connection_ConnectionSame',
         'Connection_Unsure','Connection_NewPeopleY','Connection_NewPeopleN',
         'Connection_NewPeopleUnsure','Connection_ActivityAfterY','Connection_ActivityAfterN',
         'Connection_ActivityAfterUnsure','Connection_TakePartAgainY','Connection_TakePartAgainN',
-        'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team',
-        'Community Hub','Name','Surname','Email','Phone','Receive email','Receive SMS']
+        'Connection_TakePartAgainUnsure',
+        
+        
+        'First time','Volunteer','A-Team','HQ','Community Hub','VolunteerWeeks',
+        'VolunteerMonths','VolunteerYears','WhySubmit','Name','Surname','Email',
+        'Phone','Receive email','Receive SMS','DemographicsY','DemographicsN',
+        'AgeU18','Age18-14','Age25-34','Age35-44','Age45-54','Age55-64','Age65+',
+        'GenderF','GenderM','GenderN','GenderT','GenderP','GenderO','HomePostcode',
+        'EthnicAfrican','EthnicArab','EthnicAsian','EthinicLatino','EthnicCaucasian',
+        'EthinicP','EthnicO']
 
 
     #rename columns
@@ -201,33 +209,40 @@ def survey_clean_data(TFTin, TFTout):
     
     #change data in presence(composition) data to TRUE
     change_cols = ['Handful','Pocketful','Bread bag',
-            'Carrier bag', 'Bin bag', 'Full Dog Poo Bags',
-            'Unused Dog Poo Bags','Toys (eg., tennis balls)','Other Pet Related Stuff',
+            'Carrier bag', 'Bin bag', 'Full Dog Poo Bags','Unused Dog Poo Bags',
+            'Other Pet Related Stuff',
             'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
-            'Plastic bottle, top','Glass soft drink bottles','Plastic energy drink bottles',
+            'Glass soft drink bottles','Milkshake bottle or carton','Plastic energy drink bottles',
             'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
-            'Aluminium alcoholic drink cans','Glass alcoholic bottles','Glass bottle tops',
-            'Hot drinks cups','Hot drinks tops and stirrers','Drinks cups (eg., McDonalds drinks)',
-            'Drinks tops (eg., McDonalds drinks)','Cartons','Plastic straws','Paper straws',
-            'Plastic carrier bags','Plastic bin bags','Confectionary/sweet wrappers',
+            'Protein drink bottle or carton', 'Aluminium alcoholic drink cans',
+            'Glass alcoholic bottles','Hot drinks cups','Hot drinks tops and stirrers',
+            'Cold drinks cups and tops','Cartons','Plastic straws','Paper straws',
+            'Plastic bottle, top', 'Glass bottle tops', 'Ring pull', 'Plastic bottle sleeve',
+            'Reusable drinks container','Other drink related','Confectionary/sweet wrappers',
             'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
-            'Crisps Packets','Used Chewing Gum',
-            'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
-            'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-            'Disposable BBQs and / or BBQ related items','BBQs and / or BBQ related items',
-            'Food on the go (eg.salad boxes)','Homemade lunch (eg., aluminium foil, cling film)',
-            'Fruit peel & cores','Cigarette Butts','Smoking related','Disposable vapes',
-            'Vaping / E-Cigarette Paraphernalia','Drugs related','Farming',
-            'Salt/mineral lick buckets','Silage wrap','Forestry','Tree guards','Industrial',
-            'Cable ties','Industrial plastic wrap','Toilet tissue','Face/ baby wipes',
-            'Nappies','Single-Use Period products','Single-Use Covid Masks','Rubber/nitrile gloves',
-            'Outdoor event (eg Festival)','Camping','Halloween & Fireworks','Seasonal (Christmas and/or Easter)',
-            'Normal balloons','Helium balloons','MTB related (e.g. inner tubes, water bottles etc)',
-            'Running','Roaming and other outdoor related (e.g. climbing, kayaking)',
-            'Outdoor sports event related (e.g.race)','Textiles','Clothes & Footwear',
-            'Plastic milk bottles','Plastic food containers','Cardboard food containers',
-            'Cleaning products containers','Miscellaneous','Too small/dirty to ID',
-            'Weird/Retro']
+            'Crisps Packets','Used Chewing Gum','Homemade lunch (eg., aluminium foil, cling film)',
+            'BBQ related','Fruit peel & cores','Branded single-use carrier bags',
+            'Unbranded single-use carrier bags', 'Branded bag for life','Unbranded bag for life', 
+            'Branded plastic fast / takeaway food packaging / utensils',
+            'Unbranded plastic fast / takeaway food packaging / utensils',
+            'Branded card or wood fast / takeaway food packaging / utensils',
+            'Unbranded card or wood fast / takeaway food packaging / utensils',
+            'Branded condiments packaging','Unbranded condiments packaging',
+            'Branded food on the go','Unbranded food on the go','Other food related',
+            'Clothes & Footwear','Textiles','Plastic milk bottles','Glass milk bottles',
+            'Plastic food containers','Cardboard food containers','Cleaning products containers',
+            'Cosmetics / deodorants', 'Other household,''Cigarette Butts','Nicotine poches',
+            'Disposable vapes',
+            'Nicotine related packaging','Other nicotine related','Unbagged dog poo',
+            'Needles / syringes','Other drug related','broken glass or pottery',
+            'Toilet tissue','Face/ baby wipes','Nappies','Period products',
+            'Covid Masks','First Aid & medcal waste','batteries and electronics',
+            'Other hazardous', 'Camping','Fireworks','Seasonal (Christmas and/or Easter)',
+            'Rubber balloons','Foil balloons','Outdoor event related (e.g.race)',
+            'Biking specific','Hiking specific','Other outdoor related',
+            'Farming','Forestry','Industrial','Cable ties','Miscellaneous hard plastic',
+            'Miscellaneous soft plastic','Miscellaneous card or wood','Miscellaneous metal',
+            'Too small/dirty to ID','Other Miscellaneous']
 
     df3 = df_clean
     

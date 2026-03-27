@@ -38,17 +38,18 @@ def survey_clean_data(TFTin, TFTout):
     df = df.drop('First Name', axis=1)
     df = df.drop('Last Name', axis=1)
     df = df.drop('Custom Data 1', axis=1)
+    df = df.drop('Unnamed: 300', axis=1)
 
 
     #provide correct column names - could read from existing once wierd columns are sorted
-    cols = ['Date_TrailClean','People','postcode','TrailName','FamiliarRegular',
+    cols = ['Ethics','Date_TrailClean','People','postcode','TrailName','FamiliarRegular',
         'FamiliarFewTimes','FamiliarFirst','ActivityBike', 'ActivityRun',
-        'ActivityWalk','ActivityCombo','ActivityOther','Komoot','WeatherSunny',
+        'ActivityWalk','ActivityCombo','ActivityOther','WeatherSunny',
         'WeatherOvercast','WeatherLightRain','WeatherHeavyRain','WeatherSnow',
-        'WeatherWinds','WeatherExtremes','TypeMrkdTrails','TypeRoW','TypeUnofficial',
+        'WeatherWinds','WeatherExtremes','HabitatCanal','HabitatCoastal',
+        'HabitatFarm','HabitatForest','HabitatMarsh','HabitatMoor','HabitatMountain',
+        'HabitatRiver','HabitatUrban','TypeMrkdTrails','TypeRoW','TypeUnofficial',
         'TypePump','TypeUrban','TypeOtherTrails','TypeAccess','TypeCar','TypeOther',
-        'HabitatCanal','HabitatCoastal','HabitatFarm','HabitatForest',
-        'HabitatMarsh','HabitatMoor','HabitatMountain','HabitatRiver','HabitatUrban',
         'MostTypeTrails','MostTypeFootpaths','MostTypeUnofficial','MostTypePump',
         'MostTypeUrban','MostTypeOtherTrails','MostTypeAccess','MostTypeCar',
         'MostTypeOther','Time_min','Distance_km','TotItems','Handful','Pocketful',
@@ -71,10 +72,11 @@ def survey_clean_data(TFTin, TFTout):
         'Branded card or wood fast / takeaway food packaging / utensils',
         'Unbranded card or wood fast / takeaway food packaging / utensils',
         'Branded condiments packaging','Unbranded condiments packaging',
-        'Branded food on the go','Unbranded food on the go','Other food related',
-        'Clothes & Footwear','Textiles','Plastic milk bottles','Glass milk bottles',
-        'Plastic food containers','Cardboard food containers','Cleaning products containers',
-        'Cosmetics / deodorants', 'Other household,''Cigarette Butts','Nicotine poches',
+        'Branded food on the go','Unbranded food on the go','Branded other food related',
+        'Unbranded other food related','Clothes & Footwear','Textiles',
+        'Plastic milk bottles','Glass milk bottles','Plastic food containers',
+        'Cardboard food containers','Cleaning products containers',
+        'Cosmetics / deodorants', 'Other household','Cigarette Butts','Nicotine pouches',
         'Disposable vapes',
         'Nicotine related packaging','Other nicotine related','Unbagged dog poo',
         'Needles / syringes','Other drug related','broken glass or pottery',
@@ -114,13 +116,13 @@ def survey_clean_data(TFTin, TFTout):
         'Value nbranded card or wood fast / takeaway food packaging / utensils',
         'Value Branded condiments packaging','Value Unbranded condiments packaging',
         'Value Branded food on the go','Value Unbranded food on the go',
-        'Value Other food related',
+        'Value Branded other food related','Value Unranded other food related',
         'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
         'Value Glass milk bottles',
         'Value Plastic food containers','Value Cardboard food containers',
         'Value Cleaning products containers',
-        'Value Cosmetics / deodorants', 'Vaule Other household',
-        'Value Cigarette Butts','Value Nicotine poches','Value Disposable vapes',
+        'Value Cosmetics / deodorants', 'Value Other household',
+        'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
         'Value Nicotine related packaging','Value Other nicotine related',
         'Value Unbagged dog poo',
         'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
@@ -133,35 +135,64 @@ def survey_clean_data(TFTin, TFTout):
         'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
         'Value Miscellaneous card or wood','Value Miscellaneous metal',
         'Value Too small/dirty to ID','Value Oter Miscellaneous',
-    
-        #to do
-        'Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone',
-        'Coke','Costa','Pepsi','Walkers','Mars','Nestle','Mondelez','Cadbury',
-        'Magnum','Haribo','AB InBev1','Corona','Molson Corrs','Thatchers',
-        'Heineken','Fosters','Bulmers','Burger King','Greggs','KFC','McDonalds',
-        'Subway','Aldi','Co-op','Euro Shopper','LiDL','Tesco','Other',
-        
-        
-        
-        'AnimalsY','AnimalsN','AnimalsNotChecked','AIDeath','AIChew','AINesting',
-        'AIOther',
-        
-        #to do
-        'Connection_LitterFeel','Connection_LitterAmount','Connection_Action',
-        'Connection_ConnectionY','Connection_ConnectionN','Connection_ConnectionSame',
-        'Connection_Unsure','Connection_NewPeopleY','Connection_NewPeopleN',
-        'Connection_NewPeopleUnsure','Connection_ActivityAfterY','Connection_ActivityAfterN',
-        'Connection_ActivityAfterUnsure','Connection_TakePartAgainY','Connection_TakePartAgainN',
-        'Connection_TakePartAgainUnsure',
-        
-        
-        'First time','Volunteer','A-Team','HQ','Community Hub','VolunteerWeeks',
+        'Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone','Highland Spring',
+        'Coke','Costa','Pepsi','Walkers','Barrs','Britvic','Mars','Nestle',
+        'Mondelez','Cadbury','Magnum','Haribo','AB InBev','Corona','Molson Corrs',
+        'Thatchers','Heineken','Fosters','Bulmers','Carlsberg','Burger King',
+        'Greggs','KFC','McDonalds','Subway','Aldi','Co-op','Euro Shopper','LiDL',
+        'M&S','Tesco','Other','AnimalsY','AnimalsN','AnimalsNotChecked',
+        'AIDeath','AIChew','AINesting','AIOther','AItype','ExperienceY','ExperienceN',
+        'Experience_Feeling1', 'Experience_Feeling2','Experience_Feeling3',
+        'Experience_+veFeeling0','Experience_+veFeeling1','Experience_+veFeeling2',
+        'Experience_+veFeeling3','Experience_+veFeeling4','Experience_+veFeeling5',
+        'Experience_+veFeeling6','Experience_+veFeeling7','Experience_+veFeeling8',
+        'Experience_+veFeeling9','Experience_+veFeeling10','Experience_Engagement0',
+        'Experience_Engagement1','Experience_Engagement2','Experience_Engagement3',
+        'Experience_Engagement4','Experience_Engagement5','Experience_Engagement6',
+        'Experience_Engagement7','Experience_Engagement8','Experience_Engagement9',
+        'Experience_Engagement10','Experience_Relationships0',
+        'Experience_Relationships1','Experience_Relationships2',
+        'Experience_Relationships3','Experience_Relationships4',
+        'Experience_Relationships5','Experience_Relationships6',
+        'Experience_Relationships7','Experience_Relationships8',
+        'Experience_Relationships9','Experience_Relationships10',
+        'Experience_Meaning0','Experience_Meaning1','Experience_Meaning2',
+        'Experience_Meaning3','Experience_Meaning4','Experience_Meaning5',
+        'Experience_Meaning6','Experience_Meaning7','Experience_Meaning8',
+        'Experience_Meaning9','Experience_Meaning10','Experience_Accomplishment0',
+        'Experience_Accomplishment1','Experience_Accomplishment2',
+        'Experience_Accomplishment3','Experience_Accomplishment4',
+        'Experience_Accomplishment5','Experience_Accomplishment6',
+        'Experience_Accomplishment7','Experience_Accomplishment8',
+        'Experience_Accomplishment9','Experience_Accomplishment10',
+        'Experience_Health0','Experience_Health1','Experience_Health2',
+        'Experience_Health3','Experience_Health4','Experience_Health5',
+        'Experience_Health6','Experience_Health7','Experience_Health8',
+        'Experience_Health9','Experience_Health10','Experience_NatureConnect0',
+        'Experience_NatureConnect1','Experience_NatureConnect2',
+        'Experience_NatureConnect3','Experience_NatureConnect4',
+        'Experience_NatureConnect5','Experience_NatureConnect6',
+        'Experience_NatureConnect7','Experience_NatureConnect8',
+        'Experience_NatureConnect9','Experience_NatureConnect10',
+        'Experience_Place0','Experience_Place1','Experience_Place2',
+        'Experience_Place3','Experience_Place4','Experience_Place5',
+        'Experience_Place6','Experience_Place7','Experience_Place8',
+        'Experience_Place9','Experience_Place10','Experience_Knowledge0',
+        'Experience_Knowledge1','Experience_Knowledge2','Experience_Knowledge3',
+        'Experience_Knowledge4','Experience_Knowledge5','Experience_Knowledge6',
+        'Experience_Knowledge7','Experience_Knowledge8','Experience_Knowledge9',
+        'Experience_Knowledge10',
+        'Connection_RewardY','Connection_RewardN','Connection_RewardUnsure',
+        'Connection_TakePartAgainY','Connection_TakePartAgainN',
+        'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team',
+        'HQ','Community Hub','VolunteerWeeks',
         'VolunteerMonths','VolunteerYears','WhySubmit','Name','Surname','Email',
-        'Phone','Receive email','Receive SMS','DemographicsY','DemographicsN',
+        'Receive emailY','Receive emailN','DemographicsY','DemographicsN',
         'AgeU18','Age18-14','Age25-34','Age35-44','Age45-54','Age55-64','Age65+',
-        'GenderF','GenderM','GenderN','GenderT','GenderP','GenderO','HomePostcode',
-        'EthnicAfrican','EthnicArab','EthnicAsian','EthinicLatino','EthnicCaucasian',
-        'EthinicP','EthnicO']
+        'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
+        'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican','EthnicArab',
+        'EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
+        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot']
 
 
     #rename columns
@@ -169,14 +200,6 @@ def survey_clean_data(TFTin, TFTout):
     #remove row with extra column names that aren't now needed
     df_clean = df.drop(index=0)
     
-    #remove other uneeded columns
-    df_clean = df_clean.drop('DL?', axis=1)
-    df_clean = df_clean.drop('DM?', axis=1)
-    df_clean = df_clean.drop('DN?', axis=1)
-    df_clean = df_clean.drop('GR?', axis=1)
-    df_clean = df_clean.drop('GS?', axis=1)
-    df_clean = df_clean.drop('GT?', axis=1)
-    df_clean.insert(36, 'Binbags', '')
     
     df_clean = df_clean[~df_clean['TrailName'].str.contains(r'\btest\b', case=False, na=False)]
     
@@ -228,10 +251,11 @@ def survey_clean_data(TFTin, TFTout):
             'Branded card or wood fast / takeaway food packaging / utensils',
             'Unbranded card or wood fast / takeaway food packaging / utensils',
             'Branded condiments packaging','Unbranded condiments packaging',
-            'Branded food on the go','Unbranded food on the go','Other food related',
+            'Branded food on the go','Unbranded food on the go',
+            'Branded other food related','Unbranded other food related',
             'Clothes & Footwear','Textiles','Plastic milk bottles','Glass milk bottles',
             'Plastic food containers','Cardboard food containers','Cleaning products containers',
-            'Cosmetics / deodorants', 'Other household,''Cigarette Butts','Nicotine poches',
+            'Cosmetics / deodorants', 'Other household','Cigarette Butts','Nicotine poches',
             'Disposable vapes',
             'Nicotine related packaging','Other nicotine related','Unbagged dog poo',
             'Needles / syringes','Other drug related','broken glass or pottery',
@@ -290,7 +314,6 @@ def survey_clean_data(TFTin, TFTout):
     
     df3.drop(columns=['Email'], inplace=True)
     df3.drop(columns=['email'], inplace=True)
-    df3.drop(columns=['Phone'], inplace=True)
              
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'survey.csv', index=False)

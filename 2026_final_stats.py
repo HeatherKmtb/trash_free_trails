@@ -162,13 +162,13 @@ def overview_stats(folderin, folderout):
     'Value nbranded card or wood fast / takeaway food packaging / utensils',
     'Value Branded condiments packaging','Value Unbranded condiments packaging',
     'Value Branded food on the go','Value Unbranded food on the go',
-    'Value Other food related',
+    'Value Branded other food related','Value Unbranded other food related',
     'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
     'Value Glass milk bottles',
     'Value Plastic food containers','Value Cardboard food containers',
     'Value Cleaning products containers',
     'Value Cosmetics / deodorants', 'Vaule Other household',
-    'Value Cigarette Butts','Value Nicotine poches','Value Disposable vapes',
+    'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
     'Value Nicotine related packaging','Value Other nicotine related',
     'Value Unbagged dog poo',
     'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
@@ -200,10 +200,11 @@ def overview_stats(folderin, folderout):
     'Branded card or wood fast / takeaway food packaging / utensils',
     'Unbranded card or wood fast / takeaway food packaging / utensils',
     'Branded condiments packaging','Unbranded condiments packaging',
-    'Branded food on the go','Unbranded food on the go','Other food related',
-    'Clothes & Footwear','Textiles','Plastic milk bottles','Glass milk bottles',
+    'Branded food on the go','Unbranded food on the go','Branded other food related',
+    'Unbranded other food related','Clothes & Footwear','Textiles',
+    'Plastic milk bottles','Glass milk bottles',
     'Plastic food containers','Cardboard food containers','Cleaning products containers',
-    'Cosmetics / deodorants', 'Other household,''Cigarette Butts','Nicotine poches',
+    'Cosmetics / deodorants', 'Other household,''Cigarette Butts','Nicotine pouches',
     'Disposable vapes',
     'Nicotine related packaging','Other nicotine related','Unbagged dog poo',
     'Needles / syringes','Other drug related','broken glass or pottery',
@@ -474,8 +475,9 @@ def overview_stats(folderin, folderout):
     other = ['Value Reusable drinks container',
     'Value Other drink related',
     'Value Used Chewing Gum','Value Homemade lunch (eg., aluminium foil, cling film)',
-    'Value BBQ related','Value Fruit peel & cores','Value Other food related',
-    'Value Clothes & Footwear','Value Textiles','Value Other household',
+    'Value BBQ related','Value Fruit peel & cores','Value Branded other food related',
+    'Value Unbranded other food related','Value Clothes & Footwear',
+    'Value Textiles','Value Other household',
     'Value Cigarette Butts','Value Nicotine pouches', 'Value Other nicotine related',
     'Value Unbagged dog poo','Value Needles / syringes','Value Other drug related',
     'Value Nappies', 'Value Period products','Value Covid Masks',
@@ -559,7 +561,8 @@ def overview_stats(folderin, folderout):
     'Value Unbranded card or wood fast / takeaway food packaging / utensils',
     'Value Branded condiments packaging','Value Unbranded condiments packaging',
     'Value Branded food on the go','Value Unbranded food on the go',
-    'Value Other food related','Value Plastic milk bottles',
+    'Value Branded other food related','Value Unbranded other food related',
+    'Value Plastic milk bottles',
     'Value Plastic food containers','Value Cardboard food containers',
     'Value Cigarette Butts','Value Nicotine pouches',
     'Value Disposable vapes', 'Value Nicotine related packaging',
@@ -624,7 +627,7 @@ def overview_stats(folderin, folderout):
     'Value Unbranded card or wood fast / takeaway food packaging / utensils',
     'Value Branded condiments packaging','Value Unbranded condiments packaging',
     'Value Branded food on the go','Value Unbranded food on the go',
-    'Value Other food related']
+    'Value Branded other food related','Value Unbranded other food related']
     
     house = ['Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
     'Value Glass milk bottles','Value Plastic food containers','Value Cardboard food containers',
@@ -682,13 +685,6 @@ def overview_stats(folderin, folderout):
 #Most common category of SUP    
     most_cat = c['type']    
 
-
-
-
-
-
-
-##########reached here!!!!!
     sub_DRS =   ['Plastic Water Bottles','Plastic Soft Drink Bottles',
     'Aluminium soft drink cans','Glass soft drink bottles',
     'Plastic energy drink bottles','Aluminium energy drink can',
@@ -744,42 +740,47 @@ def overview_stats(folderin, folderout):
     
     sub_EPR =   ['Plastic bottle, top',
     'Plastic energy gel sachet','Plastic energy gel end', 
-    'Plastic straws',
-    'Plastic carrier bags','Plastic bin bags',
-    'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
-    'Confectionary/sweet wrappers',
-    'Wrapper "corners" / tear-offs',
-    'Crisps Packets','Plastic milk bottles',
-    'Plastic food containers','Cleaning products containers',
-    'Hot drinks cups', 'Hot drinks tops and stirrers',
-    'Drinks tops (eg., McDonalds drinks)',
-    'Food on the go (eg.salad boxes)','Glass bottle tops',
-    'Disposable BBQs and / or BBQ related items',
-    'BBQs and / or BBQ related items', 'Cartons','Paper straws', 
-    'Drinks cups (eg., McDonalds drinks)',
-    'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-    'Vaping / E-Cigarette Paraphernalia','Toilet tissue',
-    'Cardboard food containers',
-    'Other confectionary (eg., Lollipop Sticks)']
-    
-    EPR = ['Value Plastic bottle, top',
-    'Value Plastic energy gel sachet','Value Plastic energy gel end', 
-    'Value Plastic straws',
-    'Value Plastic carrier bags','Value Plastic bin bags',
-    'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc',
-    'Value Confectionary/sweet wrappers',
+    'Protein drink bottle or carton','Milkshake bottle or carton',
+    'Hot drinks cups','Hot drinks tops and stirrers',
+    'Cold drinks cups and tops','Cartons','Plastic straws',
+    'Plastic bottle, top','Glass bottle tops', 'Ring pull', 
+    'Plastic bottle sleeve','Value Confectionary/sweet wrappers',
     'Value Wrapper "corners" / tear-offs',
-    'Value Crisps Packets','Value Plastic milk bottles',
-    'Value Plastic food containers','Value Cleaning products containers',
-    'Value Hot drinks cups', 'Value Hot drinks tops and stirrers',
-    'Value Drinks tops (eg., McDonalds drinks)',
-    'Value Food on the go (eg.salad boxes)','Value Glass bottle tops',
-    'Value Disposable BBQs and / or BBQ related items',
-    'Value BBQs and / or BBQ related items', 'Value Cartons','Value Paper straws', 'Value Drinks cups (eg., McDonalds drinks)',
-    'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)',
-    'Value Vaping / E-Cigarette Paraphernalia','Value Toilet tissue',
-    'Value Cardboard food containers',
-    'Value Other confectionary (eg., Lollipop Sticks)']
+    'Value Other confectionary (eg., Lollipop Sticks)',
+    'Value Crisps Packets','Value Branded single-use carrier bags',
+    'Value Unbranded single-use carrier bags', 
+    'Value Branded bag for life','Value Unbranded bag for life', 
+    'Value Branded plastic fast / takeaway food packaging / utensils',
+    'Value Unbranded plastic fast / takeaway food packaging / utensils',
+    'Value Branded card or wood fast / takeaway food packaging / utensils',
+    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Branded condiments packaging','Value Unbranded condiments packaging',
+    'Value Branded food on the go','Value Unbranded food on the go',
+    'Value Plastic milk bottles','Value Glass milk bottles',
+    'Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers','Value Cosmetics / deodorants', 
+    'Value Nicotine related packaging']
+    
+    EPR = ['Value Milkshake bottle or carton','Value Plastic energy gel sachet',
+    'Value Plastic energy gel end','Value Protein drink bottle or carton',
+    'Value Hot drinks cups','Value Hot drinks tops and stirrers',
+    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
+    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull', 
+    'Value Plastic bottle sleeve','Value Confectionary/sweet wrappers',
+    'Value Wrapper "corners" / tear-offs','Value Other confectionary (eg., Lollipop Sticks)',
+    'Value Crisps Packets','Value Branded single-use carrier bags',
+    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
+    'Value Unbranded bag for life', 
+    'Value Branded plastic fast / takeaway food packaging / utensils',
+    'Value Unbranded plastic fast / takeaway food packaging / utensils',
+    'Value Branded card or wood fast / takeaway food packaging / utensils',
+    'Value nbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Branded condiments packaging','Value Unbranded condiments packaging',
+    'Value Branded food on the go','Value Unbranded food on the go',
+    'Value Plastic milk bottles','Value Glass milk bottles',
+    'Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers','Value Cosmetics / deodorants', 
+    'Value Nicotine related packaging']
      
     df_EPR_subs = survey[sub_EPR]    
     subs_EPR_indy = df_EPR_subs.any(axis=1).sum()
@@ -918,9 +919,8 @@ def overview_stats(folderin, folderout):
     bags_proportion = (bags_total/total_reported_items)*100
 
 
-    outdoor = ['Value Outdoor event (eg Festival)','Value Camping','Value MTB related (e.g. inner tubes, water bottles etc)',
-    'Value Running','Value Roaming and other outdoor related (e.g. climbing, kayaking)',
-    'Value Outdoor sports event related (e.g.race)']
+    outdoor = ['Value Camping','Value Outdoor event related (e.g.race)',
+    'Value Biking specific','Value Hiking specific','Value Other outdoor related']
     
     out = []
     out_subs = []
@@ -955,11 +955,34 @@ def overview_stats(folderin, folderout):
     outs_proportion = (outs_total/total_reported_items)*100        
         
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+##########reached here!!!!! Redo brand calculation as now numbers and maybe 'x's        
+        
+        
 
     #calculate brands
 #calculate brands
-    brands = ['Lucozade','Coke','RedBull','Monster','Cadbury','McDonalds','Walkers','Mars','StellaArtois','Strongbow',
-          'Costa','Budweiser','Haribo','SIS','Carling','Fosters','Thatchers','Pepsi','Nestle','Subway','Other']
+    brands = ['Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone',
+    'Coke','Costa','Pepsi','Walkers','Mars','Nestle','Mondelez','Cadbury',
+    'Magnum','Haribo','AB InBev1','Corona','Molson Corrs','Thatchers',
+    'Heineken','Fosters','Bulmers','Burger King','Greggs','KFC','McDonalds',
+    'Subway','Aldi','Co-op','Euro Shopper','LiDL','Tesco','Other']
 
     orig_brand_res = pd.DataFrame(columns=['brand', 'weighted_count'])
 

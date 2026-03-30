@@ -38,7 +38,8 @@ def survey_clean_data(TFTin, TFTout):
     df = df.drop('First Name', axis=1)
     df = df.drop('Last Name', axis=1)
     df = df.drop('Custom Data 1', axis=1)
-    df = df.drop('Unnamed: 300', axis=1)
+    df = df.drop('Unnamed: 295', axis=1)
+
 
 
     #provide correct column names - could read from existing once wierd columns are sorted
@@ -87,8 +88,8 @@ def survey_clean_data(TFTin, TFTout):
         'Biking specific','Hiking specific','Other outdoor related',
         'Farming','Forestry','Industrial','Cable ties','Miscellaneous hard plastic',
         'Miscellaneous soft plastic','Miscellaneous card or wood','Miscellaneous metal',
-        'Too small/dirty to ID','Other Miscellaneous','Perc_SU','RecycleY',
-        'RecycleN','RecyclePerc','MoreInfoY','MoreInfoN','Value Full Dog Poo Bags',
+        'Too small/dirty to ID','Other Miscellaneous','MoreInfoY','MoreInfoN',
+        'Value Full Dog Poo Bags',
         'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
         'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
         'Value Aluminium soft drink cans',
@@ -113,10 +114,10 @@ def survey_clean_data(TFTin, TFTout):
         'Value Branded plastic fast / takeaway food packaging / utensils',
         'Value Unbranded plastic fast / takeaway food packaging / utensils',
         'Value Branded card or wood fast / takeaway food packaging / utensils',
-        'Value nbranded card or wood fast / takeaway food packaging / utensils',
+        'Value Unbranded card or wood fast / takeaway food packaging / utensils',
         'Value Branded condiments packaging','Value Unbranded condiments packaging',
         'Value Branded food on the go','Value Unbranded food on the go',
-        'Value Branded other food related','Value Unranded other food related',
+        'Value Branded other food related','Value Unbranded other food related',
         'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
         'Value Glass milk bottles',
         'Value Plastic food containers','Value Cardboard food containers',
@@ -134,13 +135,13 @@ def survey_clean_data(TFTin, TFTout):
         'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
         'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
         'Value Miscellaneous card or wood','Value Miscellaneous metal',
-        'Value Too small/dirty to ID','Value Oter Miscellaneous',
+        'Value Too small/dirty to ID','Value Oter Miscellaneous','Perc_SU',
         'Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone','Highland Spring',
         'Coke','Costa','Pepsi','Walkers','Barrs','Britvic','Mars','Nestle',
         'Mondelez','Cadbury','Magnum','Haribo','AB InBev','Corona','Molson Corrs',
         'Thatchers','Heineken','Fosters','Bulmers','Carlsberg','Burger King',
         'Greggs','KFC','McDonalds','Subway','Aldi','Co-op','Euro Shopper','LiDL',
-        'M&S','Tesco','Other','AnimalsY','AnimalsN','AnimalsNotChecked',
+        'M&S','Tesco','Other','AnimalsY','AnimalsN','AnimalsNotChecked','Rando Q',
         'AIDeath','AIChew','AINesting','AIOther','AItype','ExperienceY','ExperienceN',
         'Experience_Feeling1', 'Experience_Feeling2','Experience_Feeling3',
         'Experience_+veFeeling0','Experience_+veFeeling1','Experience_+veFeeling2',
@@ -187,7 +188,8 @@ def survey_clean_data(TFTin, TFTout):
         'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team',
         'HQ','Community Hub','VolunteerWeeks',
         'VolunteerMonths','VolunteerYears','WhySubmit','Name','Surname','Email',
-        'Receive emailY','Receive emailN','DemographicsY','DemographicsN',
+        'Receive emailY','Receive emailN','Receive email_alreadyin',
+        'DemographicsY','DemographicsN',
         'AgeU18','Age18-14','Age25-34','Age35-44','Age45-54','Age55-64','Age65+',
         'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
         'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican','EthnicArab',
@@ -255,7 +257,7 @@ def survey_clean_data(TFTin, TFTout):
             'Branded other food related','Unbranded other food related',
             'Clothes & Footwear','Textiles','Plastic milk bottles','Glass milk bottles',
             'Plastic food containers','Cardboard food containers','Cleaning products containers',
-            'Cosmetics / deodorants', 'Other household','Cigarette Butts','Nicotine poches',
+            'Cosmetics / deodorants', 'Other household','Cigarette Butts','Nicotine pouches',
             'Disposable vapes',
             'Nicotine related packaging','Other nicotine related','Unbagged dog poo',
             'Needles / syringes','Other drug related','broken glass or pottery',

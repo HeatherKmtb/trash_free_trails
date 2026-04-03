@@ -6,7 +6,7 @@ Created on Mon Mar 16 13:46:36 2026
 @author: heatherkay
 """
 
-
+import numpy as np
 import pandas as pd
 
 def overview_stats(folderin, folderout):
@@ -38,35 +38,24 @@ def overview_stats(folderin, folderout):
     survey = pd.read_csv(folderin + 'survey.csv')
     lite = pd.read_csv(folderin + 'lite.csv')
     count = pd.read_csv(folderin + 'count.csv')
-    CSsurvey = pd.read_csv(folderin + 'CS_survey.csv')
-    CScount = pd.read_csv(folderin + 'CS_count.csv')
+    #CSsurvey = pd.read_csv(folderin + 'CS_survey.csv')
+    #CScount = pd.read_csv(folderin + 'CS_count.csv')
     #bag_res_lite = pd.read_csv(folderin + 'bag_res_lite.csv')
     tfr = pd.read_csv(folderin + 'TFR.csv')
     
-    dfs = [survey, CSsurvey, CScount]
     
     #total submmissions before any filtering
     count_survey = len(survey.index)    
     count_lite = len(lite.index)
     count_count = len(count.index)
-    count_CSsurvey = len(CSsurvey.index)
-    count_CScount = len(CScount.index)
     
     #Overview Stats - submitted data
 
-    CS = [count_survey, count_lite, count_count, count_CSsurvey,
-                            count_CScount]
+    CS = [count_survey, count_lite, count_count]
 #Total combined data sets submitted
     total_CS = sum(CS)
-    cnt = [count_count, count_CScount]
-#Total Count Datasets
-    total_count = sum(cnt)
-    srvy = [count_survey, count_CSsurvey]
-#Total survey dasets
-    total_survey = sum(srvy)
-#Total lite datasets calculated as count_lite
-    
-    
+
+        
     #Overview - volunteers, distance, hours, items
     mins = survey['Time_min']
     hours = []
@@ -85,18 +74,12 @@ def overview_stats(folderin, folderout):
     survey['Time_hours'] = survey['Time_hours'].replace(0, time).fillna(time)
     survey['People'] = survey['People'].replace(0, lite_dict['People']).fillna(lite_dict['People'])
     
-    for df in dfs: #survey, CSsurvey & CS count
-        if df.empty:
-            tot_people.append(0)
-            tot_time.append(0)
-            continue
-        people = df['People'].sum()
-        hours = (df['People'] * df['Time_hours']).sum()
+    people = survey['People'].sum()
+    hours = (survey['People'] * survey['Time_hours']).sum()
 
-        tot_people.append(people)
-        tot_time.append(hours)
+    tot_people.append(people)
+    tot_time.append(hours)
 
-    
     #add to total people the number of lite and count submissions
     lite_people = count_lite * lite_dict['People']
     tot_people.append(lite_people)
@@ -109,19 +92,14 @@ def overview_stats(folderin, folderout):
     #removing empty rows before next steps so prevalance calc is correct
     count_df1 = count[count['TotItems'].notna()]
     count_df2 = count_df1[count_df1['Total_distance(m)'].notna()]
-    CScount_df1 = CScount[CScount['TotItems'].notna()]
-    CScount_df2 = CScount_df1[CScount_df1['Total_distance(m)'].notna()] 
     count = count_df2
-    CScount = CScount_df2
     
     survey_km = survey['Distance_km'].sum()
     count_m = count['Total_distance(m)'].sum()
     count_km = count_m / 1000
-    CScount_m = CScount['Total_distance(m)'].sum()
-    CScount_km = CScount_m / 1000
     lite_km = count_lite * lite_dict['Distance_km']
       
-    kms = [survey_km, count_km, CScount_km, lite_km]
+    kms = [survey_km, count_km, lite_km]
 #distance cleaned / surveyed 
     km = sum(kms)
         
@@ -159,7 +137,7 @@ def overview_stats(folderin, folderout):
     'Value Branded plastic fast / takeaway food packaging / utensils',
     'Value Unbranded plastic fast / takeaway food packaging / utensils',
     'Value Branded card or wood fast / takeaway food packaging / utensils',
-    'Value nbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
     'Value Branded condiments packaging','Value Unbranded condiments packaging',
     'Value Branded food on the go','Value Unbranded food on the go',
     'Value Branded other food related','Value Unbranded other food related',
@@ -167,7 +145,7 @@ def overview_stats(folderin, folderout):
     'Value Glass milk bottles',
     'Value Plastic food containers','Value Cardboard food containers',
     'Value Cleaning products containers',
-    'Value Cosmetics / deodorants', 'Vaule Other household',
+    'Value Cosmetics / deodorants', 'Value Other household',
     'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
     'Value Nicotine related packaging','Value Other nicotine related',
     'Value Unbagged dog poo',
@@ -180,7 +158,7 @@ def overview_stats(folderin, folderout):
     'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
     'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
     'Value Miscellaneous card or wood','Value Miscellaneous metal',
-    'Value Too small/dirty to ID','Value Oter Miscellaneous']
+    'Value Too small/dirty to ID','Value Other Miscellaneous']
     
     all_presence = ['Full Dog Poo Bags','Unused Dog Poo Bags','Other Pet Related Stuff',
     'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
@@ -204,7 +182,7 @@ def overview_stats(folderin, folderout):
     'Unbranded other food related','Clothes & Footwear','Textiles',
     'Plastic milk bottles','Glass milk bottles',
     'Plastic food containers','Cardboard food containers','Cleaning products containers',
-    'Cosmetics / deodorants', 'Other household,''Cigarette Butts','Nicotine pouches',
+    'Cosmetics / deodorants', 'Other household','Cigarette Butts','Nicotine pouches',
     'Disposable vapes',
     'Nicotine related packaging','Other nicotine related','Unbagged dog poo',
     'Needles / syringes','Other drug related','broken glass or pottery',
@@ -218,13 +196,10 @@ def overview_stats(folderin, folderout):
     'Too small/dirty to ID','Other Miscellaneous']
     
     #Resolve nan issues
-    for df in [survey, CSsurvey]:
-        df[all_items] = df[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
-
-    combined = pd.concat([survey, CSsurvey], ignore_index=True)
+    survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
 
     # Summation works the same
-    reported_items = combined[all_items].sum(axis=0).to_list()
+    reported_items = survey[all_items].sum(axis=0).to_list()
     total_reported_items = sum(reported_items)
     
     srvy_items = []
@@ -237,21 +212,12 @@ def overview_stats(folderin, folderout):
     rmv_items.append(survey_items)
     full_srvy_items.append(survey_items)
     
-    CSsurvey_items = CSsurvey['TotItems'].sum()   
-    srvy_items.append(CSsurvey_items)
-    rmv_items.append(CSsurvey_items)
-    full_srvy_items.append(CSsurvey_items)
-    
     lite_items = lite['TotItems'].sum() 
     rmv_items.append(lite_items)
     
     count_items = count['TotItems'].sum() 
     srvy_items.append(count_items)
     cnt_items.append(count_items)
-    
-    CScount_items = CScount['TotItems'].sum() 
-    srvy_items.append(CScount_items)
-    cnt_items.append(CScount_items)
     
     tfr_items = tfr['TotItems'].sum()
     srvy_items.append(tfr_items)
@@ -269,71 +235,9 @@ def overview_stats(folderin, folderout):
     total_kg = removed_items / 57  
 #volume of removed items as number of coke cans
     total_cokecans = removed_items / 1.04
-    '''
-    ATI_srvy = survey['AdjTotItems']
-    ATI_srvy_correct_itms = [x for x in ATI_srvy if str(x) != '#DIV/0!']
-    ATI_srvy_correct = [float(i) for i in ATI_srvy_correct_itms]
-    ATI_survey = sum(ATI_srvy_correct)
-    
-    ATIs = []
-    for index, i in CSsurvey.iterrows():
-        TotItems = i['TotItems']#.astype(float)
-        people = i['People']#.astype(float)
-        hours = i['Time_hours']#.astype(float)
-        time = hours*60
-        area = i['Area_km2']#.astype(float)
-        dist = area / 0.006
-        #calculate ATI
-        denominator = (people*time)*dist
-        if denominator == 0:
-            continue
-        AdjTotItems = TotItems/denominator 
-        if AdjTotItems > 0:
-            ATIs.append(AdjTotItems)
-        
-        
-    for index, i in count.iterrows():
-        TotItems = i['TotItems']#.astype(float)
-        people = i['People']#.astype(float)
-        time = 1.38
-        m = i['Total_distance(m)']#.astype(float)
-        kmc = m / 1000
-        #calculate ATI
-        denominator = (people*time)*kmc
-        if denominator == 0:
-            continue
-        AdjTotItems = TotItems/denominator     
-        if AdjTotItems > 0:
-            ATIs.append(AdjTotItems)
 
-    for index, i in CScount.iterrows():
-        TotItems = i['TotItems']#.astype(float)
-        people = i['People']#.astype(float)
-        hours = i['Time_hours']#.astype(float)
-        time = hours*60
-        m = i['Total_distance(m)']#.astype(float)
-        kmcs = m / 1000
-        #calculate ATI
-        denominator = (people*time)*kmcs
-        if denominator == 0:
-            continue
-        AdjTotItems = TotItems/denominator     
-        if AdjTotItems > 0:
-            ATIs.append(AdjTotItems) 
-              
-    
-    lite_denom = (lite_people*lite_time)*lite_km
-    if lite_denom == 0.0:
-        ATI_lite = 0.0
-    else:
-        ATI_lite = lite_items/lite_denom
-    
-    ATI_next = sum(ATIs)
-#Adjusted total items    
-    ATI = ATI_next + ATI_lite + ATI_survey
-    '''
-    new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':total_count,
-                              'total_survey':total_survey, 'total_lite': count_lite,
+    new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':count_count,
+                              'total_survey':count_survey, 'total_lite': count_lite,
                               'no_people':total_people, 
                               'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
@@ -354,7 +258,7 @@ def overview_stats(folderin, folderout):
                                             'count_kms','prevalence', 'hotspots',
                                             'worst_zone'])
     
-    distance = CScount_km + count_km
+    distance = count_km
 
 #how much is out there per km
     if distance == 0:
@@ -370,22 +274,12 @@ def overview_stats(folderin, folderout):
     'MostZonesView','MostZonesPicnic','MostZonesRoadCrossing','MostZonesSwimspot',
     'MostZonesBottomDescent','MostZonesJumps','MostZonesPause','MostZonesAlmostHome',
     'MostZonesLake','MostZonesRiver','MostZonesBeach','MostZonesSanddunes']
-    
-    mostzonesCS = ['MostZonesCarpark','MostZonesVisitorInfrastructure',
-    'MostZonesTrailMaps','MostZonesTrailhead','MostZonesDogPoo','MostZonesShakedown',
-    'MostZonesBottomDescent','MostZonesTopClimb','MostZonesView','MostZonesJumps',
-    'MostZonesUplift','MostZonesPause','MostZonesPicnic','MostZonesPuncture',
-    'MostZonesRoadCrossing','MostZonesAlmostHome','MostZonesSummit','MostZonesRoadCrossing',
-    'MostZonesSwimspot','MostZonesCamp','MostZonesToilet','MostZonesSkiLift','MostZonesOther']
 
     zonecounts = []
     for z in mostzonesindy:
         df = count[count[z].notna()]
         for index,i in df.iterrows():
             zonecounts.append(z)
-        
-    for z in mostzonesCS:
-        df = CScount[CScount[z].notna()]
 
         for index,i in df.iterrows():
             zonecounts.append(z)        
@@ -396,7 +290,7 @@ def overview_stats(folderin, folderout):
     else:
         topzone = max(set(zonecounts), key=zonecounts.count)
 
-    new_row = pd.DataFrame([{'count_submisssions':total_count, 
+    new_row = pd.DataFrame([{'count_submisssions':count_count, 
                 'count_items':tot_count_items,
                 'count_kms':distance,
                 'prevalence':prevalence,
@@ -488,12 +382,12 @@ def overview_stats(folderin, folderout):
     'Value Too small/dirty to ID','Value Other Miscellaneous']
     
     
-    plastics = combined[plastic].sum(axis=0).to_list()
-    metals = combined[metal].sum(axis=0).to_list()
-    glasses = combined[glass].sum(axis=0).to_list()
-    papers = combined[cardboard_paper_wood].sum(axis=0).to_list()       
-    potentially_plastics = combined[potentially_plastic].sum(axis=0).to_list()
-    others = combined[other].sum(axis=0).to_list()     
+    plastics = survey[plastic].sum(axis=0).to_list()
+    metals = survey[metal].sum(axis=0).to_list()
+    glasses = survey[glass].sum(axis=0).to_list()
+    papers = survey[cardboard_paper_wood].sum(axis=0).to_list()       
+    potentially_plastics = survey[potentially_plastic].sum(axis=0).to_list()
+    others = survey[other].sum(axis=0).to_list()     
     
     totpl = sum(plastics)
     totme = sum(metals)
@@ -518,17 +412,7 @@ def overview_stats(folderin, folderout):
         result = percSUP/100 * totitems
         SUP.append(result) 
 
-    df3 = CSsurvey[CSsurvey['Perc_SU'].notna()]
-    for index,i in df3.iterrows():
-        perSUP = i['Perc_SU']
-        percSUP = float(perSUP)
-        totitems = i['TotItems']
-        result = percSUP/100 * totitems
-        SUP.append(result) 
-
-    srvy_tot = df2['TotItems'].sum()
-    CSsrvy_tot = df3['TotItems'].sum()
-    tot_items_surveys = srvy_tot + CSsrvy_tot
+    tot_items_surveys = df2['TotItems'].sum()
     sup = [x for x in SUP if pd.notna(x)]
     
     tot_SUP = sum(sup)  
@@ -586,15 +470,7 @@ def overview_stats(folderin, folderout):
             continue
         calculated_SUP = (SUP_items/tot_items)*100
         calc_perc_SUP.append(calculated_SUP)
-        
-    df3 = CSsurvey       
-    for index, i in df3.iterrows():
-        SUP_items = i[col_list_SUP].sum()   
-        tot_items = i[all_items].sum()
-        if tot_items == 0:
-            continue
-        calculated_SUP = (SUP_items/tot_items)*100
-        calc_perc_SUP.append(calculated_SUP)        
+             
     SUPs = sum(calc_perc_SUP)     
 #SUP proportion % calculated          
     tot_calc_SUP = SUPs/len(calc_perc_SUP)     
@@ -655,15 +531,15 @@ def overview_stats(folderin, folderout):
     'Value Miscellaneous card or wood','Value Miscellaneous metal',
     'Value Too small/dirty to ID','Value Other Miscellaneous']
 
-    pets = combined[pet_stuff].sum(axis=0).to_list()
-    drinks = combined[drinks_related].sum(axis=0).to_list()
-    snacks = combined[snack].sum(axis=0).to_list()
-    smokes = combined[nicotine].sum(axis=0).to_list()
-    agros = combined[agro_ind].sum(axis=0).to_list()
-    hyg = combined[hygiene].sum(axis=0).to_list()
-    recre = combined[recreation].sum(axis=0).to_list()
-    home = combined[house].sum(axis=0).to_list()
-    miscs = combined[misc].sum(axis=0).to_list()
+    pets = survey[pet_stuff].sum(axis=0).to_list()
+    drinks = survey[drinks_related].sum(axis=0).to_list()
+    snacks = survey[snack].sum(axis=0).to_list()
+    smokes = survey[nicotine].sum(axis=0).to_list()
+    agros = survey[agro_ind].sum(axis=0).to_list()
+    hyg = survey[hygiene].sum(axis=0).to_list()
+    recre = survey[recreation].sum(axis=0).to_list()
+    home = survey[house].sum(axis=0).to_list()
+    miscs = survey[misc].sum(axis=0).to_list()
 
     totpet = sum(pets)
     totdrs = sum(drinks)
@@ -699,11 +575,9 @@ def overview_stats(folderin, folderout):
     
     df_DRS_subs = survey[sub_DRS]    
     subs_indy = df_DRS_subs.any(axis=1).sum()
-    df_CSDRS_subs = CSsurvey[DRS]
-    subs_CS = df_CSDRS_subs.any(axis=1).sum()
         
-    DRS_items = combined[DRS].sum(axis=0).to_list()   
-    glass_DRS_items = combined[DRS_glass].sum(axis=0).to_list()  
+    DRS_items = survey[DRS].sum(axis=0).to_list()   
+    glass_DRS_items = survey[DRS_glass].sum(axis=0).to_list()  
 
 
     lite_DRS = []
@@ -712,17 +586,14 @@ def overview_stats(folderin, folderout):
             lite_DRS.append(1)
             
     DRS_lite = sum(lite_DRS)
-    tot_DRS_subs = subs_indy + subs_CS + DRS_lite   
+    tot_DRS_subs = subs_indy + DRS_lite   
       
     subs_presence = survey[all_presence]
-    CSs_subs_items = CSsurvey[all_items]
     s_subs_report_presence = subs_presence.any(axis=1).sum()
-    CSs_subs_report_presence = CSs_subs_items.any(axis=1).sum()
-    subs_reporting_presence_withLITE = [s_subs_report_presence, CSs_subs_report_presence, count_lite]
-    subs_reporting_presence = [s_subs_report_presence, CSs_subs_report_presence]
-    
+    subs_reporting_presence_withLITE = [s_subs_report_presence, count_lite]
+    subs_for_presence = s_subs_report_presence.sum()
     subs_for_presence_wLITE = sum(subs_reporting_presence_withLITE)
-    subs_for_presence = sum(subs_reporting_presence) 
+
     
 #% Submissions reporting DRS                
     DRS_reported = (tot_DRS_subs/subs_for_presence_wLITE)*100
@@ -764,7 +635,7 @@ def overview_stats(folderin, folderout):
     'Value Plastic energy gel end','Value Protein drink bottle or carton',
     'Value Hot drinks cups','Value Hot drinks tops and stirrers',
     'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
-    'Value Paper straws'
+    'Value Paper straws',
     'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull', 
     'Value Plastic bottle sleeve','Value Confectionary/sweet wrappers',
     'Value Wrapper "corners" / tear-offs','Value Other confectionary (eg., Lollipop Sticks)',
@@ -784,12 +655,10 @@ def overview_stats(folderin, folderout):
      
     df_EPR_subs = survey[sub_EPR]    
     subs_EPR_indy = df_EPR_subs.any(axis=1).sum()
-    df_CSEPR_subs = CSsurvey[EPR]
-    subs_EPR_CS = df_CSEPR_subs.any(axis=1).sum()
-        
-    EPR_items = combined[EPR].sum(axis=0).to_list()   
+
+    EPR_items = survey[EPR].sum(axis=0).to_list()   
   
-    tot_EPR_subs = subs_EPR_indy + subs_EPR_CS  
+    tot_EPR_subs = subs_EPR_indy 
               
 #% Submissions reporting EPR                
     EPR_reported = (tot_EPR_subs/subs_for_presence)*100
@@ -804,20 +673,13 @@ def overview_stats(folderin, folderout):
     survey['Disposable vapes'] = pd.to_numeric(survey['Disposable vapes'], errors='coerce').fillna(0).astype(int)
     vape_items_indy = survey[vapes_indy].sum(axis=0).to_list()
                
-    vapes_subs_indy = vape_items_indy[0]
-    
-    all_vapes_CS = CSsurvey['Value Disposable vapes'].to_list()
-    vapes_CS = [x for x in all_vapes_CS if str(x) != 'nan']
-    
-    vapes_subs_CS = len(vapes_CS)
-    vapes_subs = vapes_subs_indy + vapes_subs_CS
-    vapes_tt_indy = vape_items_indy[1]
-    vapes_tt_CS = sum(vapes_CS)
-        
+    vapes_subs = vape_items_indy[0]
+#vapes_total_items   
+    vapes_total = vape_items_indy[1]
+       
 #% submissions reporting vapes    
-    vapes_reported = (vapes_subs/total_survey)*100
-#vapes_total_items    
-    vapes_total = vapes_tt_CS + vapes_tt_indy
+    vapes_reported = (vapes_subs/count_survey)*100
+    
 #% of total items that are vapes
     vapes_proportion = (vapes_total/total_reported_items)*100
 #% of smoking items that are vapes    
@@ -834,22 +696,12 @@ def overview_stats(folderin, folderout):
         gel_end_subs_indy.append(gelend)
         no_gelends_indy.append(no_gelends)
     gelends_subs_indy = [x for x in gel_end_subs_indy if str(x) != 'nan']    
-    gelend_subs_indy = len(gelends_subs_indy)  
+    gelend_subs = len(gelends_subs_indy)  
     gelends_indy = [x for x in no_gelends_indy if str(x) != 'nan']
-
-   
-    all_gelends_CS = CSsurvey['Value Plastic energy gel end'].to_list()
-    gelends_CS = [x for x in all_gelends_CS if str(x) != 'nan']
-    
-    gelends_subs_CS = len(gelends_CS)
-    gelend_subs = gelend_subs_indy + gelends_subs_CS
-    gelends_tt_indy = sum(gelends_indy)
-    gelends_tt_CS = sum(gelends_CS)
-      
+#gel ends_total_items
+    gelends_total = sum(gelends_indy)     
 #% submissions reporting gel ends    
-    gelends_reported = (gelend_subs/total_survey)*100
-#gel ends_total_items    
-    gelends_total = gelends_tt_indy + gelends_tt_CS
+    gelends_reported = (gelend_subs/count_survey)*100
 #% of total items that are gel ends
     gelends_proportion = (gelends_total/total_reported_items)*100 
 
@@ -862,22 +714,14 @@ def overview_stats(folderin, folderout):
         no_gels_indy.append(no_gels)
         
     gels_subs_ind = [x for x in gel_subs_indy if str(x) != 'nan']    
-    gels_subs_indy = len(gels_subs_ind)  
+    gel_subs = len(gels_subs_ind)  
 
     gels_indy = [x for x in no_gels_indy if str(x) != 'nan']
-
-   
-    all_gels_CS = CSsurvey['Value Plastic energy gel sachet'].to_list()
-    gels_CS = [x for x in all_gels_CS if str(x) != 'nan']
-    
-    gels_subs_CS = len(gels_CS)
-    gel_subs = gels_subs_indy + gels_subs_CS
-    gels_tt_indy = sum(gels_indy)
-    gels_tt_CS = sum(gels_CS)        
-#% submissions reporting gel ends    
-    gels_reported = (gel_subs/total_survey)*100
 #gel ends_total_items    
-    gels_total = gels_tt_indy + gels_tt_CS
+    gels_total = sum(gels_indy)     
+#% submissions reporting gel ends    
+    gels_reported = (gel_subs/count_survey)*100
+
 #% of total items that are gel ends
     gels_proportion = (gels_total/total_reported_items)*100 
        
@@ -897,22 +741,9 @@ def overview_stats(folderin, folderout):
                 poo.append(bags)
                 bag.append(1)
                 
-    for index, i in CSsurvey.iterrows():
-        full_bags = i['Value Full Dog Poo Bags']
-        bags = i['Value Unused Dog Poo Bags']
-        if full_bags > 0:
-            poo.append(full_bags)
-            bag.append(1)
-            if bags > 0:
-                poo.append(bags)  
-        else:
-            if bags > 0:
-                poo.append(bags)
-                bag.append(1)                
-            
     all_bags = len(bag)
 #% submissions reporting poo bags   
-    bags_reported = (all_bags/total_survey)*100
+    bags_reported = (all_bags/count_survey)*100
 #poo bags_total_items    
     bags_total = sum(poo)   
 #% of total items that are poo bags
@@ -925,19 +756,13 @@ def overview_stats(folderin, folderout):
     out = []
     out_subs = []
     out_df = survey[outdoor]
-    outCS_df = CSsurvey[outdoor]
+
     for index, i in out_df.iterrows():
         outs = i.sum()
         if outs > 0:
             out_subs.append(1)
         out.append(outs)  
-        
-    for index, i in outCS_df.iterrows():
-        outs = i.sum()
-        if outs > 0:
-            out_subs.append(1)
-        out.append(outs)      
-    
+           
     tot_subs = len(out_subs)
     
     lite_outs = []
@@ -954,92 +779,37 @@ def overview_stats(folderin, folderout):
 #% of total items that are outdoor gear
     outs_proportion = (outs_total/total_reported_items)*100        
         
-        
-        
-        
-       
-##########reached here!!!!! Redo brand calculation as now numbers and maybe 'x's        
-        
-        
+
 
     #calculate brands
-#calculate brands
+
     brands = ['Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone',
     'Highland Spring','Coke','Costa','Pepsi','Walkers','Barrs','Britvic',
     'Mars','Nestle','Mondelez','Cadbury','Magnum','Haribo','AB InBev','Corona',
     'Molson Corrs','Thatchers','Heineken','Fosters','Bulmers','Carlsberg',
     'Burger King','Greggs','KFC','McDonalds','Subway','Aldi','Co-op',
     'Euro Shopper','LiDL','M&S','Tesco','Other']
-
-    orig_brand_res = pd.DataFrame(columns=['brand', 'weighted_count'])
-
-    # Weight mapping
-    weights = {'B1': 3, 'B2': 2, 'B3': 1}
-
-    for b in brands:
-        total_weighted = 0
     
-        for col_prefix, weight in weights.items():
-            # Count non-null for survey
-            col_name = f"{col_prefix}_{b}"
-            count_survey = survey[col_name].notna().sum()
-            # Count non-null for CSsurvey
-            count_cs = CSsurvey[col_name].notna().sum()
-            # Count non-null for CSsurvey
-            count_tfr = tfr[col_name].notna().sum()
-        
-            # Add weighted contribution
-            total_weighted += (count_survey + count_cs + count_tfr) * weight
+  
+    survey[brands] = survey[brands].replace('x', 1).apply(pd.to_numeric, errors='coerce')
     
-        new_row = pd.DataFrame({'brand': [b], 'weighted_count': [total_weighted]})
-        orig_brand_res = pd.concat([orig_brand_res, new_row], ignore_index=True)
+    brands_sum = survey[brands].sum().reset_index()
+    brands_sum.columns = ['brand', 'Total']
 
-    # Sort by weighted count
-    orig_brand_res = orig_brand_res.sort_values(by='weighted_count', ascending=False)
+    # Sort by prevalence
+    brands_sum = brands_sum.sort_values(by='Total', ascending=False)
     #brands 1, 2 and 3    
-    brand1 = orig_brand_res.iloc[0]['brand']
-    brand2 = orig_brand_res.iloc[1]['brand']
-    brand3 = orig_brand_res.iloc[2]['brand']
+    brand1 = brands_sum.iloc[0]['brand']
+    brand2 = brands_sum.iloc[1]['brand']
+    brand3 = brands_sum.iloc[2]['brand']
                              
-    orig_brand_res.to_csv(folderout + 'brands.csv', index=False)
+    brands_sum.to_csv(folderout + 'brands.csv', index=False)
     
-    # Alternative version to include other brands - Columns prefixes
-    col_prefixes = ['B1', 'B2', 'B3']
-
-    # Step 1: Extract unique "Other" brands from both survey and CSsurvey
-    other_brands_survey = survey[[f"{prefix}_Other" for prefix in col_prefixes]].stack().dropna().unique().tolist()
-    other_brands_CS = CSsurvey[[f"{prefix}_Other" for prefix in col_prefixes]].stack().dropna().unique().tolist()
-    other_brands_tfr = tfr[[f"{prefix}_Other" for prefix in col_prefixes]].stack().dropna().unique().tolist()
-
-    # Merge new brands, remove duplicates
-    all_brands = list(set(brands[:-1] + other_brands_survey + other_brands_CS + other_brands_tfr))  # exclude original 'Other'
-
-    # Step 2: Count occurrences of each brand across all positions
-    brand_counts = {}
-    for b in all_brands:
-        counting = 0
-        for prefix in col_prefixes:
-            counting += (survey[f"{prefix}_{b}"].notna().sum() if f"{prefix}_{b}" in survey.columns else 0)
-            counting += (CSsurvey[f"{prefix}_{b}"].notna().sum() if f"{prefix}_{b}" in CSsurvey.columns else 0)
-        brand_counts[b] = counting
-
-    # Step 3: Convert counts to DataFrame
-    brand_res = pd.DataFrame({
-        'brand': list(brand_counts.keys()),
-        'count': list(brand_counts.values())
-    })
-
-    # Step 4: Rank brands by count (lowest = 1, highest = max), ties get same score
-    brand_res['score'] = brand_res['count'].rank(method='dense', ascending=True).astype(int)
-
-    # Optional: sort by score
-    brand_res = brand_res.sort_values(by='score', ascending=True).reset_index(drop=True)
-
-    brand_res.to_csv(folderout + 'brands_all.csv', index=False)
-
+    #maybe work out something here to deal with other brands once you see what inputs you get...
+    #it may need to be something like the animal info from pre-2026
+    #ALSO have lost data from TFR and CS survey
     
-    
-    new_row = pd.DataFrame([{'survey_submisssions':total_survey,
+    new_row = pd.DataFrame([{'survey_submisssions':count_survey,
                 'total items surveyed':fully_surveyed_items, 
                 'total composition items':total_reported_items, 
                 'weight removed':total_kg, 
@@ -1072,56 +842,43 @@ def overview_stats(folderin, folderout):
                     'Would do again','provided contact info'])
     
     #animal interaction - how many (%) answered the question and checked
-    CSsurv_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
-    CScount_AIcols = ['AIY','AIN','AINotSure']
-    survey_AIcols = ['AnimalsY','AnimalsN','AnimalsInfo']
+    survey_AIcols = ['AnimalsY','AnimalsN']
     lite_AIcols = ['Animal Interaction - No',
                'Animal Interaction - Chew Marks','Animal Interaction - Death']
     
     AI_survey = survey[survey_AIcols].notna().any(axis=1).sum()
-    AI_CSsurvey = CSsurvey[CSsurv_AIcols].notna().any(axis=1).sum()
-    AI_CScount = CScount[CScount_AIcols].notna().any(axis=1).sum()
     AI_lite = lite[lite_AIcols].any(axis=1).sum()
     
-    AI_subs = [AI_survey, AI_CSsurvey, AI_CScount, AI_lite]
+    AI_subs = [AI_survey, AI_lite]
     subs_tot = sum(AI_subs)
     survey_AI = survey['AnimalsY'].value_counts().get('Yes', 0)
-    CSsurvey_AI = CSsurvey['AnimalsY'].value_counts().get('Yes', 0)
-    CScount_AI = CScount['AIY'].value_counts().get('Yes', 0)
     lite_AI = (lite['Animal Interaction - Chew Marks'] | lite['Animal Interaction - Death']).sum()
-    AI_yes = [survey_AI, CSsurvey_AI, CScount_AI, lite_AI]
+    AI_yes = [survey_AI, lite_AI]
     AI_tot = sum(AI_yes)
     
 #percent submissions reporting AI observed
     perc_AI = (AI_tot/subs_tot)*100
     
-    dfs = [CSsurvey, survey]
     deaths = []
-    for df in dfs:
-        if 'AnimalsInfo' in df.columns and df['AnimalsInfo'].notna().any():
-            death = df['AnimalsInfo'].astype(str).str.contains(r'\b(death|dead|meth|drown|smell|remains|entrapment)\b', case=False, na=False).sum()
-        else:
-            death = 0
-        deaths.append(death)
-
+    death_survey = survey['AIDeath'].sum()
+    deaths.append(death_survey)
 
     lite_death = lite['Animal Interaction - Death'].sum()
     deaths.append(lite_death)
     
     tot_deaths = sum(deaths)
-    subs_for_death = [AI_survey, AI_lite, AI_CSsurvey]
+    subs_for_death = [AI_survey, AI_lite]
     death_subs_tot = sum(subs_for_death)
 #percent submissions reporting death of those reporting they checked for AI  
     perc_death = (tot_deaths/death_subs_tot)*100
     
     survey_1st = survey['First time'].value_counts().get('This is my first time!', 0)
-    CSsurvey_1st = CSsurvey['Connection_TakePartBeforeN'].value_counts().get('No', 0)
     if count['First_time'].isna().all:
         count_1st = 0
     else:
         count_1st = count['First_time'].value_counts().get('This is my first time!', 0)
 
-    subs_for_1st = [survey_1st, CSsurvey_1st, count_1st]
+    subs_for_1st = [survey_1st, count_1st]
 #number submitting for first time - not lite    
     no_1st = sum(subs_for_1st)
     
@@ -1143,21 +900,6 @@ def overview_stats(folderin, folderout):
 #number submitting again - not including CS or lite        
     beforers = sum(befores)    
     
-    p_survey4 = survey['Connection_Action'].value_counts().get(4, 0)
-    p_CSsurvey4 = CSsurvey['Connection_Action'].value_counts().get(4, 0)
-    p_CScount4 = CScount['Connect_Feel'].value_counts().get(4, 0)
-    p_survey3 = survey['Connection_Action'].value_counts().get(3, 0)
-    p_CSsurvey3 = CSsurvey['Connection_Action'].value_counts().get(3, 0)
-    p_CScount3 = CScount['Connect_Feel'].value_counts().get(3, 0)
-    proud = [p_survey4, p_CSsurvey4, p_CScount4, p_survey3, p_CSsurvey3, p_CScount3]     
-    prouds = sum(proud)
-    na_survey = survey['Connection_Action'].notna().sum()
-    na_CSsurvey = CSsurvey['Connection_Action'].notna().sum()
-    na_CScount = CScount['Connect_Feel'].notna().sum()
-    nas = [na_survey, na_CSsurvey, na_CScount]
-    count_nas = sum(nas)
-#percent feeling proud after taking action 
-    perc_proud = (prouds/count_nas) * 100
     
     if 'Connection_ConnectionY' not in count.columns:
         count.rename(columns={'Connect_ConnectY': 'Connection_ConnectionY'}, inplace=True) 
@@ -1166,16 +908,16 @@ def overview_stats(folderin, folderout):
         count.rename(columns={'Connect_ConnectNotSure': 'Connection_Unsure'}, inplace=True)
     
 
-    dfs = [survey, count, CSsurvey]
+
     connection = []
     counts_connect = []
-    for df in dfs:
-        more_connected = df['Connection_ConnectionY'].value_counts().get('Yes', 0) 
-        connection.append(more_connected)
-        columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
+
+    more_connected = count['Connection_ConnectionY'].value_counts().get('Yes', 0) 
+    connection.append(more_connected)
+    columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
                                'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
-        count_connect = df[columns_of_interest].notnull().any(axis=1).sum()
-        counts_connect.append(count_connect)
+    count_connect = count[columns_of_interest].notnull().any(axis=1).sum()
+    counts_connect.append(count_connect)
     
     lite_connects = lite['Increased Nature Connection - Yes'].sum()
     connection.append(lite_connects)
@@ -1188,32 +930,6 @@ def overview_stats(folderin, folderout):
 #percent feeling more connected    
     perc_more_connected = (connects/total_answer_connect) *100
     
-    dfs = [survey, CSsurvey] 
-    people = []
-    answered_p = []
-    activity = []
-    answered_a = []
-    people_cols = ['Connection_NewPeopleY', 'Connection_NewPeopleN']
-    activity_cols = ['Connection_ActivityAfterY', 'Connection_ActivityAfterN']
-    for df in dfs:
-        new_people = df['Connection_NewPeopleY'].value_counts().get('Yes', 0)
-        answered_people = df[people_cols].notnull().any(axis=1).sum()
-        activity_after = df['Connection_ActivityAfterY'].value_counts().get('Yes', 0)
-        answered_activity = df[activity_cols].notnull().any(axis=1).sum()
-        people.append(new_people)
-        answered_p.append(answered_people)
-        activity.append(activity_after)
-        answered_a.append(answered_activity)
-    
-    new_people = sum(people)
-    ans_people = sum(answered_p)
-#percentage meeting inspiring/new people    
-    perc_new_peeps = (new_people/ans_people) *100
-    
-    active_after = sum(activity)
-    ans_act = sum(answered_a)
-#percentage doing an activity after
-    perc_active = (active_after/ans_act) * 100
     
     again = survey['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
     again_cols = ['Connection_TakePartAgainY', 'Connection_TakePartAgainN', 'Connection_TakePartAgainUnsure']
@@ -1238,10 +954,8 @@ def overview_stats(folderin, folderout):
 
     new_row = pd.DataFrame([{'Fauna Interaction':perc_AI, 
                     'Fauna Death':perc_death,'First Time':no_1st, 
-                    'Repeat volunteers':beforers,'Felt proud':perc_proud,
+                    'Repeat volunteers':beforers,#'Felt proud':perc_proud,
                        'Felt more connected':perc_more_connected,
-                       'met someone inspiring':perc_new_peeps, 
-                       'went out after':perc_active,
                        'Would do again':perc_participate_again,
                        'provided contact info':perc_contacts}])
     impacts_results = pd.concat([impacts_results, new_row], ignore_index=True)    

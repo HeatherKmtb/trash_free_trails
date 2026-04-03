@@ -7,7 +7,7 @@ Created on Mon Mar  9 14:15:04 2026
 """
 
 import pandas as pd
-import glob
+import re
 import os
 
 
@@ -135,7 +135,7 @@ def survey_clean_data(TFTin, TFTout):
         'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
         'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
         'Value Miscellaneous card or wood','Value Miscellaneous metal',
-        'Value Too small/dirty to ID','Value Oter Miscellaneous','Perc_SU',
+        'Value Too small/dirty to ID','Value Other Miscellaneous','Perc_SU',
         'Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone','Highland Spring',
         'Coke','Costa','Pepsi','Walkers','Barrs','Britvic','Mars','Nestle',
         'Mondelez','Cadbury','Magnum','Haribo','AB InBev','Corona','Molson Corrs',
@@ -202,6 +202,8 @@ def survey_clean_data(TFTin, TFTout):
     #remove row with extra column names that aren't now needed
     df_clean = df.drop(index=0)
     
+    df = df.drop('Rando Q', axis=1)
+    
     
     df_clean = df_clean[~df_clean['TrailName'].str.contains(r'\btest\b', case=False, na=False)]
     
@@ -222,15 +224,70 @@ def survey_clean_data(TFTin, TFTout):
     denominator = (people*time)*km
     AdjTotItems = TotItems/denominator 
     #Add ATI column to df in correct location
-    df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
-   
-
-    #filtering data
-    #remove any rows with TotItems = 0
-    #df2 = df_clean[df_clean['TotItems']>0]
+    df_clean.insert(loc=50, column = 'AdjTotItems', value=AdjTotItems)
     
-    #remove any rows with error in AdjTotItems
-    #df3 = df2[df2['AdjTotItems'].notna()]
+
+    exp_cols = ['Experience_+veFeeling0','Experience_+veFeeling1','Experience_+veFeeling2',
+    'Experience_+veFeeling3','Experience_+veFeeling4','Experience_+veFeeling5',
+    'Experience_+veFeeling6','Experience_+veFeeling7','Experience_+veFeeling8',
+    'Experience_+veFeeling9','Experience_+veFeeling10','Experience_Engagement0',
+    'Experience_Engagement1','Experience_Engagement2','Experience_Engagement3',
+    'Experience_Engagement4','Experience_Engagement5','Experience_Engagement6',
+    'Experience_Engagement7','Experience_Engagement8','Experience_Engagement9',
+    'Experience_Engagement10','Experience_Relationships0',
+    'Experience_Relationships1','Experience_Relationships2',
+    'Experience_Relationships3','Experience_Relationships4',
+    'Experience_Relationships5','Experience_Relationships6',
+    'Experience_Relationships7','Experience_Relationships8',
+    'Experience_Relationships9','Experience_Relationships10',
+    'Experience_Meaning0','Experience_Meaning1','Experience_Meaning2',
+    'Experience_Meaning3','Experience_Meaning4','Experience_Meaning5',
+    'Experience_Meaning6','Experience_Meaning7','Experience_Meaning8',
+    'Experience_Meaning9','Experience_Meaning10','Experience_Accomplishment0',
+    'Experience_Accomplishment1','Experience_Accomplishment2',
+    'Experience_Accomplishment3','Experience_Accomplishment4',
+    'Experience_Accomplishment5','Experience_Accomplishment6',
+    'Experience_Accomplishment7','Experience_Accomplishment8',
+    'Experience_Accomplishment9','Experience_Accomplishment10',
+    'Experience_Health0','Experience_Health1','Experience_Health2',
+    'Experience_Health3','Experience_Health4','Experience_Health5',
+    'Experience_Health6','Experience_Health7','Experience_Health8',
+    'Experience_Health9','Experience_Health10','Experience_NatureConnect0',
+    'Experience_NatureConnect1','Experience_NatureConnect2',
+    'Experience_NatureConnect3','Experience_NatureConnect4',
+    'Experience_NatureConnect5','Experience_NatureConnect6',
+    'Experience_NatureConnect7','Experience_NatureConnect8',
+    'Experience_NatureConnect9','Experience_NatureConnect10',
+    'Experience_Place0','Experience_Place1','Experience_Place2',
+    'Experience_Place3','Experience_Place4','Experience_Place5',
+    'Experience_Place6','Experience_Place7','Experience_Place8',
+    'Experience_Place9','Experience_Place10','Experience_Knowledge0',
+    'Experience_Knowledge1','Experience_Knowledge2','Experience_Knowledge3',
+    'Experience_Knowledge4','Experience_Knowledge5','Experience_Knowledge6',
+    'Experience_Knowledge7','Experience_Knowledge8','Experience_Knowledge9',
+    'Experience_Knowledge10']
+  
+    df_clean[exp_cols] = df_clean[exp_cols].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+    for i in range(0, len(exp_cols), 11):
+        group = exp_cols[i : i + 11]
+        new_col_name = group[0][:-1] 
+        df_clean[new_col_name] = df_clean[group].idxmax(axis=1).str.extract(r'(\d+)$').astype(int)
+        df_clean.drop(columns=group, inplace=True) 
+    
+    
+    #remove sensitive data for U18s
+    cols_to_clear = ['Experience_Feeling1', 'Experience_Feeling2',
+        'Experience_Feeling3','Experience_+veFeeling','Experience_Engagement',
+        'Experience_Relationships','Experience_Meaning','Experience_Accomplishment',
+        'Experience_Health','Experience_NatureConnect','Experience_Knowledge',
+        'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
+        'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican',
+        'EthnicArab','EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
+        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot']
+
+    df_clean.loc[df_clean['AgeU18'].notna(), cols_to_clear] = None
+        
+
     
     #change data in presence(composition) data to TRUE
     change_cols = ['Handful','Pocketful','Bread bag',
@@ -316,6 +373,13 @@ def survey_clean_data(TFTin, TFTout):
     
     df3.drop(columns=['Email'], inplace=True)
     df3.drop(columns=['email'], inplace=True)
+    
+    #reorder so experience cols are together
+    cols = list(range(df3.shape[1]))
+    target_block = cols[348:357]
+    remaining_cols = [c for c in cols if c not in target_block]
+    new_order = remaining_cols[:302] + target_block + remaining_cols[302:]
+    df3 = df3.iloc[:, new_order]
              
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'survey.csv', index=False)

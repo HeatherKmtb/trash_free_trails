@@ -26,7 +26,7 @@ def sorting_dfs(TFTin, TFTout):
             path to folder to save file with clean data
     """
 
-    df = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Monthly_stats/2026/2026_03/input/survey.csv')
+    df = pd.read_csv(TFTin + 'survey.csv')
 
     # Booleans
     pet_cols = ['Toys (eg., tennis balls)', 'Other Pet Related Stuff']
@@ -58,9 +58,9 @@ def sorting_dfs(TFTin, TFTout):
     
     misc_cols = ['Miscellaneous','Weird/Retro']
     misc_combined = df[misc_cols].any(axis=1).replace(False, np.nan)
-
+  
     
-    
+  
     # Summing cols
     pet_val_cols = ['Value Toys (eg., tennis balls)', 'Value Other Pet Related Stuff']
     pet_sum = df[pet_val_cols].sum(axis=1)
@@ -90,9 +90,78 @@ def sorting_dfs(TFTin, TFTout):
     event_sum = df[event_val_cols].sum(axis=1)
 
     misc_val_cols = ['Value Miscellaneous','Value Weird/Retro']
-    misc_sum = df[misc_val_cols].sum(axis=1)    
+    misc_sum = df[misc_val_cols].sum(axis=1)   
     
+ 
+    
+    #brand colum reshifting
+    brand_cols = [c for c in df.columns if c.startswith(('B1_', 'B2_', 'B3_'))]
+    unique_brands = set(c.split('_', 1)[1] for c in brand_cols)
 
+    for brand in unique_brands:
+        df[brand] = pd.Series(dtype='object')
+
+        for i in [1, 2, 3]:
+            col_name = f'B{i}_{brand}'
+            if col_name in df.columns:
+                mask = df[col_name].notna()
+                if brand == 'Other':
+                    df.loc[mask, brand] = df.loc[mask, col_name]
+                else:
+                    df.loc[mask, brand] = f'x{i}'
+
+    df = df.drop(columns=brand_cols)
+    
+ 
+    
+    #place connection reshifting
+    conditions = [df['Connection_ConnectionY'].notna(), 
+                  df['Connection_ConnectionN'].notna(),
+                  df['Connection_ConnectionSame'].notna()
+                  ]
+
+    choices = [10, 0, 5]
+
+    df['Experience_Place'] = np.select(conditions, choices, default=np.nan)
+
+
+
+    #Renaming cols
+    mapping = {'Plastic carrier bags': 'Branded single-use carrier bags', 
+               'Value Plastic carrier bags': 'Value Branded single-use carrier bags',
+               'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc':'Branded plastic fast / takeaway food packaging / utensils',
+               'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc':'Value Branded plastic fast / takeaway food packaging / utensils',
+               'Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)':'Branded card or wood fast / takeaway food packaging / utensils',
+               'Value Other fast food, takeaway and / or on the go food packaging, cups, cutlery (eg., cardboard)':'Value Branded card or wood fast / takeaway food packaging / utensils',
+               'Food on the go (eg.salad boxes)':'Branded food on the go',
+               'Value Food on the go (eg.salad boxes)':'Value Branded food on the go',
+               'Drugs related':'Other drug related',
+               'Value Drugs related':'Value Other drug related',
+               'Single-Use Period products':'Period products',
+               'Single-Use Covid Masks':'Covid Masks',
+               'Value Single-Use Period products':'Value Period products',
+               'Value Single-Use Covid Masks':'Value Covid masks',
+               'Rubber/nitrile gloves':'First Aid & medcal waste',
+               'Value Rubber/nitrile gloves':'Value First Aid & medcal waste',
+               'Halloween & Fireworks':'Fireworks',
+               'Value Halloween & Fireworks':'Value Fireworks',
+               'Seasonal (Christmas and/or Easter)':'Seasonal (Christmas and/or Easter)',
+               'Value Seasonal (Christmas and/or Easter)':'Value Seasonal (Christmas and/or Easter)',
+               'Normal balloons':'Rubber balloons',
+               'Helium balloons':'Foil balloons',
+               'Value Normal balloons':'Value Rubber balloons',
+               'Value Helium balloons':'Value Foil balloons',
+               'MTB related (e.g. inner tubes, water bottles etc)':'Biking specific',
+               'Roaming and other outdoor related (e.g. climbing, kayaking)':'Hiking specific',
+               'Value MTB related (e.g. inner tubes, water bottles etc)':'Value Biking specific',
+               'Value Roaming and other outdoor related (e.g. climbing, kayaking)':'Value Hiking specific',
+               'AnimalsInfo':'AIOther'
+               }
+
+    df = df.rename(columns=mapping)
+ 
+    
+ 
     #Add all the new empty columns
     new_empty_cols = [
         'Ethics', 'FamiliarRegular', 'FamiliarFewTimes', 'FamiliarFirst',
@@ -103,59 +172,46 @@ def sorting_dfs(TFTin, TFTout):
         'Milkshake bottle or carton','Protein drink bottle or carton',
         'Ring pull', 'Plastic bottle sleeve',
         'Reusable drinks container','Other drink related',
-        'Branded single-use carrier bags',
         'Unbranded single-use carrier bags', 'Branded bag for life',
         'Unbranded bag for life', 
-        'Branded plastic fast / takeaway food packaging / utensils',
         'Unbranded plastic fast / takeaway food packaging / utensils',
-        'Branded card or wood fast / takeaway food packaging / utensils',
         'Unbranded card or wood fast / takeaway food packaging / utensils',
         'Branded condiments packaging','Unbranded condiments packaging',
-        'Branded food on the go','Unbranded food on the go',
-        'Branded other food related',
+        'Unbranded food on the go','Branded other food related',
         'Unbranded other food related','Cosmetics / deodorants', 'Other household',
         'Nicotine pouches','Nicotine related packaging','Unbagged dog poo',
-        'Needles / syringes','Other drug related','broken glass or pottery',
-        'First Aid & medcal waste','batteries and electronics',
+        'Needles / syringes','broken glass or pottery',
+        'batteries and electronics',
         'Other hazardous', 'Other outdoor related','Miscellaneous hard plastic',
         'Miscellaneous soft plastic','Miscellaneous card or wood',
         'Miscellaneous metal','Value Milkshake bottle or carton',
         'Value Protein drink bottle or carton',
         'Value Ring pull', 'Value Plastic bottle sleeve',
         'Value Reusable drinks container','Value Other drink related',
-        'Value Branded single-use carrier bags',
         'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
         'Value Unbranded bag for life', 
-        'Value Branded plastic fast / takeaway food packaging / utensils',
         'Value Unbranded plastic fast / takeaway food packaging / utensils',
-        'Value Branded card or wood fast / takeaway food packaging / utensils',
         'Value Unbranded card or wood fast / takeaway food packaging / utensils',
         'Value Branded condiments packaging','Value Unbranded condiments packaging',
-        'Value Branded food on the go','Value Unbranded food on the go',
-        'Value Branded other food related',
+        'Value Unbranded food on the go','Value Branded other food related',
         'Value Unbranded other food related','Value Cosmetics / deodorants',
         'Value Other household','Value Nicotine pouches',
         'Value Nicotine related packaging','Value Unbagged dog poo',
-        'Value Needles / syringes','Value Other drug related',
-        'Value broken glass or pottery',
-        'Value First Aid & medcal waste','Value batteries and electronics',
+        'Value Needles / syringes','Value broken glass or pottery',
+        'Value batteries and electronics',
         'Value Other hazardous', 'Value Other outdoor related',
         'Value Miscellaneous hard plastic',
         'Value Miscellaneous soft plastic','Value Miscellaneous card or wood',
-        'Value Miscellaneous metal','Glass milk bottles', 'Period products', 
-        'Covid Masks', 'Fireworks', 'Rubber balloons', 'Foil balloons', 
-        'Biking specific', 'Hiking specific', 'Value Glass milk bottles', 
-        'Value Broken glass or pottery', 'Value Period products', 
-        'Value Covid Masks', 'Value Batteries and electronics', 'Value Fireworks', 
-        'Value Rubber balloons', 'Value Foil balloons', 'Value Biking specific', 
-        'Value Hiking specific', 'Lucozade', 'Ribena', 'RedBull', 'Monster',
-        'High5', 'SIS', 'Danone', 'Highland Spring', 'Coke', 'Costa', 'Pepsi', 
-        'Walkers', 'Barrs', 'Britvic', 'Mars', 'Nestle', 'Mondelez', 'Cadbury', 
-        'Magnum', 'Haribo', 'AB InBev', 'Corona', 'Molson Corrs', 'Thatchers',
-        'Heineken', 'Fosters', 'Bulmers', 'Carlsberg', 'Burger King', 'Greggs',
-        'KFC', 'McDonalds', 'Subway', 'Aldi', 'Co-op', 'Euro Shopper', 'LiDL', 
-        'M&S', 'Tesco', 'Other', 'AnimalsNotChecked', 'AIDeath', 'AIChew', 
-        'AINesting', 'AIOther', 'AItype', 'ExperienceY', 'ExperienceN', 
+        'Value Miscellaneous metal','Glass milk bottles','Value Glass milk bottles', 
+        'Value Broken glass or pottery', 
+        'Value Covid Masks', 'Value Batteries and electronics', 
+        'Ribena','Danone', 'Highland Spring', 
+        'Barrs', 'Britvic','Mondelez', 'High5',
+        'Magnum', 'AB InBev', 'Corona', 'Molson Corrs', 
+        'Heineken','Bulmers', 'Carlsberg', 'Burger King', 'Greggs',
+        'KFC', 'Aldi', 'Co-op', 'Euro Shopper', 'LiDL', 
+        'M&S', 'Tesco','AnimalsNotChecked', 'AIDeath', 'AIChew', 
+        'AINesting','AItype', 'ExperienceY', 'ExperienceN', 
         'Experience_Feeling1', 'Experience_Feeling2', 'Experience_Feeling3', 
         'Experience_+veFeeling', 'Experience_Engagement', 
         'Experience_Relationships', 'Experience_Meaning', 
@@ -163,16 +219,20 @@ def sorting_dfs(TFTin, TFTout):
         'Experience_NatureConnect', 'Experience_Knowledge', 
         'Connection_RewardY', 'Connection_RewardN', 'Connection_RewardUnsure', 
         'HQ', 'VolunteerWeeks', 'VolunteerMonths', 'VolunteerYears', 
-        'WhySubmit', 'Email', 'Receive emailY', 'Receive emailN', 
+        'WhySubmit', 'Receive emailY', 'Receive emailN', 
         'Receive email_alreadyin', 'DemographicsY', 'DemographicsN', 
         'AgeU18', 'Age18-14', 'Age25-34', 'Age35-44', 'Age45-54', 'Age55-64', 
         'Age65+', 'GenderFemale', 'GenderMale', 'GenderNon-binary', 'GenderTransgender', 
         'GenderPreferNot', 'GenderOther', 'HomePostcode', 'EthnicAfrican', 
         'EthnicArab', 'EthnicAsian', 'EthinicLatino', 'EthnicCaucasian', 
-        'EthinicPreferNot', 'EthnicOther', 'IllnessY', 'IllnessN', 'IllnessPreferNot']
+        'EthinicPreferNot', 'EthnicOther', 'IllnessY', 'IllnessN', 'IllnessPreferNot'
+        ]
     
     new_df_piece = pd.DataFrame(np.nan, index=df.index, columns=new_empty_cols)
     df = pd.concat([df, new_df_piece], axis=1)
+
+
+
 
     # Add the calculated columns
     df['Other Pet Related Stuff'] = pet_combined
@@ -195,6 +255,9 @@ def sorting_dfs(TFTin, TFTout):
     df['Value Outdoor event related (e.g.race)'] = event_sum
     df['Other Miscellaneous'] = misc_combined
     df['Value Other Miscellaneous'] = misc_sum
+
+
+
 
     # Sort out the order
     desired_order = ['Ethics','Date_TrailClean','People','postcode','TrailName','FamiliarRegular',
@@ -222,7 +285,8 @@ def sorting_dfs(TFTin, TFTout):
         'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
         'Crisps Packets','Used Chewing Gum','Homemade lunch (eg., aluminium foil, cling film)',
         'BBQ related','Fruit peel & cores','Branded single-use carrier bags',
-        'Unbranded single-use carrier bags', 'Branded bag for life','Unbranded bag for life', 
+        'Unbranded single-use carrier bags', 'Branded bag for life',
+        'Unbranded bag for life', 
         'Branded plastic fast / takeaway food packaging / utensils',
         'Unbranded plastic fast / takeaway food packaging / utensils',
         'Branded card or wood fast / takeaway food packaging / utensils',
@@ -301,18 +365,23 @@ def sorting_dfs(TFTin, TFTout):
         'Experience_Feeling1', 'Experience_Feeling2','Experience_Feeling3',
         'Experience_+veFeeling','Experience_Engagement',
         'Experience_Relationships','Experience_Meaning','Experience_Accomplishment',
-        'Experience_Health','Experience_NatureConnect','Experience_Knowledge',
+        'Experience_Health','Experience_NatureConnect','Experience_Place',
+        'Experience_Knowledge',
         'Connection_RewardY','Connection_RewardN','Connection_RewardUnsure',
         'Connection_TakePartAgainY','Connection_TakePartAgainN',
         'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team',
         'HQ','Community Hub','VolunteerWeeks',
-        'VolunteerMonths','VolunteerYears','WhySubmit','Name','Surname','Email',
+        'VolunteerMonths','VolunteerYears','WhySubmit','Name','Surname',
         'Receive emailY','Receive emailN','Receive email_alreadyin',
         'DemographicsY','DemographicsN',
         'AgeU18','Age18-14','Age25-34','Age35-44','Age45-54','Age55-64','Age65+',
         'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
         'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican','EthnicArab',
         'EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
-        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot']
+        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot','month','year',
+        'email_id','community','name'
+        ]
     
     df = df[desired_order]
+    
+    df.to_csv(TFTout + 'survey.csv')

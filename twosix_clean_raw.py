@@ -7,6 +7,7 @@ Created on Mon Mar  9 14:15:04 2026
 """
 
 import pandas as pd
+import numpy as np
 import re
 import os
 
@@ -202,8 +203,8 @@ def survey_clean_data(TFTin, TFTout):
     #remove row with extra column names that aren't now needed
     df_clean = df.drop(index=0)
     
-    df = df.drop('Rando Q', axis=1)
-    
+    df_clean = df_clean.drop('Rando Q', axis=1)
+    df_clean.insert(58, 'Binbags', np.nan)
     
     df_clean = df_clean[~df_clean['TrailName'].str.contains(r'\btest\b', case=False, na=False)]
     
@@ -293,29 +294,38 @@ def survey_clean_data(TFTin, TFTout):
     change_cols = ['Handful','Pocketful','Bread bag',
             'Carrier bag', 'Bin bag', 'Full Dog Poo Bags','Unused Dog Poo Bags',
             'Other Pet Related Stuff',
-            'Plastic Water Bottles','Plastic Soft Drink Bottles','Aluminium soft drink cans',
-            'Glass soft drink bottles','Milkshake bottle or carton','Plastic energy drink bottles',
-            'Aluminium energy drink can','Plastic energy gel sachet','Plastic energy gel end',
+            'Plastic Water Bottles','Plastic Soft Drink Bottles',
+            'Aluminium soft drink cans',
+            'Glass soft drink bottles','Milkshake bottle or carton',
+            'Plastic energy drink bottles',
+            'Aluminium energy drink can','Plastic energy gel sachet',
+            'Plastic energy gel end',
             'Protein drink bottle or carton', 'Aluminium alcoholic drink cans',
             'Glass alcoholic bottles','Hot drinks cups','Hot drinks tops and stirrers',
             'Cold drinks cups and tops','Cartons','Plastic straws','Paper straws',
-            'Plastic bottle, top', 'Glass bottle tops', 'Ring pull', 'Plastic bottle sleeve',
-            'Reusable drinks container','Other drink related','Confectionary/sweet wrappers',
-            'Wrapper "corners" / tear-offs','Other confectionary (eg., Lollipop Sticks)',
-            'Crisps Packets','Used Chewing Gum','Homemade lunch (eg., aluminium foil, cling film)',
+            'Plastic bottle, top', 'Glass bottle tops', 'Ring pull', 
+            'Plastic bottle sleeve',
+            'Reusable drinks container','Other drink related',
+            'Confectionary/sweet wrappers',
+            'Wrapper "corners" / tear-offs',
+            'Other confectionary (eg., Lollipop Sticks)',
+            'Crisps Packets','Used Chewing Gum',
+            'Homemade lunch (eg., aluminium foil, cling film)',
             'BBQ related','Fruit peel & cores','Branded single-use carrier bags',
-            'Unbranded single-use carrier bags', 'Branded bag for life','Unbranded bag for life', 
+            'Unbranded single-use carrier bags', 'Branded bag for life',
+            'Unbranded bag for life', 
             'Branded plastic fast / takeaway food packaging / utensils',
             'Unbranded plastic fast / takeaway food packaging / utensils',
             'Branded card or wood fast / takeaway food packaging / utensils',
             'Unbranded card or wood fast / takeaway food packaging / utensils',
             'Branded condiments packaging','Unbranded condiments packaging',
             'Branded food on the go','Unbranded food on the go',
-            'Branded other food related','Unbranded other food related',
-            'Clothes & Footwear','Textiles','Plastic milk bottles','Glass milk bottles',
-            'Plastic food containers','Cardboard food containers','Cleaning products containers',
-            'Cosmetics / deodorants', 'Other household','Cigarette Butts','Nicotine pouches',
-            'Disposable vapes',
+            'Branded other food related',
+            'Unbranded other food related','Clothes & Footwear','Textiles',
+            'Plastic milk bottles','Glass milk bottles','Plastic food containers',
+            'Cardboard food containers','Cleaning products containers',
+            'Cosmetics / deodorants', 'Other household','Cigarette Butts',
+            'Nicotine pouches','Disposable vapes',
             'Nicotine related packaging','Other nicotine related','Unbagged dog poo',
             'Needles / syringes','Other drug related','broken glass or pottery',
             'Toilet tissue','Face/ baby wipes','Nappies','Period products',

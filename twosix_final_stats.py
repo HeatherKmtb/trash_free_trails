@@ -808,6 +808,7 @@ def overview_stats(folderin, folderout):
     #maybe work out something here to deal with other brands once you see what inputs you get...
     #it may need to be something like the animal info from pre-2026
     #ALSO have lost data from TFR and CS survey
+    #can also add in here if we get tiered data! But keep an eye for now
     
     new_row = pd.DataFrame([{'survey_submisssions':count_survey,
                 'total items surveyed':fully_surveyed_items, 
@@ -858,6 +859,9 @@ def overview_stats(folderin, folderout):
     
 #percent submissions reporting AI observed
     perc_AI = (AI_tot/subs_tot)*100
+    
+    survey['AIDeath'] = survey['AIDeath'].replace(['X', 'x'], 1)
+    survey['AIDeath'] = pd.to_numeric(survey['AIDeath'], errors='coerce')
     
     deaths = []
     death_survey = survey['AIDeath'].sum()
@@ -918,6 +922,7 @@ def overview_stats(folderin, folderout):
                                'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
     count_connect = count[columns_of_interest].notnull().any(axis=1).sum()
     counts_connect.append(count_connect)
+    
     
     lite_connects = lite['Increased Nature Connection - Yes'].sum()
     connection.append(lite_connects)

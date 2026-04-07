@@ -19,14 +19,14 @@ def sorting_dfs(TFTin, TFTout):
     ----------
              
     TFTin: string
-            path to folder with input csv file with new data  
+            path to input csv file with original TFT data 
              
             
     TFTout: string
-            path to folder to save file with clean data
+            path to output file with updated TFT data
     """
 
-    df = pd.read_csv(TFTin + 'survey.csv')
+    df = pd.read_csv(TFTin)
 
     # Booleans
     pet_cols = ['Toys (eg., tennis balls)', 'Other Pet Related Stuff']
@@ -384,4 +384,4 @@ def sorting_dfs(TFTin, TFTout):
     
     df = df[desired_order]
     
-    df.to_csv(TFTout + 'survey.csv')
+    df.to_csv(TFTout)

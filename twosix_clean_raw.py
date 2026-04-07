@@ -504,7 +504,7 @@ def count_clean_data(TFTin, TFTout):
             
     df3.to_csv(TFTout + 'count.csv', index=False)
     
-def update_lite_averages(year_folder, TFTout):
+def update_lite_averages(year_folder, TFTin, TFTout):
     """
     A function which takes the bag averages data and the survey data, it uses the 
     survey data to update the averages (whilst ignoring outliers) and then writes out 
@@ -524,56 +524,80 @@ def update_lite_averages(year_folder, TFTout):
     
     bag_df = pd.read_csv(year_folder + 'bag_averages_raw.csv')
     survey = pd.read_csv(TFTout + 'survey.csv')
+    lite = pd.read_csv(TFTin + 'lite.csv')
+    
+    #Sort Generic Bin Bag
+    lite = lite.rename(columns={'Quantity - Generic Bin Bag': 'Quantity - Bin Bag'})
 
-
-    bag_types = ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag']
-
-    # make a copy so we don't modify df directly
+    #everything is lowercase
     df_updated = bag_df.copy()
+    df_updated.columns = [c.lower().strip() for c in df_updated.columns]
+    
+    bag_types_lower = ['handful', 'pocketful', 'bread bag', 'carrier bag', 'bin bag']
+    
+    # Map for survey columns (lowercase -> actual)
+    survey_col_map = {c.lower().strip(): c for c in survey.columns}
 
+    #survey data
     for _, row in survey.iterrows():
-        # Identify which column is filled
-        for col in ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag', 'Multiple Bin Bags']:
-            val = row[col]
+        search_keys = bag_types_lower + ['multiple bin bags']
+        for key in search_keys:
+            actual_col = survey_col_map.get(key)
+            if not actual_col: continue 
+            
+            val = row[actual_col]
             if pd.notna(val) and (val is True or isinstance(val, (int, float))):
-                
-                # Determine bag type and items per bag
-                if col == 'Multiple Bin Bags':
-                    bag_type = 'Bin bag'
-                    tot_per_bag = row['TotItems'] / val  # divide by number of bags
-                else:
-                    bag_type = col
-                    tot_per_bag = row['TotItems']
+                # Standardize search_type and calculate tot_per_bag
+                search_type = 'bin bag' if key == 'multiple bin bags' else key
+                tot_per_bag = row['TotItems'] / val if key == 'multiple bin bags' else row['TotItems']
 
-                # Get outlier limits using IQR
-                series = df_updated[bag_type].dropna()
-                if len(series) >= 4:  # need enough data to get quartiles
-                    Q1 = series.quantile(0.25)
-                    Q3 = series.quantile(0.75)
-                    IQR = Q3 - Q1
-                    lower = Q1 - 1.5 * IQR
-                    upper = Q3 + 1.5 * IQR
-                else:
-                    # if too few data points, skip outlier filtering
-                    lower, upper = -float("inf"), float("inf")
-
-                # Append if within range
-                if lower <= tot_per_bag <= upper:
-                    # Append to df (add a new row with only that column filled)
-                    new_row = {c: None for c in bag_types}
-                    new_row[bag_type] = tot_per_bag
+                # Move data directly to df_updated
+                if search_type in df_updated.columns:
+                    new_row = {c: None for c in df_updated.columns}
+                    new_row[search_type] = tot_per_bag
                     df_updated = pd.concat([df_updated, pd.DataFrame([new_row])], ignore_index=True)
-                break  # only one type per row
+                break 
 
-    for col in bag_types:
-        df_updated[col] = pd.to_numeric(df_updated[col], errors='coerce')
+    #lite data 
+    qty_cols = [c for c in lite.columns if 'Quantity' in c]
+    
+    for _, row in lite.iterrows():
+        # Only process if we have an item count
+        if pd.isna(row['How many items?']):
+            continue
 
-    # Now compute numeric mean
+        for col in qty_cols:
+            val = row[col]
+            if pd.notna(val) and (val is True or (isinstance(val, (int, float)) and val > 0)):
+                # Clean the column name to match our lowercase list
+                clean_name = col.replace('Quantity - ', '').strip().lower()
+                
+                if 'multiple' in clean_name:
+                    search_type = 'bin bag'
+                    num_bags = row.get('How many bags?', val)
+                    num_bags = num_bags if (isinstance(num_bags, (int, float)) and num_bags > 0) else 1
+                    tot_per_bag = row['How many items?'] / num_bags
+                else:
+                    search_type = clean_name
+                    tot_per_bag = row['How many items?']
+
+                # Move data directly to df_updated
+                if search_type in df_updated.columns:
+                    new_row = {c: None for c in df_updated.columns}
+                    new_row[search_type] = tot_per_bag
+                    df_updated = pd.concat([df_updated, pd.DataFrame([new_row])], ignore_index=True)
+                break
+
+
+    for col in bag_types_lower:
+        if col in df_updated.columns:
+            df_updated[col] = pd.to_numeric(df_updated[col], errors='coerce')
+
+
     averages = df_updated.mean(numeric_only=True)
     averages_df = averages.reset_index()
     averages_df.columns = ['bag', 'avg_items']
 
-    # Clean bag names if needed
     averages_df['bag'] = averages_df['bag'].str.lower().str.replace(' ', '')
     
     binbag_avg = averages_df.loc[averages_df['bag'] == 'binbag', 'avg_items'].values[0]
@@ -597,8 +621,8 @@ def update_lite_averages(year_folder, TFTout):
     
     av.to_csv(TFTout + 'other_averages_calc.csv')
     averages_df.to_csv(TFTout + 'bag_averages_calc.csv', index=False)
-    
-        
+   
+          
     
 def lite_clean_data(TFTin, TFTout, year_folder):
     """
@@ -637,6 +661,9 @@ def lite_clean_data(TFTin, TFTout, year_folder):
 
     # --- 3a. Add TotItems column ---
     def get_tot_items(row):
+        if pd.notna(row['How many items?']):
+            return row['How many items?']
+        
         for bag, col in bag_column_map.items():
             if row[col] == True:
                 avg_items = avg_map.get(bag, 0)

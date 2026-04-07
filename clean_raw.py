@@ -380,7 +380,6 @@ def update_lite_averages(year_folder, TFTout):
     bag_df = pd.read_csv(year_folder + 'bag_averages_raw.csv')
     survey = pd.read_csv(TFTout + 'survey.csv')
 
-
     bag_types = ['Handful', 'Pocketful', 'Bread bag', 'Carrier bag', 'Bin bag']
 
     # make a copy so we don't modify df directly
@@ -492,7 +491,7 @@ def lite_clean_data(TFTin, TFTout, year_folder):
 
     # --- 3a. Add TotItems column ---
     def get_tot_items(row):
-        for bag, col in bag_column_map.items():
+        for bag, col in bag_column_map.items():   
             if row[col] == True:
                 avg_items = avg_map.get(bag, 0)
                 num_bags = row['How many bags?'] if (bag == 'multiplebinbags' and not pd.isna(row['How many bags?'])) else 1

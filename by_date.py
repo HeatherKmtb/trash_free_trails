@@ -318,13 +318,13 @@ def date_and_location_stats(folderin, start_date, end_date, postcode):
            postcode - start of postcode in uppercase
     """
 
-    survey = pd.read_csv(folderin + 'survey/survey_2025.csv')
-    lite = pd.read_csv(folderin + 'lite/lite_2025.csv')
-    count = pd.read_csv(folderin + 'count/count_2025.csv')
-    CSsurvey = pd.read_csv(folderin + 'CS_survey/CS_survey_2025.csv')
-    CScount = pd.read_csv(folderin + 'CS_count/CS_count_2025.csv')
+    survey = pd.read_csv(folderin + 'survey/all_survey.csv')
+    lite = pd.read_csv(folderin + 'lite/all_lite.csv')
+    count = pd.read_csv(folderin + 'count/all_count.csv')
+    CSsurvey = pd.read_csv(folderin + 'CS_survey/all_CS_survey.csv')
+    CScount = pd.read_csv(folderin + 'CS_count/all_CS_count.csv')
     #bag_res_lite = pd.read_csv(folderin + 'bag_res_lite.csv')
-    tfr = pd.read_csv(folderin + 'TFR/TFR_2025.csv')
+    tfr = pd.read_csv(folderin + 'TFR/all_TFR.csv')
     
     #prepping the date columns
     dfs_TrailClean = [survey, CSsurvey]

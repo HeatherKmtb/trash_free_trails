@@ -43,7 +43,8 @@ def count_animal_deaths(df, column="AnimalsInfo", keywords=None):
 
 def get_country_data(postcodesin, TFTin, folderout):
     """
-    A function which takes clean monthly TFT survey data and produces monthly stats
+    A function which takes clean TFT survey data and splits it per tri-nations
+    producing 3 new survey .csvs
     
     Parameters
     ----------
@@ -60,6 +61,66 @@ def get_country_data(postcodesin, TFTin, folderout):
     postcodes_df = pd.read_csv(postcodesin)
 
     df = pd.read_csv(TFTin)
+
+    df['postcode'] = df['postcode'].astype(str)
+
+    postcodes = []
+    for index,i in df.iterrows():
+         postcode = i['postcode']
+ 
+         first = postcode.upper()
+         new = first.replace(" ","")
+         start = new[:4]
+         letters = ''.join(x for x in start if x.isalpha())
+         postcodes.append(letters)
+         
+    df['postcode_start'] = postcodes  
+
+    Scotland = []   
+    Wales = []
+    England = []
+    for index,i in postcodes_df.iterrows():
+        if i['Country'] == 'Scotland':
+            postcode = i['Prefix']
+            Scotland.append(postcode)
+        elif i['Country'] == 'Wales':
+            postcode = i['Prefix']
+            Wales.append(postcode)  
+        else:
+            postcode = i['Prefix']
+            England.append(postcode)         
+
+    scots = df[df['postcode_start'].isin(Scotland)].copy()
+    cymru = df[df['postcode_start'].isin(Wales)].copy()
+    eng = df[df['postcode_start'].isin(England)].copy()
+
+
+    eng.to_csv(folderout + 'england.csv')
+    scots.to_csv(folderout + 'alba.csv')
+    cymru.to_csv(folderout + 'cymru.csv')
+    
+def get_country_data_lite(postcodesin, TFTin, folderout):
+    """
+    A function which takes clean TFT lite data and splits it per tri-nations
+    producing 3 new survey .csvs
+    
+    Parameters
+    ----------
+    
+    postcodesin: string
+             path to input csv file with postcode, countrywise data    
+    
+    TFTin: string
+             path to input csv file with TFT data
+            
+    folderout: string
+           path to save results
+    """
+    postcodes_df = pd.read_csv(postcodesin)
+
+    df = pd.read_csv(TFTin)
+    
+    df = df.rename({'Trail Postcode':'postcode'}, axis=1)
 
     df['postcode'] = df['postcode'].astype(str)
 
@@ -114,12 +175,7 @@ def get_DRS_data_per_country(TFTin, folderout):
     folderout: string
            path to save results
     """
-    
-    from country_data_prep import count_animal_deaths
-    
-    
 
-    
     results = pd.DataFrame(columns=['country', '% submissions reporting DRS',
                               'total DRS (including glass)','total glass DRS items',
                               'total metal DRS items','total plastic DRS items',

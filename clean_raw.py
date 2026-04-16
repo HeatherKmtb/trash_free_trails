@@ -141,8 +141,11 @@ def survey_clean_data(TFTin, TFTout):
     
     df_clean = df_clean[~df_clean['TrailName'].str.contains(r'\btest\b', case=False, na=False)]
     
-    #Save file to add to raw dataset
-    #df_clean.to_csv(rawout)
+    #Remove dmographics and experience data for U18s
+    
+    
+    
+    
     
     #need distance = 0 changed to ? here - use an average here!!!!
     df_clean.loc[df_clean['Distance_km'] == 0, 'Distance_km'] = 4.83
@@ -161,12 +164,6 @@ def survey_clean_data(TFTin, TFTout):
     df_clean.insert(loc=30, column = 'AdjTotItems', value=AdjTotItems)
    
 
-    #filtering data
-    #remove any rows with TotItems = 0
-    #df2 = df_clean[df_clean['TotItems']>0]
-    
-    #remove any rows with error in AdjTotItems
-    #df3 = df2[df2['AdjTotItems'].notna()]
     
     #change data in presence(composition) data to TRUE
     change_cols = ['Handful','Pocketful','Bread bag',

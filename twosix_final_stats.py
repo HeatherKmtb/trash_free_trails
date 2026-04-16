@@ -858,6 +858,7 @@ def overview_stats(folderin, folderout):
     AI_tot = sum(AI_yes)
     
 #percent submissions reporting AI observed
+
     perc_AI = (AI_tot/subs_tot)*100
     
     survey['AIDeath'] = survey['AIDeath'].replace(['X', 'x'], 1)
@@ -904,37 +905,63 @@ def overview_stats(folderin, folderout):
 #number submitting again - not including CS or lite        
     beforers = sum(befores)    
     
-    
+    #count is place connection, new survey is place and nature, lite is nature 
     if 'Connection_ConnectionY' not in count.columns:
         count.rename(columns={'Connect_ConnectY': 'Connection_ConnectionY'}, inplace=True) 
         count.rename(columns={'Connect_ConnectN': 'Connection_ConnectionN'}, inplace=True)
         count.rename(columns={'Connect_ConnectSame': 'Connection_ConnectionSame'}, inplace=True)
         count.rename(columns={'Connect_ConnectNotSure': 'Connection_Unsure'}, inplace=True)
     
+    place_connection = []
+    ncounts_connect = []
+    pcounts_connect = []
+    nature_connection = []
 
-
-    connection = []
-    counts_connect = []
-
-    more_connected = count['Connection_ConnectionY'].value_counts().get('Yes', 0) 
-    connection.append(more_connected)
+    #count df
+    place_connected = count['Connection_ConnectionY'].value_counts().get('Yes', 0) 
+    place_connection.append(place_connected)
     columns_of_interest = ['Connection_ConnectionY', 'Connection_ConnectionN', 
-                               'Connection_ConnectionSame', 'Connection_Unsure'] #won't work for count until redo columns
+                               'Connection_ConnectionSame', 'Connection_Unsure'] 
     count_connect = count[columns_of_interest].notnull().any(axis=1).sum()
-    counts_connect.append(count_connect)
+    pcounts_connect.append(count_connect)
     
+    #lite df
+    lite_connects = lite['nature_connection'] >= 6
+    lite_connect = (lite_connects == True).sum()  
+    nature_connection.append(lite_connect)
+
+    count_rows = lite['nature_connection'].notna().sum()
+    ncounts_connect.append(count_rows)
+
+    #survey df
+    survey_nature = survey['Experience_NatureConnect'] >= 6
+    s_nature = (survey_nature == True).sum()
+    nature_connection.append(s_nature)
     
-    lite_connects = lite['Increased Nature Connection - Yes'].sum()
-    connection.append(lite_connects)
-    NCcols = [c for c in lite.columns if c.startswith("Increased Nature Connection")]
-    count_rows = (lite[NCcols] == True).any(axis=1).sum()
-    counts_connect.append(count_rows)
+    survey_place = survey['Experience_Place'] >= 6
+    s_place = (survey_place == True).sum()
+    place_connection.append(s_place)
+                            
+    sn_rows = survey['Experience_NatureConnect'].notna().sum()
+    ncounts_connect.append(sn_rows)
+
+    sp_rows = survey['Experience_Place'].notna().sum()
+    pcounts_connect.append(sp_rows)                        
+                            
     
-    total_answer_connect = sum(counts_connect)
-    connects = sum(connection)
+    total_answer_connect_n = sum(ncounts_connect)
+    total_answer_connect_p = sum(pcounts_connect)
+    nature_connects = sum(nature_connection)
+    place_connects = sum(place_connection)
 #percent feeling more connected    
-    perc_more_connected = (connects/total_answer_connect) *100
+    perc_more_nconnected = (nature_connects/total_answer_connect_n) *100
+    perc_more_pconnected = (place_connects/total_answer_connect_p) *100
+
+    perma_count = survey['perma_score'].notna().sum()
+    perma_wb = survey['perma_score'] >= 6
+    no_perma_wb = (perma_wb == True).sum()
     
+    perc_inc_wb = (no_perma_wb/perma_count) *100
     
     again = survey['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
     again_cols = ['Connection_TakePartAgainY', 'Connection_TakePartAgainN', 'Connection_TakePartAgainUnsure']
@@ -960,7 +987,9 @@ def overview_stats(folderin, folderout):
     new_row = pd.DataFrame([{'Fauna Interaction':perc_AI, 
                     'Fauna Death':perc_death,'First Time':no_1st, 
                     'Repeat volunteers':beforers,#'Felt proud':perc_proud,
-                       'Felt more connected':perc_more_connected,
+                       'Felt more connected to nature':perc_more_nconnected,
+                       'Felt more connected to place':perc_more_pconnected,
+                       'Percent with positive well-being':perc_inc_wb,
                        'Would do again':perc_participate_again,
                        'provided contact info':perc_contacts}])
     impacts_results = pd.concat([impacts_results, new_row], ignore_index=True)    

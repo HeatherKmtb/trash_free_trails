@@ -195,7 +195,8 @@ def survey_clean_data(TFTin, TFTout):
         'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
         'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican','EthnicArab',
         'EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
-        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot']
+        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot'
+        ]
 
 
     #rename columns
@@ -266,16 +267,32 @@ def survey_clean_data(TFTin, TFTout):
     'Experience_Knowledge1','Experience_Knowledge2','Experience_Knowledge3',
     'Experience_Knowledge4','Experience_Knowledge5','Experience_Knowledge6',
     'Experience_Knowledge7','Experience_Knowledge8','Experience_Knowledge9',
-    'Experience_Knowledge10']
+    'Experience_Knowledge10'
+    ]
   
-    df_clean[exp_cols] = df_clean[exp_cols].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+    df_clean[exp_cols] = df_clean[exp_cols].apply(pd.to_numeric, errors='coerce')
+
+    df_clean[exp_cols] = df_clean[exp_cols].replace({
+        '0 - Not at all': 0,
+        '10 - Completely': 10
+        }, regex=False)
+    
     for i in range(0, len(exp_cols), 11):
         group = exp_cols[i : i + 11]
+        
+        
         new_col_name = group[0][:-1] 
-        df_clean[new_col_name] = df_clean[group].idxmax(axis=1).str.extract(r'(\d+)$').astype(int)
-        df_clean.drop(columns=group, inplace=True) 
+        max_col = df_clean[group].idxmax(axis=1) 
+        df_clean[new_col_name] = max_col.str.extract(r'(\d+)$').astype(float)
+        df_clean.drop(columns=group, inplace=True)
     
+    perma_cols = ['Experience_+veFeeling','Experience_Engagement',
+        'Experience_Relationships','Experience_Meaning','Experience_Accomplishment',
+        'Experience_Health'
+        ]
     
+    df_clean['perma_score'] = df_clean[perma_cols].mean(axis=1)
+        
     #remove sensitive data for U18s
     cols_to_clear = ['Experience_Feeling1', 'Experience_Feeling2',
         'Experience_Feeling3','Experience_+veFeeling','Experience_Engagement',
@@ -284,7 +301,8 @@ def survey_clean_data(TFTin, TFTout):
         'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
         'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican',
         'EthnicArab','EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
-        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot']
+        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot'
+        ]
 
     df_clean.loc[df_clean['AgeU18'].notna(), cols_to_clear] = None
         
@@ -335,7 +353,8 @@ def survey_clean_data(TFTin, TFTout):
             'Biking specific','Hiking specific','Other outdoor related',
             'Farming','Forestry','Industrial','Cable ties','Miscellaneous hard plastic',
             'Miscellaneous soft plastic','Miscellaneous card or wood','Miscellaneous metal',
-            'Too small/dirty to ID','Other Miscellaneous']
+            'Too small/dirty to ID','Other Miscellaneous'
+            ]
 
     df3 = df_clean
     
@@ -450,7 +469,8 @@ def count_clean_data(TFTin, TFTout):
         'Count_UnnaturalY','Count_UnnaturalN',
         'Count_UnnaturalNotSure','Participate_CleanY','Participate_CleanN',
         'Participate_CleanNotSure','First_time','Volunteer','A-Team','Community Hub',
-        'FirstName','LastName','Email','phone','Receive_email','SMS']
+        'FirstName','LastName','Email','phone','Receive_email','SMS'
+        ]
     
     
     #rename columns
@@ -672,7 +692,17 @@ def lite_clean_data(TFTin, TFTout, year_folder):
         return 0
 
     df['TotItems'] = df.apply(get_tot_items, axis=1)
-
+    
+    df['LIVE I felt connected to nature during the trail clean'] = df['LIVE I felt connected to nature during the trail clean'].str.strip('[]"')
+    df['OLD I felt connected to nature during the trail clean'] = df['OLD I felt connected to nature during the trail clean'].replace(6, np.nan)    
+            
+    NC_cols = ['LIVE I felt connected to nature during the trail clean',
+               'OLD I felt connected to nature during the trail clean'
+               ]
+    # Combine the two into a single new column
+    df['nature_connection'] = df['LIVE I felt connected to nature during the trail clean'].combine_first(df['OLD I felt connected to nature during the trail clean'])
+    df = df.drop(columns=NC_cols)
+    
     email_ref_df = pd.read_csv(TFTin + 'email_reference.csv')  
     
     df['Email'] = (df['Email'].str.strip().str.lower())
@@ -1042,6 +1072,73 @@ def add_to_existing_data(TFTout, year_folder):
     df_alltime.to_csv(year_folder + 'lite/all_bag_res_lite.csv', index=False)
     
         
-        
-        
+def data_for_Sophie(TFTout, Sophieout):
+    """
+    A function which takes the prepared monthly TFT data and removes stuff that
+    our lovely well-being researcher doesn't need and makes new .csvs for her'
+    
+    Parameters
+    ----------
+    
+    TFTout: string
+            path to folder with input csv files with cleaned raw monthly data
+            
+    Sophieout: string
+            path to folder for output csv files 
+             
+    """
+    survey = pd.read_csv(TFTout + 'survey.csv')    
+    lite = pd.read_csv(TFTout + 'lite.csv')
+ 
+    
+    survey_cols = ['Ethics','Date_TrailClean','People','postcode','TrailName','FamiliarRegular',
+        'FamiliarFewTimes','FamiliarFirst','ActivityBike', 'ActivityRun',
+        'ActivityWalk','ActivityCombo','ActivityOther','WeatherSunny',
+        'WeatherOvercast','WeatherLightRain','WeatherHeavyRain','WeatherSnow',
+        'WeatherWinds','WeatherExtremes','HabitatCanal','HabitatCoastal',
+        'HabitatFarm','HabitatForest','HabitatMarsh','HabitatMoor','HabitatMountain',
+        'HabitatRiver','HabitatUrban','TypeMrkdTrails','TypeRoW','TypeUnofficial',
+        'TypePump','TypeUrban','TypeOtherTrails','TypeAccess','TypeCar','TypeOther',
+        'MostTypeTrails','MostTypeFootpaths','MostTypeUnofficial','MostTypePump',
+        'MostTypeUrban','MostTypeOtherTrails','MostTypeAccess','MostTypeCar',
+        'MostTypeOther','Time_min','Distance_km','TotItems','Handful','Pocketful',
+        'Bread bag', 'Carrier bag', 'Bin bag', 'Multiple Bin Bags', 
+        'AnimalsY','AnimalsN','AnimalsNotChecked',
+        'AIDeath','AIChew','AINesting','AIOther','AItype','ExperienceY','ExperienceN',
+        'Experience_Feeling1', 'Experience_Feeling2','Experience_Feeling3',
+        'Experience_Engagement','Experience_Relationships',
+        'Experience_Meaning','Experience_Accomplishment',
+        'Experience_Health','Experience_NatureConnect',
+        'Experience_Place','Experience_Knowledge',
+        'Connection_RewardY','Connection_RewardN','Connection_RewardUnsure',
+        'Connection_TakePartAgainY','Connection_TakePartAgainN',
+        'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team',
+        'HQ','Community Hub','VolunteerWeeks',
+        'VolunteerMonths','VolunteerYears','WhySubmit','Name','Surname','email_id',
+        'DemographicsY','DemographicsN',
+        'AgeU18','Age18-14','Age25-34','Age35-44','Age45-54','Age55-64','Age65+',
+        'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
+        'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican','EthnicArab',
+        'EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
+        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot','perma_score'
+        ]
+    
+    lite_cols = ['Title', 'Created Date', 'Trail Postcode',
+           'Trail Type - Public Rights of Way', 'Trail Type - Parks & Playgrounds',
+           'Trail Type - Mountain Bike Trails', 'Trail Types - Access Routes',
+           'Trail Type - Other', 'Quantity - Handful', 'Quantity - Pocketful',
+           'Quantity - Bread Bag', 'Quantity - Carrier Bag',
+           'Quantity - TFT Bin Bag', 'Quantity - Generic Bin Bag',
+           'Quantity - Multiple Bin Bags', 'How many bags?', 'How many items?',
+           "Animal Interaction - Didn't Check", 'Animal Interaction - No',
+           'Animal Interaction - Chew Marks', 'Animal Interaction - Death',
+           'How did trail cleaning make you feel? Describe in one word',
+           'year', 'month', 'TotItems',
+           'nature_connection', 'email_id', 'community', 'name']
+    
+    survey = survey[survey_cols]
+    lite = lite[lite_cols]
+    
+    survey.to_csv(Sophieout + 'survey.csv', index = False)
+    lite.to_csv(Sophieout + 'lite.csv', index = False)
     

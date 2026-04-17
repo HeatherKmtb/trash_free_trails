@@ -127,7 +127,9 @@ def sorting_dfs(TFTin, TFTout):
 
 
     #Renaming cols
-    mapping = {'Plastic carrier bags': 'Branded single-use carrier bags', 
+    mapping = {'Plastic bin bags':'Other household',
+               'Value Plastic bin bags':'Value Other household',
+               'Plastic carrier bags': 'Branded single-use carrier bags', 
                'Value Plastic carrier bags': 'Value Branded single-use carrier bags',
                'Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc':'Branded plastic fast / takeaway food packaging / utensils',
                'Value Plastic fast food, takeaway and / or on the go food packaging, cups, cutlery etc':'Value Branded plastic fast / takeaway food packaging / utensils',
@@ -178,7 +180,7 @@ def sorting_dfs(TFTin, TFTout):
         'Unbranded card or wood fast / takeaway food packaging / utensils',
         'Branded condiments packaging','Unbranded condiments packaging',
         'Unbranded food on the go','Branded other food related',
-        'Unbranded other food related','Cosmetics / deodorants', 'Other household',
+        'Unbranded other food related','Cosmetics / deodorants', 
         'Nicotine pouches','Nicotine related packaging','Unbagged dog poo',
         'Needles / syringes','broken glass or pottery',
         'batteries and electronics',

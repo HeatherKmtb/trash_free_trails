@@ -42,6 +42,7 @@ def overview_stats(folderin, folderout):
     #CScount = pd.read_csv(folderin + 'CS_count.csv')
     #bag_res_lite = pd.read_csv(folderin + 'bag_res_lite.csv')
     tfr = pd.read_csv(folderin + 'TFR.csv')
+    experience = pd.read_csv(folderin + 'experience.csv')
     
     
     #total submmissions before any filtering
@@ -946,7 +947,22 @@ def overview_stats(folderin, folderout):
     ncounts_connect.append(sn_rows)
 
     sp_rows = survey['Experience_Place'].notna().sum()
-    pcounts_connect.append(sp_rows)                        
+    pcounts_connect.append(sp_rows) 
+
+    #experience df
+    experience_nature = experience['Experience_NatureConnect'] >= 6
+    e_nature = (experience_nature == True).sum()
+    nature_connection.append(e_nature)
+    
+    experience_place = experience['Experience_Place'] >= 6
+    e_place = (experience_place == True).sum()
+    place_connection.append(e_place)
+                            
+    en_rows = experience['Experience_NatureConnect'].notna().sum()
+    ncounts_connect.append(en_rows)
+
+    ep_rows = experience['Experience_Place'].notna().sum()
+    pcounts_connect.append(ep_rows)                        
                             
     
     total_answer_connect_n = sum(ncounts_connect)

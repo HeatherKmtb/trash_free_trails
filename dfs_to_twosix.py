@@ -10,7 +10,7 @@ Created on Fri Apr  3 15:42:35 2026
 import pandas as pd
 import numpy as np
 
-def sorting_dfs(TFTin, TFTout):
+def survey_dfs(TFTin, TFTout):
     """
     A function which takes the pre-2026 survey data and adjust the columns to
     match the 2026 updated data
@@ -157,13 +157,16 @@ def sorting_dfs(TFTin, TFTout):
                'Roaming and other outdoor related (e.g. climbing, kayaking)':'Hiking specific',
                'Value MTB related (e.g. inner tubes, water bottles etc)':'Value Biking specific',
                'Value Roaming and other outdoor related (e.g. climbing, kayaking)':'Value Hiking specific',
+               'Strongbow':'Heineken',
+               'Carling':'Molson Coors',
                'AnimalsInfo':'AIOther'
                }
 
     df = df.rename(columns=mapping)
  
+    df['AB InBev'] = df['StellaArtois'].fillna(df['Budweiser'])
     
- 
+
     #Add all the new empty columns
     new_empty_cols = [
         'Ethics', 'FamiliarRegular', 'FamiliarFewTimes', 'FamiliarFirst',
@@ -209,8 +212,7 @@ def sorting_dfs(TFTin, TFTout):
         'Value Covid Masks', 'Value Batteries and electronics', 
         'Ribena','Danone', 'Highland Spring', 
         'Barrs', 'Britvic','Mondelez', 'High5',
-        'Magnum', 'AB InBev', 'Corona', 'Molson Corrs', 
-        'Heineken','Bulmers', 'Carlsberg', 'Burger King', 'Greggs',
+        'Magnum', 'Corona', 'Bulmers', 'Carlsberg', 'Burger King', 'Greggs',
         'KFC', 'Aldi', 'Co-op', 'Euro Shopper', 'LiDL', 
         'M&S', 'Tesco','AnimalsNotChecked', 'AIDeath', 'AIChew', 
         'AINesting','AItype', 'ExperienceY', 'ExperienceN', 
@@ -234,8 +236,6 @@ def sorting_dfs(TFTin, TFTout):
     df = pd.concat([df, new_df_piece], axis=1)
 
 
-
-
     # Add the calculated columns
     df['Other Pet Related Stuff'] = pet_combined
     df['Value Other Pet Related Stuff'] = pet_sum
@@ -257,9 +257,7 @@ def sorting_dfs(TFTin, TFTout):
     df['Value Outdoor event related (e.g.race)'] = event_sum
     df['Other Miscellaneous'] = misc_combined
     df['Value Other Miscellaneous'] = misc_sum
-
-
-
+    
 
     # Sort out the order
     desired_order = ['Ethics','Date_TrailClean','People','postcode','TrailName','FamiliarRegular',
@@ -359,7 +357,7 @@ def sorting_dfs(TFTin, TFTout):
         'Value Too small/dirty to ID','Value Other Miscellaneous','Perc_SU',
         'Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone','Highland Spring',
         'Coke','Costa','Pepsi','Walkers','Barrs','Britvic','Mars','Nestle',
-        'Mondelez','Cadbury','Magnum','Haribo','AB InBev','Corona','Molson Corrs',
+        'Mondelez','Cadbury','Magnum','Haribo','AB InBev','Corona','Molson Coors',
         'Thatchers','Heineken','Fosters','Bulmers','Carlsberg','Burger King',
         'Greggs','KFC','McDonalds','Subway','Aldi','Co-op','Euro Shopper','LiDL',
         'M&S','Tesco','Other','AnimalsY','AnimalsN','AnimalsNotChecked',
@@ -386,4 +384,45 @@ def sorting_dfs(TFTin, TFTout):
     
     df = df[desired_order]
     
+    df.to_csv(TFTout, index=False)
+    
+def lite_dfs(TFTin, TFTout):
+    """
+    A function which takes the pre-2026 survey data and adjust the columns to
+    match the 2026 updated data
+    
+    Parameters
+    ----------
+             
+    TFTin: string
+            path to input csv file with original TFT data 
+             
+            
+    TFTout: string
+            path to output file with updated TFT data
+    """
+
+    df = pd.read_csv(TFTin)
+    
+    conditions = [df['Increased Nature Connection - No']==True, 
+                  df['Increased Nature Connection - No Change']==True,
+                  df['Increased Nature Connection - Yes']==True
+                  ]
+
+    choices = [0, 5, 10]
+
+    df['nature_connection'] = np.select(conditions, choices, default=np.nan)
+    NC_cols = ['Increased Nature Connection - No',
+               'Increased Nature Connection - No Change',
+               'Increased Nature Connection - Yes'
+               ]
+    
+    df.drop(columns = NC_cols)
+    
+    #Add all the new empty columns
+    df.insert(30,'How did trail cleaning make you feel? Describe in one word', np.nan)
+    df.insert(16,'How many items?',np.nan)
+    
     df.to_csv(TFTout)
+    
+

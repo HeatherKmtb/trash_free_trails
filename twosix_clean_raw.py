@@ -566,7 +566,7 @@ def update_lite_averages(year_folder, TFTin, TFTout):
             if not actual_col: continue 
             
             val = row[actual_col]
-            if pd.notna(val) and (val is True or isinstance(val, (int, float))):
+            if pd.notna(val) and (val is True or isinstance(val, (int, float))) and val != 0:
                 # Standardize search_type and calculate tot_per_bag
                 search_type = 'bin bag' if key == 'multiple bin bags' else key
                 tot_per_bag = row['TotItems'] / val if key == 'multiple bin bags' else row['TotItems']
@@ -697,7 +697,11 @@ def lite_clean_data(TFTin, TFTout, year_folder):
     df['OLD I felt connected to nature during the trail clean'] = df['OLD I felt connected to nature during the trail clean'].replace(6, np.nan)    
             
     NC_cols = ['LIVE I felt connected to nature during the trail clean',
-               'OLD I felt connected to nature during the trail clean'
+               'OLD I felt connected to nature during the trail clean',
+               'Increased Nature Connection - No',
+               'Increased Nature Connection - No Change',
+               'Increased Nature Connection - Not Sure',
+               'Increased Nature Connection - Yes'
                ]
     # Combine the two into a single new column
     df['nature_connection'] = df['LIVE I felt connected to nature during the trail clean'].combine_first(df['OLD I felt connected to nature during the trail clean'])
@@ -1029,7 +1033,228 @@ def TFRaces_clean_data_v1(TFTin, TFTout):
     #exporting the cleaned monthly data 
     df_clean.to_csv(TFTout + 'TFR.csv', index=False)
     
+def experience_clean_data(TFTin, TFTout):
+    """
+    A function which takes new raw wellbeing data and prepares it for analyses
+    
+    Parameters
+    ----------
+             
+    TFTin: string
+            path to folder with input csv file with new data  
+             
+            
+    TFTout: string
+            path to folder to save file with clean data
+    """
+    #read csv file
+    df = pd.read_csv(TFTin + 'experience.csv' )
+    
+    #remove unneeded columns
+    df = df.drop('Respondent ID', axis=1)
+    df = df.drop('Collector ID', axis=1)
+    df = df.drop('Start Date', axis=1)
+    df = df.drop('End Date', axis=1)
+    df = df.drop('IP Address', axis=1)
+    df = df.drop('Email Address', axis=1)
+    df = df.drop('First Name', axis=1)
+    df = df.drop('Last Name', axis=1)
+    df = df.drop('Custom Data 1', axis=1)
 
+
+    #provide correct column names - could read from existing once wierd columns are sorted
+    cols = ['EthicsY','EthicsN','Location','Date_TrailClean','Type_Hosted',
+            'Type_Self_organised','Type_NotSure','Type_Other','FamiliarRegular',
+            'FamiliarFewTimes','FamiliarFirst','Experience_Feeling1', 
+            'Experience_Feeling2','Experience_Feeling3',
+            'Experience_+veFeeling0','Experience_+veFeeling1','Experience_+veFeeling2',
+            'Experience_+veFeeling3','Experience_+veFeeling4','Experience_+veFeeling5',
+            'Experience_+veFeeling6','Experience_+veFeeling7','Experience_+veFeeling8',
+            'Experience_+veFeeling9','Experience_+veFeeling10','Experience_Engagement0',
+            'Experience_Engagement1','Experience_Engagement2','Experience_Engagement3',
+            'Experience_Engagement4','Experience_Engagement5','Experience_Engagement6',
+            'Experience_Engagement7','Experience_Engagement8','Experience_Engagement9',
+            'Experience_Engagement10','Experience_Relationships0',
+            'Experience_Relationships1','Experience_Relationships2',
+            'Experience_Relationships3','Experience_Relationships4',
+            'Experience_Relationships5','Experience_Relationships6',
+            'Experience_Relationships7','Experience_Relationships8',
+            'Experience_Relationships9','Experience_Relationships10',
+            'Experience_Meaning0','Experience_Meaning1','Experience_Meaning2',
+            'Experience_Meaning3','Experience_Meaning4','Experience_Meaning5',
+            'Experience_Meaning6','Experience_Meaning7','Experience_Meaning8',
+            'Experience_Meaning9','Experience_Meaning10','Experience_Accomplishment0',
+            'Experience_Accomplishment1','Experience_Accomplishment2',
+            'Experience_Accomplishment3','Experience_Accomplishment4',
+            'Experience_Accomplishment5','Experience_Accomplishment6',
+            'Experience_Accomplishment7','Experience_Accomplishment8',
+            'Experience_Accomplishment9','Experience_Accomplishment10',
+            'Experience_Health0','Experience_Health1','Experience_Health2',
+            'Experience_Health3','Experience_Health4','Experience_Health5',
+            'Experience_Health6','Experience_Health7','Experience_Health8',
+            'Experience_Health9','Experience_Health10','Experience_NatureConnect0',
+            'Experience_NatureConnect1','Experience_NatureConnect2',
+            'Experience_NatureConnect3','Experience_NatureConnect4',
+            'Experience_NatureConnect5','Experience_NatureConnect6',
+            'Experience_NatureConnect7','Experience_NatureConnect8',
+            'Experience_NatureConnect9','Experience_NatureConnect10',
+            'Experience_Place0','Experience_Place1','Experience_Place2',
+            'Experience_Place3','Experience_Place4','Experience_Place5',
+            'Experience_Place6','Experience_Place7','Experience_Place8',
+            'Experience_Place9','Experience_Place10','Experience_Knowledge0',
+            'Experience_Knowledge1','Experience_Knowledge2','Experience_Knowledge3',
+            'Experience_Knowledge4','Experience_Knowledge5','Experience_Knowledge6',
+            'Experience_Knowledge7','Experience_Knowledge8','Experience_Knowledge9',
+            'Experience_Knowledge10','TakePartAgainY','TakePartAgainN',
+            'TakePartAgainUnsure','First time','Volunteer','A-Team',
+            'HQ','Community Hub', 'Clean_Hosting','Clean_Supporting',
+            'Clean_Attending','VolunteerWeeks','VolunteerMonths','VolunteerYears',
+            'Anything else','Name','Surname','Email','Receive emailY',
+            'Receive emailN','Receive email_alreadyin','DemographicsY','DemographicsN',
+            'AgeU18','Age18-14','Age25-34','Age35-44','Age45-54','Age55-64','Age65+',
+            'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
+            'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican','EthnicArab',
+            'EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
+            'EthnicOther','IllnessY','IllnessN','IllnessPreferNot'
+            ]
+    
+    #rename columns
+    df.columns=cols
+    #remove row with extra column names that aren't now needed
+    df_clean = df.drop(index=0)
+    
+    exp_cols = ['Experience_+veFeeling0','Experience_+veFeeling1','Experience_+veFeeling2',
+    'Experience_+veFeeling3','Experience_+veFeeling4','Experience_+veFeeling5',
+    'Experience_+veFeeling6','Experience_+veFeeling7','Experience_+veFeeling8',
+    'Experience_+veFeeling9','Experience_+veFeeling10','Experience_Engagement0',
+    'Experience_Engagement1','Experience_Engagement2','Experience_Engagement3',
+    'Experience_Engagement4','Experience_Engagement5','Experience_Engagement6',
+    'Experience_Engagement7','Experience_Engagement8','Experience_Engagement9',
+    'Experience_Engagement10','Experience_Relationships0',
+    'Experience_Relationships1','Experience_Relationships2',
+    'Experience_Relationships3','Experience_Relationships4',
+    'Experience_Relationships5','Experience_Relationships6',
+    'Experience_Relationships7','Experience_Relationships8',
+    'Experience_Relationships9','Experience_Relationships10',
+    'Experience_Meaning0','Experience_Meaning1','Experience_Meaning2',
+    'Experience_Meaning3','Experience_Meaning4','Experience_Meaning5',
+    'Experience_Meaning6','Experience_Meaning7','Experience_Meaning8',
+    'Experience_Meaning9','Experience_Meaning10','Experience_Accomplishment0',
+    'Experience_Accomplishment1','Experience_Accomplishment2',
+    'Experience_Accomplishment3','Experience_Accomplishment4',
+    'Experience_Accomplishment5','Experience_Accomplishment6',
+    'Experience_Accomplishment7','Experience_Accomplishment8',
+    'Experience_Accomplishment9','Experience_Accomplishment10',
+    'Experience_Health0','Experience_Health1','Experience_Health2',
+    'Experience_Health3','Experience_Health4','Experience_Health5',
+    'Experience_Health6','Experience_Health7','Experience_Health8',
+    'Experience_Health9','Experience_Health10','Experience_NatureConnect0',
+    'Experience_NatureConnect1','Experience_NatureConnect2',
+    'Experience_NatureConnect3','Experience_NatureConnect4',
+    'Experience_NatureConnect5','Experience_NatureConnect6',
+    'Experience_NatureConnect7','Experience_NatureConnect8',
+    'Experience_NatureConnect9','Experience_NatureConnect10',
+    'Experience_Place0','Experience_Place1','Experience_Place2',
+    'Experience_Place3','Experience_Place4','Experience_Place5',
+    'Experience_Place6','Experience_Place7','Experience_Place8',
+    'Experience_Place9','Experience_Place10','Experience_Knowledge0',
+    'Experience_Knowledge1','Experience_Knowledge2','Experience_Knowledge3',
+    'Experience_Knowledge4','Experience_Knowledge5','Experience_Knowledge6',
+    'Experience_Knowledge7','Experience_Knowledge8','Experience_Knowledge9',
+    'Experience_Knowledge10'
+    ]
+  
+    df_clean[exp_cols] = df_clean[exp_cols].apply(pd.to_numeric, errors='coerce')
+
+    df_clean[exp_cols] = df_clean[exp_cols].replace({
+        '0 - Not at all': 0,
+        '10 - Completely': 10
+        }, regex=False)
+    
+    for i in range(0, len(exp_cols), 11):
+        group = exp_cols[i : i + 11]
+        
+        
+        new_col_name = group[0][:-1] 
+        max_col = df_clean[group].idxmax(axis=1) 
+        df_clean[new_col_name] = max_col.str.extract(r'(\d+)$').astype(float)
+        df_clean.drop(columns=group, inplace=True)
+    
+    perma_cols = ['Experience_+veFeeling','Experience_Engagement',
+        'Experience_Relationships','Experience_Meaning','Experience_Accomplishment',
+        'Experience_Health'
+        ]
+    
+    df_clean['perma_score'] = df_clean[perma_cols].mean(axis=1)
+        
+    #remove sensitive data for U18s
+    cols_to_clear = ['Experience_Feeling1', 'Experience_Feeling2',
+        'Experience_Feeling3','Experience_+veFeeling','Experience_Engagement',
+        'Experience_Relationships','Experience_Meaning','Experience_Accomplishment',
+        'Experience_Health','Experience_NatureConnect','Experience_Knowledge',
+        'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
+        'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican',
+        'EthnicArab','EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
+        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot'
+        ]
+ 
+    before = len(df_clean.index)
+    df_clean.loc[df_clean['AgeU18'].notna(), cols_to_clear] = None
+    after = len(df_clean.index)
+    U18s_int = before - after
+    U18s = str(U18s_int)
+    
+    
+    df3 = df_clean
+    
+    #prepare columns with year and month data to be able to extract monthly or yearly data 
+    m = []
+    y = []
+    dates = df3['Date_TrailClean'].values
+    for d in dates:
+        split = d.split('/')
+        month = split[1]
+        year = split[2]
+        if len(month) == 1:
+            new = '0' + month
+            m.append(new)
+            y.append(year)
+        else:
+            m.append(month)
+            y.append(year)
+        
+    df3['month'] = m
+    df3['year'] = y
+    
+    email_ref_df = pd.read_csv(TFTin + 'email_reference.csv', encoding='cp1252')  
+    
+    df3['Email'] = (df3['Email'].str.strip().str.lower())
+    new_emails = df3[~df3['Email'].isin(email_ref_df['email'])]['Email'].dropna().unique()
+    
+    if len(new_emails) > 0:
+        current_max_id = email_ref_df['email_id'].max()
+    
+        new_rows = pd.DataFrame({
+            'email': new_emails,
+            'email_id': range(current_max_id + 1, current_max_id + 1 + len(new_emails))
+            })
+
+        email_ref_df = pd.concat([email_ref_df, new_rows], ignore_index=True)
+    
+        email_ref_df.to_csv(TFTin + 'email_reference.csv', index=False)
+        
+    df3 = df3.merge(email_ref_df, left_on='Email', right_on='email', how='left')
+    
+    
+    
+    cols_to_drop = ['Email','email','Name','Surname','name']
+    df3.drop(columns=['Email'], inplace=True)
+    df3.drop(columns=['email'], inplace=True)
+    
+    #exporting the cleaned monthly data 
+    df3.to_csv(TFTout + 'experience.csv', index=False)
+    
+    print('Number of Under 18s submissions = ' + U18s)
     
 def add_to_existing_data(TFTout, year_folder):
     """
@@ -1048,7 +1273,7 @@ def add_to_existing_data(TFTout, year_folder):
              
     """
 
-    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite', 'TFR']
+    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite', 'TFR', 'experience']
     #read csv file
     for file in forms:
         df_month = pd.read_csv(TFTout + file + '.csv')   
@@ -1070,6 +1295,7 @@ def add_to_existing_data(TFTout, year_folder):
     df_alltime = pd.concat(alltime, ignore_index = True) 
     bag_res_dfy.to_csv(year_folder + 'lite/bag_res_lite_2026.csv', index=False) 
     df_alltime.to_csv(year_folder + 'lite/all_bag_res_lite.csv', index=False)
+
     
         
 def data_for_Sophie(TFTout, Sophieout):

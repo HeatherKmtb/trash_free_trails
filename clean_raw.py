@@ -41,7 +41,7 @@ def survey_clean_data(TFTin, TFTout):
 
 
     #provide correct column names - could read from existing once wierd columns are sorted
-    cols = ['Date_TrailClean','People','postcode','TrailName','ActivityBike',
+    cols = ['EthicsY','EthicsN','Date_TrailClean','People','postcode','TrailName','ActivityBike',
         'ActivityRun','ActivityWalk','ActivityCombo','ActivityOther',
         'TypeMrkdTrails','TypeRoW','TypeUnofficial','TypePump','TypeUrban',
         'TypeOtherTrails','TypeAccess','TypeCar','TypeOther','MostTypeTrails',

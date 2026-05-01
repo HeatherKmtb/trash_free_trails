@@ -460,11 +460,11 @@ def date_range_extract_data(folderin, start_date, end_date, folderout):
     count = pd.read_csv(folderin + 'count/all_count.csv')
     CSsurvey = pd.read_csv(folderin + 'CS_survey/all_CS_survey.csv')
     CScount = pd.read_csv(folderin + 'CS_count/all_CS_count.csv')
-    #bag_res_lite = pd.read_csv(folderin + 'bag_res_lite.csv')
+    experience = pd.read_csv(folderin + 'experience/all_experience.csv')
     tfr = pd.read_csv(folderin + 'TFR/all_TFR.csv')
     
     #prepping the date columns
-    dfs_TrailClean = [survey, CSsurvey]
+    dfs_TrailClean = [survey, CSsurvey, experience]
     
     dfs_Count = [count, CScount]
     
@@ -484,9 +484,9 @@ def date_range_extract_data(folderin, start_date, end_date, folderout):
         df['date_dt'] = pd.to_datetime(df['Date_Count'], format='%d/%m/%Y')
         df.insert(1, 'date_dt', df.pop('date_dt'))
     
-    #getting total items
+    #getting dataframes
     dfs = {"survey": survey,"CSsurvey": CSsurvey,"count": count,
-    "CScount": CScount,"tfr": tfr,"lite": lite}
+    "CScount": CScount,"tfr": tfr,"lite": lite, "experience":experience}
 
     start = pd.to_datetime(start_date, dayfirst=True)
     end   = pd.to_datetime(end_date, dayfirst=True)

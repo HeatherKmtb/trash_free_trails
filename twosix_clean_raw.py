@@ -1205,7 +1205,8 @@ def experience_clean_data(TFTin, TFTout):
     U18s = str(U18s_int)
     
     
-    df3 = df_clean
+    df3 = df_clean[df_clean['Date_TrailClean'].notna()]
+    
     
     #prepare columns with year and month data to be able to extract monthly or yearly data 
     m = []
@@ -1248,57 +1249,17 @@ def experience_clean_data(TFTin, TFTout):
     
     
     cols_to_drop = ['Email','email','Name','Surname','name']
-    df3.drop(columns=['Email'], inplace=True)
-    df3.drop(columns=['email'], inplace=True)
+    df3.drop(columns=cols_to_drop, inplace=True)
+
     
     #exporting the cleaned monthly data 
     df3.to_csv(TFTout + 'experience.csv', index=False)
     
     print('Number of Under 18s submissions = ' + U18s)
     
-def add_to_existing_data(TFTout, year_folder):
-    """
-    A function which takes the prepared monthly TFT data and adds it to the 
-    correct yearly file
-    
-    Parameters
-    ----------
-    
-    TFTout: string
-            path to folder with input csv files with cleaned raw monthly data
-            
-    yearin: string
-            path to folder with input csv files with cleaned raw yearly data and
-            for output files 
-             
-    """
 
-    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite', 'TFR', 'experience']
-    #read csv file
-    for file in forms:
-        df_month = pd.read_csv(TFTout + file + '.csv')   
-        df_year = pd.read_csv(year_folder + file + '/' + file + '_2026.csv')
-        df_all_time = pd.read_csv(year_folder + file + '/all_' + file + '.csv')
-        dfs = (df_month, df_year)
-        alltime = (df_month, df_all_time)
-        df_final = pd.concat(dfs, ignore_index = True) 
-        df_alltime = pd.concat(alltime, ignore_index = True) 
-        df_final.to_csv(year_folder + file + '/' + file + '_2026.csv', index=False) 
-        df_alltime.to_csv(year_folder + file + '/all_' + file + '.csv', index=False)
         
-    bag_res = pd.read_csv(TFTout + 'bag_res_lite.csv') 
-    y_bag_res = pd.read_csv(year_folder + 'lite/bag_res_lite_2026.csv')
-    all_bagres = pd.read_csv(year_folder + 'lite/all_bag_res_lite.csv')
-    dfs = [bag_res, y_bag_res]
-    alltime = [bag_res, all_bagres]
-    bag_res_dfy = pd.concat(dfs, ignore_index = True) 
-    df_alltime = pd.concat(alltime, ignore_index = True) 
-    bag_res_dfy.to_csv(year_folder + 'lite/bag_res_lite_2026.csv', index=False) 
-    df_alltime.to_csv(year_folder + 'lite/all_bag_res_lite.csv', index=False)
-
-    
-        
-def data_for_Sophie(TFTout, Sophieout):
+def data_for_r2r(TFTout, r2rout):
     """
     A function which takes the prepared monthly TFT data and removes stuff that
     our lovely well-being researcher doesn't need and makes new .csvs for her'
@@ -1340,7 +1301,7 @@ def data_for_Sophie(TFTout, Sophieout):
         'Connection_TakePartAgainY','Connection_TakePartAgainN',
         'Connection_TakePartAgainUnsure','First time','Volunteer','A-Team',
         'HQ','Community Hub','VolunteerWeeks',
-        'VolunteerMonths','VolunteerYears','WhySubmit','Name','Surname','email_id',
+        'VolunteerMonths','VolunteerYears','WhySubmit','email_id',
         'DemographicsY','DemographicsN',
         'AgeU18','Age18-14','Age25-34','Age35-44','Age45-54','Age55-64','Age65+',
         'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
@@ -1365,6 +1326,48 @@ def data_for_Sophie(TFTout, Sophieout):
     survey = survey[survey_cols]
     lite = lite[lite_cols]
     
-    survey.to_csv(Sophieout + 'survey.csv', index = False)
-    lite.to_csv(Sophieout + 'lite.csv', index = False)
+    survey.to_csv(r2rout + 'r2r_survey.csv', index = False)
+    lite.to_csv(r2rout + 'r2r_lite.csv', index = False)
+    
+def add_to_existing_data(TFTout, year_folder):
+    """
+    A function which takes the prepared monthly TFT data and adds it to the 
+    correct yearly file
+    
+    Parameters
+    ----------
+    
+    TFTout: string
+            path to folder with input csv files with cleaned raw monthly data
+            
+    yearin: string
+            path to folder with input csv files with cleaned raw yearly data and
+            for output files 
+             
+    """
+
+    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite', 'TFR', 
+             'experience','r2r_lite','r2r_survey']
+    #read csv file
+    for file in forms:
+        df_month = pd.read_csv(TFTout + file + '.csv')   
+        df_year = pd.read_csv(year_folder + file + '/' + file + '_2026.csv')
+        df_all_time = pd.read_csv(year_folder + file + '/all_' + file + '.csv')
+        dfs = (df_month, df_year)
+        alltime = (df_month, df_all_time)
+        df_final = pd.concat(dfs, ignore_index = True) 
+        df_alltime = pd.concat(alltime, ignore_index = True) 
+        df_final.to_csv(year_folder + file + '/' + file + '_2026.csv', index=False) 
+        df_alltime.to_csv(year_folder + file + '/all_' + file + '.csv', index=False)
+        
+    bag_res = pd.read_csv(TFTout + 'bag_res_lite.csv') 
+    y_bag_res = pd.read_csv(year_folder + 'lite/bag_res_lite_2026.csv')
+    all_bagres = pd.read_csv(year_folder + 'lite/all_bag_res_lite.csv')
+    dfs = [bag_res, y_bag_res]
+    alltime = [bag_res, all_bagres]
+    bag_res_dfy = pd.concat(dfs, ignore_index = True) 
+    df_alltime = pd.concat(alltime, ignore_index = True) 
+    bag_res_dfy.to_csv(year_folder + 'lite/bag_res_lite_2026.csv', index=False) 
+    df_alltime.to_csv(year_folder + 'lite/all_bag_res_lite.csv', index=False)
+
     

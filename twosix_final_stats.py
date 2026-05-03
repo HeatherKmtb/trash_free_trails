@@ -26,7 +26,8 @@ def overview_stats(folderin, folderout):
     
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 
-                                      'total_survey', 'total_lite', 'trash_watch',
+                                      'total_survey', 'total_lite', 'total_experience',
+                                      'trash_watch',
                                       'no_people','distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
@@ -49,6 +50,7 @@ def overview_stats(folderin, folderout):
     count_survey = len(survey.index)    
     count_lite = len(lite.index)
     count_count = len(count.index)
+    count_exp = len(experience.index)
     
     #Overview Stats - submitted data
 
@@ -239,7 +241,7 @@ def overview_stats(folderin, folderout):
 
     new_row = pd.DataFrame([{'total_submisssions':total_CS, 'total_count':count_count,
                               'total_survey':count_survey, 'total_lite': count_lite,
-                              'no_people':total_people, 
+                              'total_experience':count_exp, 'no_people':total_people, 
                               'distance_km':km,
                               'duration_hours':total_time, 'items_removed':removed_items,
                               'items_surveyed':surveyed_items, 'total_items':total_items,

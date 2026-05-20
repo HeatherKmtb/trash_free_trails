@@ -840,10 +840,11 @@ def overview_stats(folderin, folderout):
 
     survey_results.to_csv(folderout + '/survey.csv', index=False)  
     
-    impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 'Fauna Death',
-                    'First Time', 'Repeat volunteers','Felt proud',
-                    'Felt more connected','met someone inspiring', 'went out after',
-                    'Would do again','provided contact info'])
+    impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 
+                    'Fauna Death','First Time', 'Repeat volunteers',
+                    'Felt more connected to nature','Felt more connected to place',
+                    'Percent with positive well-being','Would do again',
+                     'provided contact info'])
     
     #animal interaction - how many (%) answered the question and checked
     survey_AIcols = ['AnimalsY','AnimalsN']
@@ -861,7 +862,6 @@ def overview_stats(folderin, folderout):
     AI_tot = sum(AI_yes)
     
 #percent submissions reporting AI observed
-
     perc_AI = (AI_tot/subs_tot)*100
     
     survey['AIDeath'] = survey['AIDeath'].replace(['X', 'x'], 1)
@@ -1010,6 +1010,7 @@ def overview_stats(folderin, folderout):
                        'Percent with positive well-being':perc_inc_wb,
                        'Would do again':perc_participate_again,
                        'provided contact info':perc_contacts}])
+    
     impacts_results = pd.concat([impacts_results, new_row], ignore_index=True)    
     
     impacts_results.to_csv(folderout + '/impacts.csv', index=False) 

@@ -375,7 +375,8 @@ def overview_stats_per_year(folderin, folderout, year):
 
     count_results.to_csv(folderout + '/count_' + year + '.csv',index=False)  
     
-    survey_results = pd.DataFrame(columns = ['survey_submisssions', 'total items surveyed', 
+    survey_results = pd.DataFrame(columns = ['survey_submisssions', 'HQ_subs',
+                'A-Team subs','CH subs', 'total items surveyed', 
                 'total composition items','weight removed', 'volume removed', 'distance_kms', 'area kms2',
                 'most common material', 'SUP reported','SUP calculated','most common category',
                 'DRS reported','DRS total items','DRS total glass','DRS % of total items',
@@ -392,7 +393,11 @@ def overview_stats_per_year(folderin, folderout, year):
 
 #Survey stats
     
-#first ones currently covered in overviews
+#first ones currently covered in overviews except
+    HQ_subs = survey['HQ'].value_counts().get('TFT HQ doing the thing', 0)
+    AT_subs = survey['A-Team'].value_counts().get('I am an A-TEAMer', 0)
+    CHs = survey['Community Hub'].value_counts().notna()
+    CH_subs = len(CHs)
     
     kms_survey = [survey_km] 
 #distance covered    
@@ -971,7 +976,8 @@ def overview_stats_per_year(folderin, folderout, year):
     brands_sum.to_csv(folderout + 'brands_' + year + '.csv', index=False)
     
     
-    new_row = pd.DataFrame([{'survey_submisssions':total_survey,
+    new_row = pd.DataFrame([{'survey_submisssions':total_survey,'HQ_subs':HQ_subs,
+                'A-Team subs':AT_subs,'CH subs':CH_subs,
                 'total items surveyed':fully_surveyed_items, 
                 'total composition items':total_reported_items, 
                 'weight removed':total_kg, 
@@ -1204,7 +1210,8 @@ def overview_stats_overall(folderin, folderout):
     
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['total_submisssions', 'total_count', 
-                                      'total_survey', 'total_lite', 'trash_watch',
+                                      'total_survey', 'total_lite', 
+                                      'total_experience','trash_watch',
                                       'no_people','distance_km','duration_hours', 
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
@@ -1533,7 +1540,8 @@ def overview_stats_overall(folderin, folderout):
 
     count_results.to_csv(folderout + '/count_all_time.csv',index=False)  
     
-    survey_results = pd.DataFrame(columns = ['survey_submisssions', 'total items surveyed', 
+    survey_results = pd.DataFrame(columns = ['survey_submisssions', 'HQ_subs',
+                'A-Team subs','CH subs','total items surveyed', 
                 'total composition items','weight removed', 'volume removed', 'distance_kms', 'area kms2',
                 'most common material', 'SUP reported','SUP calculated','most common category',
                 'DRS reported','DRS total items','DRS total glass','DRS % of total items',
@@ -1550,7 +1558,11 @@ def overview_stats_overall(folderin, folderout):
 
 #Survey stats
     
-#first ones currently covered in overviews
+#first ones currently covered in overviews except
+    HQ_subs = survey['HQ'].value_counts().get('TFT HQ doing the thing', 0)
+    AT_subs = survey['A-Team'].value_counts().get('I am an A-TEAMer', 0)
+    CHs = survey['Community Hub'].value_counts().notna()
+    CH_subs = len(CHs)
     
     kms_survey = [survey_km] 
 #distance covered    
@@ -2129,7 +2141,8 @@ def overview_stats_overall(folderin, folderout):
     brands_sum.to_csv(folderout + 'brands_all_time.csv', index=False)
     
     
-    new_row = pd.DataFrame([{'survey_submisssions':total_survey,
+    new_row = pd.DataFrame([{'survey_submisssions':total_survey,'HQ_subs':HQ_subs,
+                'A-Team subs':AT_subs,'CH subs':CH_subs,
                 'total items surveyed':fully_surveyed_items, 
                 'total composition items':total_reported_items, 
                 'weight removed':total_kg, 

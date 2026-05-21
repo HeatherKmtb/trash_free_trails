@@ -303,7 +303,8 @@ def overview_stats(folderin, folderout):
 
     count_results.to_csv(folderout + '/count.csv',index=False)  
     
-    survey_results = pd.DataFrame(columns = ['survey_submisssions', 'total items surveyed', 
+    survey_results = pd.DataFrame(columns = ['survey_submisssions', 'HQ_subs',
+                'A-Team subs','CH subs','total items surveyed', 
                 'total composition items','weight removed', 'volume removed', 'distance_kms', 'area kms2',
                 'most common material', 'SUP reported','SUP calculated','most common category',
                 'DRS reported','DRS total items','DRS total glass','DRS % of total items',
@@ -320,7 +321,11 @@ def overview_stats(folderin, folderout):
 
 #Survey stats
     
-#first ones currently covered in overviews
+#first ones currently covered in overviews except
+    HQ_subs = survey['HQ'].value_counts().get('TFT HQ doing the thing', 0)
+    AT_subs = survey['A-Team'].value_counts().get('I am an A-TEAMer', 0)
+    CHs = survey['Community Hub'].value_counts().notna()
+    CH_subs = len(CHs)
     
     kms_survey = [survey_km] 
 #distance covered    
@@ -813,7 +818,8 @@ def overview_stats(folderin, folderout):
     #ALSO have lost data from TFR and CS survey
     #can also add in here if we get tiered data! But keep an eye for now
     
-    new_row = pd.DataFrame([{'survey_submisssions':count_survey,
+    new_row = pd.DataFrame([{'survey_submisssions':count_survey,'HQ_subs':HQ_subs,
+                'A-Team subs':AT_subs,'CH subs':CH_subs,
                 'total items surveyed':fully_surveyed_items, 
                 'total composition items':total_reported_items, 
                 'weight removed':total_kg, 

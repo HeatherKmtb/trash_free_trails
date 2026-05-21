@@ -1008,7 +1008,7 @@ def TFRaces_clean_data_v1(TFTin, TFTout):
         'Merch_Stanleyflask', 'Merch_Patch_TFTlogo', 'Merch_Patch_PAlogo', 
         'Merch_Patch_PAwhitesquare', 'Merch_Patch_Trashmob', 'Merch_woodmarker',
         'Merch_steelmarker', 'Merch_NCcards + tin', 'Merch_NCcards no tin',
-        'survey', 'count', 'TotItems', 'include_Y', 'include_N',
+        'Merch_beeswax','survey', 'count', 'TotItems', 'include_Y', 'include_N',
         'include_some', 'Item1', 'Item2', 'Item3', 'Item4', 'Item5', 'Item1_Quantity', 
         'Item2_Quantity', 'Item3_Quantity', 'Item4_Quantity', 'Item5_Quantity', 
         'B1_Lucozade','B1_Coke','B1_RedBull','B1_Monster','B1_Cadbury',

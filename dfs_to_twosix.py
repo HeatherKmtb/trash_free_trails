@@ -94,20 +94,35 @@ def survey_dfs(TFTin, TFTout):
     
  
     
-    #brand colum reshifting
+    #brand column reshifting
     brand_cols = [c for c in df.columns if c.startswith(('B1_', 'B2_', 'B3_'))]
     unique_brands = set(c.split('_', 1)[1] for c in brand_cols)
 
     for brand in unique_brands:
-        df[brand] = pd.Series(dtype='object')
+        if brand == 'Other':
+        # Initialize 'Other' with empty lists so we can append multiple values
+            df['Other'] = [[] for _ in range(len(df))]
+        
+            for i in [1, 2, 3]:
+                col_name = f'B{i}_Other'
+                if col_name in df.columns:
+                # Find rows where this column is not null
+                    mask = df[col_name].notna()
+                
+                # Append "xi: value" to the list for those rows
+                    df.loc[mask, 'Other'] = df.loc[mask].apply(
+                        lambda row: row['Other'] + [f'x{i}: {row[col_name]}'], axis=1)
+        
+        # Optional: Convert the lists into a clean, comma-separated string
+            df['Other'] = df['Other'].apply(lambda x: ', '.join(x) if x else None)
 
-        for i in [1, 2, 3]:
-            col_name = f'B{i}_{brand}'
-            if col_name in df.columns:
-                mask = df[col_name].notna()
-                if brand == 'Other':
-                    df.loc[mask, brand] = df.loc[mask, col_name]
-                else:
+        else:
+        # Standard logic for the rest of the brands
+            df[brand] = pd.Series(dtype='object')
+            for i in [1, 2, 3]:
+                col_name = f'B{i}_{brand}'
+                if col_name in df.columns:
+                    mask = df[col_name].notna()
                     df.loc[mask, brand] = f'x{i}'
 
     df = df.drop(columns=brand_cols)
@@ -477,25 +492,38 @@ def CSsurvey_dfs(TFTin, TFTout):
     
  
     
-    #brand colum reshifting
+    # brand column reshifting
     brand_cols = [c for c in df.columns if c.startswith(('B1_', 'B2_', 'B3_'))]
     unique_brands = set(c.split('_', 1)[1] for c in brand_cols)
 
     for brand in unique_brands:
-        df[brand] = pd.Series(dtype='object')
+        if brand == 'Other':
+        # Initialize 'Other' with empty lists so we can append multiple values
+            df['Other'] = [[] for _ in range(len(df))]
+        
+            for i in [1, 2, 3]:
+                col_name = f'B{i}_Other'
+                if col_name in df.columns:
+                # Find rows where this column is not null
+                    mask = df[col_name].notna()
+                
+                # Append "xi: value" to the list for those rows
+                    df.loc[mask, 'Other'] = df.loc[mask].apply(
+                        lambda row: row['Other'] + [f'x{i}: {row[col_name]}'], axis=1)
+        
+        # Optional: Convert the lists into a clean, comma-separated string
+            df['Other'] = df['Other'].apply(lambda x: ', '.join(x) if x else None)
 
-        for i in [1, 2, 3]:
-            col_name = f'B{i}_{brand}'
-            if col_name in df.columns:
-                mask = df[col_name].notna()
-                if brand == 'Other':
-                    df.loc[mask, brand] = df.loc[mask, col_name]
-                else:
+        else:
+        # Standard logic for the rest of the brands
+            df[brand] = pd.Series(dtype='object')
+            for i in [1, 2, 3]:
+                col_name = f'B{i}_{brand}'
+                if col_name in df.columns:
+                    mask = df[col_name].notna()
                     df.loc[mask, brand] = f'x{i}'
 
     df = df.drop(columns=brand_cols)
-    
- 
     
     #place connection reshifting
     conditions = [df['Connection_ConnectionY'].notna(), 
@@ -717,4 +745,79 @@ def CSsurvey_dfs(TFTin, TFTout):
     
     df.to_csv(TFTout, index=False)
     
+def TFR_dfs(TFTin, TFTout):
+    """
+    A function which takes the pre-2026 citizen science survey data and adjusts 
+    the columns to match the 2026 updated data
+    
+    Parameters
+    ----------
+             
+    TFTin: string
+            path to input csv file with original TFT data 
+             
+            
+    TFTout: string
+            path to output file with updated TFT data
+    """
 
+    df = pd.read_csv(TFTin)
+    
+    #brand colum reshifting
+    brand_cols = [c for c in df.columns if c.startswith(('B1_', 'B2_', 'B3_'))]
+    unique_brands = set(c.split('_', 1)[1] for c in brand_cols)
+
+    for brand in unique_brands:
+        df[brand] = pd.Series(dtype='object')
+
+        for i in [1, 2, 3]:
+            col_name = f'B{i}_{brand}'
+            if col_name in df.columns:
+                mask = df[col_name].notna()
+                if brand == 'Other':
+                    df.loc[mask, brand] = df.loc[mask, col_name]
+                else:
+                    df.loc[mask, brand] = f'x{i}'
+
+    df = df.drop(columns=brand_cols)
+    
+    #Renaming cols
+    mapping = {'Strongbow':'Heineken',
+               'Carling':'Molson Coors'
+               }
+
+    df = df.rename(columns=mapping)
+ 
+    df['AB InBev'] = df['StellaArtois'].fillna(df['Budweiser'])
+    
+    df[['Ribena', 'High5', 'Danone', 'Highland Spring', 'Barrs', 'Britvic', 
+        'Mondelez', 'Magnum', 'Corona', 'Bulmers', 'Carlsberg', 'Burger King', 
+        'Greggs', 'KFC', 'Aldi', 'Co-op', 'Euro Shopper', 'LiDL', 'M&S', 
+        'Tesco','Torq','Styrkr','Maurten','Precision']] = np.nan
+    
+    desired_order = ['Start_Date', 'End_Date','postcode','EventName','ActivityMTB',
+        'ActivityGravel','ActivityRun','ActivityTriathlon','ActivityHike',
+        'ActivityFestival','ActivityOther', 'Attendees',
+        'Conversations','Newsletters','Merch_teeS','Merch_teeS', 'Merch_teeM'
+        'Merch_teeL', 'Merch_teeXL', 'Merch_tee_5-6', 'Merch_tee_7-8',
+        'Merch_tee_9-11', 'Merch_hoodyS', 'Merch_hoodyM', 'Merch_hoodyL', 
+        'Merch_hoodyXL', 'Mech_glasscoffee', 'Merch_KBCcoffee', 'Merch_Hydroflask',
+        'Merch_Stanleyflask', 'Merch_Patch_TFTlogo', 'Merch_Patch_PAlogo', 
+        'Merch_Patch_PAwhitesquare', 'Merch_Patch_Trashmob', 'Merch_woodmarker',
+        'Merch_steelmarker', 'Merch_NCcards + tin', 'Merch_NCcards no tin',
+        'Merch_beeswax','survey', 'count', 'TotItems', 'include_Y', 'include_N',
+        'include_some', 'Item1', 'Item2', 'Item3', 'Item4', 'Item5', 'Item1_Quantity', 
+        'Item2_Quantity', 'Item3_Quantity', 'Item4_Quantity', 'Item5_Quantity', 
+        'Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone','Highland Spring',
+        'Coke','Costa','Pepsi','Walkers','Barrs','Britvic','Mars','Nestle',
+        'Mondelez','Cadbury','Magnum','Haribo','AB InBev','Corona','Molson Coors',
+        'Thatchers','Heineken','Fosters','Bulmers','Carlsberg','Burger King',
+        'Greggs','KFC','McDonalds','Subway','Aldi','Co-op','Euro Shopper','LiDL',
+        'M&S','Tesco','Torq','Styrkr','Maurten','Precision','OTE','Other',
+        'AnimalsY','AnimalsN','AnimalsNotChecked','AnimalsInfo'
+        ]
+    
+    df = df[desired_order]
+    
+    df.to_csv(TFTout, index=False)
+    

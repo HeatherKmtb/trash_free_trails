@@ -825,11 +825,19 @@ def stats_and_graphs(folderin, folderout):
 
     ax.bar(df_sorted['TrailName'], df_sorted['TotItems'], color='black', label='Other Items')
     ax.bar(df_sorted['TrailName'], df_sorted['DRS_sum'], color='#7CB701', label='DRS Items')
+    
+    afont = {'family' : 'sans-serif',
+        'weight' : 'normal',
+        'size'   : 12}
+    
+    tfont = {'family' : 'sans-serif',
+        'weight' : 'bold',
+        'size'   : 18}
 
 
-    ax.set_xlabel('Location', fontsize=12)
-    ax.set_ylabel('Total Items', fontsize=12)
-    ax.set_title('Items per Trail Breakdown', fontsize=14, pad=15)
+    ax.set_xlabel('Location', **afont)
+    ax.set_ylabel('Total Items', **afont)
+    ax.set_title('Items per Trail Breakdown', **tfont, pad=15)
     ax.legend()
 
     # Rotate x-axis labels to prevent overlapping
@@ -850,13 +858,13 @@ def stats_and_graphs(folderin, folderout):
     brand_totals = df[brands].apply(pd.to_numeric, errors='coerce').sum()
     brand_totals = brand_totals.sort_values(ascending=False)
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-    ax.bar(brand_totals.index, brand_totals.values, color='black', edgecolor='black')
+    ax.bar(brand_totals.index, brand_totals.values, color='#3D6A2C', edgecolor='black')
 
-    ax.set_xlabel('Brands', fontsize=12)
-    ax.set_ylabel('Total', fontsize=12)
-    ax.set_title('Total Sum per Brand', fontsize=14, pad=15)
+    ax.set_xlabel('Brands', **afont)
+    ax.set_ylabel('Total', **afont)
+    ax.set_title('Total Sum per Brand', **tfont, pad=15)
 
     plt.xticks(rotation=45, ha='right')
 
@@ -906,7 +914,11 @@ def stats_and_graphs(folderin, folderout):
     sizes = [not_AI, AI_remaining, AI_death]
     labels = ['No observed animal interaction', 'Animal Interaction', 'Evidence of Death']
 
-    colors = ['#E2E8F0', '#2B6CB0', '#2B6CB0']
+    colors = ['#F7F6EC', '#70ADA3', '#70ADA3']
+    
+    afont = {'family' : 'sans-serif',
+        'weight' : 'normal',
+        'size'   : 10}
 
 
     fig, ax = plt.subplots(figsize=(6, 6))
@@ -918,18 +930,18 @@ def stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%', 
         startangle=90, 
         counterclock=False,
-        textprops=dict(color='#4A5568', fontsize=11),
+        textprops=dict(color='#4A5568', **afont),
         wedgeprops=dict(edgecolor='white', linewidth=2) 
         )
 
 
-    wedges[2].set_hatch('\\\\') 
+    wedges[2].set_hatch('////') 
 
     autotexts[1].set_text(f"{perc_AI:.1f}%")
-    autotexts[0].set_color('#4A5568')  
-    autotexts[1].set_color('white')    # Main AI total text
+    autotexts[0].set_color('#4A5568') #dark grey 
+    autotexts[1].set_color('black')    # Main AI total text
     autotexts[1].set_fontweight('bold')
-    autotexts[2].set_color('white')    # Death subset text
+    autotexts[2].set_color('black')    # Death subset text
 
 
     ax.set_title("Animal Interaction with Single-use Pollution", fontsize=15, fontweight='bold', color='#1A202C', pad=20)
@@ -942,9 +954,9 @@ def stats_and_graphs(folderin, folderout):
     df = experience
     counts = df['Experience_NatureConnect'].value_counts().sort_index()
 
-    color_0 = "#312E81"    # Deep Indigo (0 - All the other color)
+    color_0 = "#508591"    # A-Team blue (0 - All the other color)
     color_5 = "#F1F5F9"    # Pale Slate/Gray (5 - Neutral/Pale center)
-    color_10 = "#10B981"   # Emerald Green (10 - All Green)
+    color_10 = "#00945C"   # Emergence Green (10 - All Green)
 
     # Create two smooth gradients meeting perfectly at 5
     cmap_low = mcolors.LinearSegmentedColormap.from_list("low", [color_0, color_5])
@@ -972,7 +984,7 @@ def stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%',
         startangle=140,
         counterclock=False,
-        textprops=dict(color='#4A5568', fontsize=11),
+        textprops=dict(color='#4A5568', **afont),
         wedgeprops=dict(edgecolor='white', linewidth=2)  # Sharp white borders between slices
         )
 
@@ -987,7 +999,7 @@ def stats_and_graphs(folderin, folderout):
             autotext.set_color('#1E293B')
 
 # Title styling
-    ax.set_title("Nature Connection Scores", fontsize=16, fontweight='bold', color='#1E293B', pad=20)
+    ax.set_title("Nature Connection Scores", **tfont, pad=20)
 
     plt.tight_layout()
     plt.savefig(folderout + 'nature_connection.png', dpi=300, bbox_inches='tight', facecolor='white')
@@ -1000,9 +1012,9 @@ def stats_and_graphs(folderin, folderout):
     df['perma_score'] = df['perma_score'].round(0).astype(int)
     counts = df['perma_score'].value_counts().sort_index()
 
-    color_0 = "#312E81"    # Deep Indigo (0 - All the other color)
+    color_0 = "#508591"    # A-Team blue (0 - All the other color)
     color_5 = "#F1F5F9"    # Pale Slate/Gray (5 - Neutral/Pale center)
-    color_10 = "#10B981"   # Emerald Green (10 - All Green)
+    color_10 = "#00945C"   # Emergence Green (10 - All Green)
 
     # Create two smooth gradients meeting perfectly at 5
     cmap_low = mcolors.LinearSegmentedColormap.from_list("low", [color_0, color_5])
@@ -1030,7 +1042,7 @@ def stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%',
         startangle=140,
         counterclock=False,
-        textprops=dict(color='#4A5568', fontsize=11),
+        textprops=dict(color='#4A5568', **afont),
         wedgeprops=dict(edgecolor='white', linewidth=2)  # Sharp white borders between slices
         )
 
@@ -1045,7 +1057,7 @@ def stats_and_graphs(folderin, folderout):
             autotext.set_color('#1E293B')
 
 # Title styling
-    ax.set_title("Well-being Scores", fontsize=16, fontweight='bold', color='#1E293B', pad=20)
+    ax.set_title("Well-being Scores", **tfont, pad=20)
 
     plt.tight_layout()
     plt.savefig(folderout + 'well_being.png', dpi=300, bbox_inches='tight', facecolor='white')

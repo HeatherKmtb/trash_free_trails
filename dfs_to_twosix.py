@@ -215,7 +215,7 @@ def survey_dfs(TFTin, TFTout):
         'Value Branded condiments packaging','Value Unbranded condiments packaging',
         'Value Unbranded food on the go','Value Branded other food related',
         'Value Unbranded other food related','Value Cosmetics / deodorants',
-        'Value Other household','Value Nicotine pouches',
+        'Value Nicotine pouches',
         'Value Nicotine related packaging','Value Unbagged dog poo',
         'Value Needles / syringes','Value broken glass or pottery',
         'Value batteries and electronics',
@@ -244,7 +244,8 @@ def survey_dfs(TFTin, TFTout):
         'Age65+', 'GenderFemale', 'GenderMale', 'GenderNon-binary', 'GenderTransgender', 
         'GenderPreferNot', 'GenderOther', 'HomePostcode', 'EthnicAfrican', 
         'EthnicArab', 'EthnicAsian', 'EthinicLatino', 'EthnicCaucasian', 
-        'EthinicPreferNot', 'EthnicOther', 'IllnessY', 'IllnessN', 'IllnessPreferNot'
+        'EthinicPreferNot', 'EthnicOther', 'IllnessY', 'IllnessN', 
+        'IllnessPreferNot','perma_score'
         ]
     
     new_df_piece = pd.DataFrame(np.nan, index=df.index, columns=new_empty_cols)
@@ -393,8 +394,8 @@ def survey_dfs(TFTin, TFTout):
         'GenderFemale','GenderMale','GenderNon-binary','GenderTransgender',
         'GenderPreferNot','GenderOther','HomePostcode','EthnicAfrican','EthnicArab',
         'EthnicAsian','EthinicLatino','EthnicCaucasian','EthinicPreferNot',
-        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot','month','year',
-        'email_id','community','name'
+        'EthnicOther','IllnessY','IllnessN','IllnessPreferNot','perma_score',
+        'month','year','email_id','community','name'
         ]
     
     df = df[desired_order]

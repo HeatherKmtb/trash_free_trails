@@ -269,13 +269,14 @@ def survey_clean_data(TFTin, TFTout):
     'Experience_Knowledge7','Experience_Knowledge8','Experience_Knowledge9',
     'Experience_Knowledge10'
     ]
-  
-    df_clean[exp_cols] = df_clean[exp_cols].apply(pd.to_numeric, errors='coerce')
 
     df_clean[exp_cols] = df_clean[exp_cols].replace({
         '0 - Not at all': 0,
         '10 - Completely': 10
         }, regex=False)
+    
+      
+    df_clean[exp_cols] = df_clean[exp_cols].apply(pd.to_numeric, errors='coerce')
     
     for i in range(0, len(exp_cols), 11):
         group = exp_cols[i : i + 11]
@@ -283,7 +284,7 @@ def survey_clean_data(TFTin, TFTout):
         
         new_col_name = group[0][:-1] 
         max_col = df_clean[group].idxmax(axis=1) 
-        df_clean[new_col_name] = max_col.str.extract(r'(\d+)$').astype(float)
+        df_clean[new_col_name] = max_col.str.extract(r'(\d+)').astype(float)
         df_clean.drop(columns=group, inplace=True)
     
     perma_cols = ['Experience_+veFeeling','Experience_Engagement',
@@ -1164,12 +1165,12 @@ def experience_clean_data(TFTin, TFTout):
     'Experience_Knowledge10'
     ]
   
-    df_clean[exp_cols] = df_clean[exp_cols].apply(pd.to_numeric, errors='coerce')
-
     df_clean[exp_cols] = df_clean[exp_cols].replace({
         '0 - Not at all': 0,
         '10 - Completely': 10
         }, regex=False)
+     
+    df_clean[exp_cols] = df_clean[exp_cols].apply(pd.to_numeric, errors='coerce')
     
     for i in range(0, len(exp_cols), 11):
         group = exp_cols[i : i + 11]
@@ -1177,7 +1178,7 @@ def experience_clean_data(TFTin, TFTout):
         
         new_col_name = group[0][:-1] 
         max_col = df_clean[group].idxmax(axis=1) 
-        df_clean[new_col_name] = max_col.str.extract(r'(\d+)$').astype(float)
+        df_clean[new_col_name] = max_col.str.extract(r'(\d+)').astype(float)
         df_clean.drop(columns=group, inplace=True)
     
     perma_cols = ['Experience_+veFeeling','Experience_Engagement',
@@ -1198,12 +1199,11 @@ def experience_clean_data(TFTin, TFTout):
         'EthnicOther','IllnessY','IllnessN','IllnessPreferNot'
         ]
  
-    before = len(df_clean.index)
     df_clean.loc[df_clean['AgeU18'].notna(), cols_to_clear] = None
-    after = len(df_clean.index)
-    U18s_int = before - after
+
+    U18s_int = df_clean['AgeU18'].notna().sum()
     U18s = str(U18s_int)
-    
+    df_clean.loc[df_clean['AgeU18'].notna(), cols_to_clear] = None
     
     df3 = df_clean[df_clean['Date_TrailClean'].notna()]
     

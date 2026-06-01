@@ -42,7 +42,6 @@ def survey_clean_data(TFTin, TFTout):
     df = df.drop('Unnamed: 295', axis=1)
 
 
-
     #provide correct column names - could read from existing once wierd columns are sorted
     cols = ['Ethics','Date_TrailClean','People','postcode','TrailName','FamiliarRegular',
         'FamiliarFewTimes','FamiliarFirst','ActivityBike', 'ActivityRun',
@@ -204,6 +203,8 @@ def survey_clean_data(TFTin, TFTout):
     #remove row with extra column names that aren't now needed
     df_clean = df.drop(index=0)
     
+    
+    
     df_clean = df_clean.drop('Rando Q', axis=1)
     df_clean.insert(58, 'Binbags', np.nan)
     
@@ -347,7 +348,7 @@ def survey_clean_data(TFTin, TFTout):
             'Too small/dirty to ID','Other Miscellaneous'
             ]
 
-    df3 = df_clean
+    df3 = df_clean[df_clean['Date_TrailClean'].notna()]
     
     #df3[change_cols] = 'TRUE'
     
@@ -1340,7 +1341,7 @@ def add_to_existing_data(TFTout, year_folder):
              
     """
 
-    forms = ['count', 'survey', 'CS_count', 'CS_survey', 'lite', 'TFR', 
+    forms = ['count', 'survey', 'lite', 'TFR', 
              'experience','r2r_lite','r2r_survey']
     #read csv file
     for file in forms:

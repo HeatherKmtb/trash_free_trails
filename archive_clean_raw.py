@@ -26,7 +26,7 @@ def survey_clean_data(TFTin, TFTout):
             path to folder to save file with clean data
     """
     #read csv file
-    df = pd.read_csv(TFTin + 'survey.csv' )
+    df = pd.read_csv(TFTin + 'old_survey.csv' )
     
     #remove unneeded columns
     df = df.drop('Respondent ID', axis=1)
@@ -244,7 +244,7 @@ def survey_clean_data(TFTin, TFTout):
     df3.drop(columns=['Phone'], inplace=True)
              
     #exporting the cleaned monthly data 
-    df3.to_csv(TFTout + 'survey.csv', index=False)
+    df3.to_csv(TFTout + 'old_survey.csv', index=False)
     
     
 def count_clean_data(TFTin, TFTout):

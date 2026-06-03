@@ -872,7 +872,7 @@ def overview_stats(folderin, folderout):
     
     survey['AIDeath'] = survey['AIDeath'].replace(['X', 'x'], 1)
     survey['AIDeath'] = pd.to_numeric(survey['AIDeath'], errors='coerce')
-    
+
     deaths = []
     death_survey = survey['AIDeath'].sum()
     deaths.append(death_survey)

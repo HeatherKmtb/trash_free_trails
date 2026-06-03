@@ -399,7 +399,17 @@ def survey_dfs(TFTin, TFTout):
         ]
     
     df = df[desired_order]
-    
+      
+    #convert chew and death from the AI comments
+    death_pattern = r'(death|dead|meth|drown|smell|remains|entrapment)'
+    chew_pattern = r'chew'
+
+    death_mask = df['AIOther'].astype(str).str.contains(death_pattern, case=False, na=False)
+    chew_mask = df['AIOther'].astype(str).str.contains(chew_pattern, case=False, na=False)
+
+    df['AIDeath'] = df['AIDeath'].fillna(0) + death_mask.astype(int)
+    df['AIChew'] = df['AIChew'].fillna(0) + chew_mask.astype(int)
+
     df.to_csv(TFTout, index=False)
     
 def lite_dfs(TFTin, TFTout):

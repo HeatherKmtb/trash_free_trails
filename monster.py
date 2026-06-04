@@ -661,7 +661,7 @@ def experience_clean_data(TFTin, TFTout):
     
 
 
-def stats_and_graphs(folderin, folderout):
+def monster_stats_and_graphs(folderin, folderout):
     """
     A function which takes clean monthly TFT survey data and produces monthly stats
     
@@ -823,8 +823,8 @@ def stats_and_graphs(folderin, folderout):
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    ax.bar(df_sorted['TrailName'], df_sorted['TotItems'], color='black', label='Other Items')
-    ax.bar(df_sorted['TrailName'], df_sorted['DRS_sum'], color='#7CB701', label='DRS Items')
+    ax.bar(df_sorted['TrailName'], df_sorted['TotItems'], color='#80DCB5', label='Other Items')
+    ax.bar(df_sorted['TrailName'], df_sorted['DRS_sum'], color='#00945C', label='DRS Items')
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
@@ -860,7 +860,7 @@ def stats_and_graphs(folderin, folderout):
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    ax.bar(brand_totals.index, brand_totals.values, color='#3D6A2C', edgecolor='black')
+    ax.bar(brand_totals.index, brand_totals.values, color='#00945C', edgecolor='black')
 
     ax.set_xlabel('Brands', **afont)
     ax.set_ylabel('Total', **afont)
@@ -914,7 +914,7 @@ def stats_and_graphs(folderin, folderout):
     sizes = [not_AI, AI_remaining, AI_death]
     labels = ['No observed animal interaction', 'Animal Interaction', 'Evidence of Death']
 
-    colors = ['#F7F6EC', '#70ADA3', '#70ADA3']
+    colors = ['#80DCB5', '#00945C', '#00945C']
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
@@ -930,7 +930,7 @@ def stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%', 
         startangle=90, 
         counterclock=False,
-        textprops=dict(color='#4A5568', **afont),
+        textprops=dict(color='#80DCB5', **afont),
         wedgeprops=dict(edgecolor='white', linewidth=2) 
         )
 
@@ -938,10 +938,11 @@ def stats_and_graphs(folderin, folderout):
     wedges[2].set_hatch('////') 
 
     autotexts[1].set_text(f"{perc_AI:.1f}%")
-    autotexts[0].set_color('#4A5568') #dark grey 
+    autotexts[0].set_color('#1A202C') #paler
     autotexts[1].set_color('black')    # Main AI total text
     autotexts[1].set_fontweight('bold')
     autotexts[2].set_color('black')    # Death subset text
+    autotexts[2].set_fontweight('bold')
 
 
     ax.set_title("Animal Interaction with Single-use Pollution", fontsize=15, fontweight='bold', color='#1A202C', pad=20)
@@ -1057,13 +1058,435 @@ def stats_and_graphs(folderin, folderout):
             autotext.set_color('#1E293B')
 
 # Title styling
-    ax.set_title("Well-being Scores", **tfont, pad=20)
+    ax.set_title("Well-being Scores \n Called a PERMA score, calculated from 5 of the experience responses \n ranking from 0 - lowest score to 10 - highest score", **tfont, pad=20)
 
+    bg_color = '#00945C' 
+
+    fig.patch.set_facecolor(bg_color)  # Changes the whole image background
+    ax.set_facecolor(bg_color)   # Changes the background behind the pie chart
+    
     plt.tight_layout()
-    plt.savefig(folderout + 'well_being.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(folderout + 'well_being2.png', 
+                dpi=300, 
+                bbox_inches='tight', 
+                facecolor=fig.get_facecolor(), 
+                edgecolor='none'
+                )
     
+def TFT_stats_and_graphs(folderin, folderout):
+    """
+    A function which takes all time TFT data and produces graphs to match Monster graphics
     
+    Parameters
+    ----------
+    
+    folderin: string
+             path to input folder with csv files with monthly TFT data
+            
+    folderout: string
+           path for folder to save results in
+    """
 
+    
+    #create df for results - or could read in and append to overall stats sheet
+    results = pd.DataFrame(columns = ['no_people','distance_km','duration_hours', 
+                                      'total_items'
+                                      ])
+    
+    lite_dt = pd.read_csv(folderin + 'other_averages_calc.csv',
+                          index_col=0).iloc[:, 0]
+    lite_dict = lite_dt.to_dict()  
+    
+    survey = pd.read_csv(folderin + 'survey/all_survey.csv')
+    lite = pd.read_csv(folderin + 'lite/all_lite.csv')
+    experience = pd.read_csv(folderin + 'experience/all_experience.csv')
+  
+    count_lite = len(lite.index)
+
+        
+    #Overview - volunteers, distance, hours, items
+    mins = survey['Time_min']
+    hours = []
+    for m in mins:
+        hour = m/60
+        hours.append(hour)
+        
+    survey['Time_hours'] = hours    
+    
+    tot_people = []
+    tot_time = []
+    
+    minutes = lite_dict['Time_min']
+    time = minutes/60
+
+    survey['Time_hours'] = survey['Time_hours'].replace(0, time).fillna(time)
+    survey['People'] = survey['People'].replace(0, lite_dict['People']).fillna(lite_dict['People'])
+    
+    people = survey['People'].sum()
+    hours = (survey['People'] * survey['Time_hours']).sum()
+
+    tot_people.append(people)
+    tot_time.append(hours)
+
+    #add to total people the number of lite and count submissions
+    lite_people = count_lite * lite_dict['People']
+    tot_people.append(lite_people)
+
+     
+    #volunteers
+    total_people = sum(tot_people)
+    
+    survey_km = survey['Distance_km'].sum()
+    lite_km = count_lite * lite_dict['Distance_km']
+      
+    kms = [survey_km, lite_km]
+    #distance cleaned / surveyed 
+    km = sum(kms)
+        
+    #method to estimate time spent on count
+    lite_time = count_lite * time
+    tot_time.append(lite_time)
+    #time 
+    total_time = sum(tot_time) 
+
+    all_items = ['Value Full Dog Poo Bags',
+    'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
+    'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans',
+    'Value Glass soft drink bottles','Value Milkshake bottle or carton',
+    'Value Plastic energy drink bottles',
+    'Value Aluminium energy drink can','Value Plastic energy gel sachet',
+    'Value Plastic energy gel end',
+    'Value Protein drink bottle or carton', 'Value Aluminium alcoholic drink cans',
+    'Value Glass alcoholic bottles','Value Hot drinks cups',
+    'Value Hot drinks tops and stirrers',
+    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
+    'Value Paper straws',
+    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull', 
+    'Value Plastic bottle sleeve',
+    'Value Reusable drinks container','Value Other drink related',
+    'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
+    'Value Other confectionary (eg., Lollipop Sticks)',
+    'Value Crisps Packets','Value Used Chewing Gum','Value Homemade lunch (eg., aluminium foil, cling film)',
+    'Value BBQ related','Value Fruit peel & cores','Value Branded single-use carrier bags',
+    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
+    'Value Unbranded bag for life', 
+    'Value Branded plastic fast / takeaway food packaging / utensils',
+    'Value Unbranded plastic fast / takeaway food packaging / utensils',
+    'Value Branded card or wood fast / takeaway food packaging / utensils',
+    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Branded condiments packaging','Value Unbranded condiments packaging',
+    'Value Branded food on the go','Value Unbranded food on the go',
+    'Value Branded other food related','Value Unbranded other food related',
+    'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
+    'Value Glass milk bottles',
+    'Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers',
+    'Value Cosmetics / deodorants', 'Value Other household',
+    'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
+    'Value Nicotine related packaging','Value Other nicotine related',
+    'Value Unbagged dog poo',
+    'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
+    'Value Toilet tissue','Value Face/ baby wipes','Value Nappies','Value Period products',
+    'Value Covid Masks','Value First Aid & medcal waste','Value Batteries and electronics',
+    'Value Other hazardous', 'Value Camping','Value Fireworks','Value Seasonal (Christmas and/or Easter)',
+    'Value Rubber balloons','Value Foil balloons','Value Outdoor event related (e.g.race)',
+    'Value Biking specific','Value Hiking specific','Value Other outdoor related',
+    'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
+    'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
+    'Value Miscellaneous card or wood','Value Miscellaneous metal',
+    'Value Too small/dirty to ID','Value Other Miscellaneous']
+    
+    #Resolve nan issues
+    survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+    rmv_items = [] 
+
+    survey_items = survey['TotItems'].sum()   
+    rmv_items.append(survey_items)
+
+    lite_items = lite['TotItems'].sum() 
+    rmv_items.append(lite_items)
+      
+    total_items = sum(rmv_items)
+    
+    new_row = pd.DataFrame([{'no_people':total_people, 'distance_km':km,
+                              'duration_hours':total_time, 'total_items':total_items
+                              }])
+    
+    results= pd.concat([results, new_row], ignore_index=True) 
+                                        
+    
+    results.to_csv(folderout + '/overview.csv',index=False)  
+
+    #plot DRS items
+    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
+    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles',
+    'Value Glass soft drink bottles','Value Glass alcoholic bottles'
+    ] 
+
+    df = survey 
+    
+    df['DRS_sum'] = df[DRS].sum(axis=1)
+
+    #df_sorted = df.sort_values(by='TotItems', ascending=False)
+
+    #fig, ax = plt.subplots(figsize=(10, 6))
+
+    #ax.bar(df_sorted['TrailName'], df_sorted['TotItems'], color='#80DCB5', label='Other Items')
+    #ax.bar(df_sorted['TrailName'], df_sorted['DRS_sum'], color='#00945C', label='DRS Items')
+  
+    
+    afont = {'family' : 'sans-serif',
+        'weight' : 'normal',
+        'size'   : 12}
+    
+    tfont = {'family' : 'sans-serif',
+        'weight' : 'bold',
+        'size'   : 18}
+
+    #ax.set_ylabel('Total Items', **afont)
+    #ax.set_xlabel('Location', **afont)
+    #ax.set_title('Items per Trail Breakdown', **tfont, pad=15)
+    #ax.legend()
+
+    # Rotate x-axis labels to prevent overlapping
+    plt.xticks(rotation=45, ha='right')
+
+    plt.savefig(folderout + '/total_items.png', bbox_inches='tight')
+    plt.close
+  
+    #plot brands
+    brands = ['Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone',
+              'Highland Spring','Coke','Costa','Pepsi','Walkers','Barrs',
+              'Britvic','Mars','Nestle','Mondelez','Cadbury','Magnum','Haribo',
+              'AB InBev','Corona','Molson Corrs','Thatchers','Heineken',
+              'Fosters','Bulmers','Carlsberg','Burger King','Greggs','KFC',
+              'McDonalds','Subway','Aldi','Co-op','Euro Shopper','LiDL',
+              'M&S','Tesco']  
+
+    brand_totals = df[brands].apply(pd.to_numeric, errors='coerce').sum()
+    brand_totals = brand_totals.sort_values(ascending=False)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.bar(brand_totals.index, brand_totals.values, color='#00945C', edgecolor='black')
+
+    ax.set_xlabel('Brands', **afont)
+    ax.set_ylabel('Total', **afont)
+    ax.set_title('Total Sum per Brand', **tfont, pad=15)
+
+    plt.xticks(rotation=45, ha='right')
+
+    plt.savefig(folderout + '/brands.png', bbox_inches='tight')
+    plt.close
+    
+    #plot animal interaction
+    #animal interaction - how many (%) answered the question and checked
+    survey_AIcols = ['AnimalsY','AnimalsN']
+    lite_AIcols = ['Animal Interaction - No',
+               'Animal Interaction - Chew Marks','Animal Interaction - Death']
+    
+    AI_survey = survey[survey_AIcols].notna().any(axis=1).sum()
+    AI_lite = lite[lite_AIcols].any(axis=1).sum()
+    
+    AI_subs = [AI_survey, AI_lite]
+    subs_tot = sum(AI_subs)
+    survey_AI = survey['AnimalsY'].value_counts().get('Yes', 0)
+    lite_AI = (lite['Animal Interaction - Chew Marks'] | lite['Animal Interaction - Death']).sum()
+    AI_yes = [survey_AI, lite_AI]
+    AI_tot = sum(AI_yes)
+    
+    #percent submissions reporting AI observed
+    perc_AI = (AI_tot/subs_tot)*100
+    
+    survey['AIDeath'] = survey['AIDeath'].replace(['X', 'x'], 1)
+    survey['AIDeath'] = pd.to_numeric(survey['AIDeath'], errors='coerce')
+    
+    deaths = []
+    death_survey = survey['AIDeath'].sum()
+    deaths.append(death_survey)
+    
+    lite_death = lite['Animal Interaction - Death'].sum()
+    deaths.append(lite_death)
+    
+    tot_deaths = sum(deaths)
+    subs_for_death = [AI_survey, AI_lite]
+    death_subs_tot = sum(subs_for_death)
+    #percent submissions reporting death of those reporting they checked for AI  
+    perc_death = (tot_deaths/death_subs_tot)*100
+        
+    #preparing for the pie chart
+    not_AI = 100 - perc_AI
+    AI_remaining = perc_AI - perc_death
+    AI_death = perc_death
+    
+    sizes = [not_AI, AI_remaining, AI_death]
+    labels = ['No observed animal interaction', 'Animal Interaction', 'Evidence of Death']
+    
+    colors = ['#80DCB5', '#00945C', '#00945C']
+    
+    afont = {'family' : 'sans-serif',
+        'weight' : 'normal',
+        'size'   : 10}
+    
+    
+    fig, ax = plt.subplots(figsize=(6, 6))
+    
+    wedges, texts, autotexts = ax.pie(
+        sizes, 
+        labels=labels, 
+        colors=colors, 
+        autopct='%1.1f%%', 
+        startangle=90, 
+        counterclock=False,
+        textprops=dict(color='#80DCB5', **afont),
+        wedgeprops=dict(edgecolor='white', linewidth=2) 
+        )
+    
+    
+    wedges[2].set_hatch('////') 
+    
+    autotexts[1].set_text(f"{perc_AI:.1f}%")
+    autotexts[0].set_color('#1A202C') #paler
+    autotexts[1].set_color('black')    # Main AI total text
+    autotexts[1].set_fontweight('bold')
+    autotexts[2].set_color('black')    # Death subset text
+    autotexts[2].set_fontweight('bold')
+    
+    
+    ax.set_title("Animal Interaction with Single-use Pollution", fontsize=15, fontweight='bold', color='#1A202C', pad=20)
+    
+    plt.tight_layout()
+    plt.savefig(folderout + 'AI_pie_chart.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close
+    
+    #plot nature connection and perma score
+    df = experience
+    counts = df['Experience_NatureConnect'].value_counts().sort_index()
+    
+    color_0 = "#508591"    # A-Team blue (0 - All the other color)
+    color_5 = "#F1F5F9"    # Pale Slate/Gray (5 - Neutral/Pale center)
+    color_10 = "#00945C"   # Emergence Green (10 - All Green)
+    
+    # Create two smooth gradients meeting perfectly at 5
+    cmap_low = mcolors.LinearSegmentedColormap.from_list("low", [color_0, color_5])
+    cmap_high = mcolors.LinearSegmentedColormap.from_list("high", [color_5, color_10])
+    
+     
+    colors = []
+    for i in range(11):
+        if i <= 5:
+            colors.append(cmap_low(i / 5.0))       # Maps 0 -> 5
+        else:
+            colors.append(cmap_high((i - 5) / 5.0)) # Maps 5 -> 10
+    
+    #counts_filtered = counts[counts > 0]
+    colors_filtered = [colors[int(i)] for i in counts.index]
+    labels = [f"Score {int(i)}" for i in counts.index]
+    
+    #Plot the pie chart
+    fig, ax = plt.subplots(figsize=(8, 8))
+    
+    wedges, texts, autotexts = ax.pie(
+        counts,
+        labels=labels,
+        colors=colors_filtered,
+        autopct='%1.1f%%',
+        startangle=140,
+        counterclock=False,
+        textprops=dict(color='#4A5568', **afont),
+        wedgeprops=dict(edgecolor='white', linewidth=2)  # Sharp white borders between slices
+        )
+    
+    # 5. Dynamically adjust text color inside slices for contrast/readability
+    for i, autotext in enumerate(autotexts):
+        score_value = counts.index[i]
+    # Use white text for the very dark slices (0, 1, 10), dark text for pale slices
+        if score_value <= 1 or score_value == 10:
+            autotext.set_color('white')
+            autotext.set_fontweight('bold')
+        else:
+            autotext.set_color('#1E293B')
+    
+    # Title styling
+    ax.set_title("Nature Connection Scores", **tfont, pad=20)
+    
+    plt.tight_layout()
+    plt.savefig(folderout + 'nature_connection.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close
+    
+    
+    
+    #perma_score
+    df = df.dropna(subset=['perma_score'])
+    df['perma_score2'] = df['perma_score'].round(0).astype(int)
+    counts = df['perma_score'].value_counts().sort_index()
+    
+    color_0 = "#508591"    # A-Team blue (0 - All the other color)
+    color_5 = "#F1F5F9"    # Pale Slate/Gray (5 - Neutral/Pale center)
+    color_10 = "#00945C"   # Emergence Green (10 - All Green)
+    
+    # Create two smooth gradients meeting perfectly at 5
+    cmap_low = mcolors.LinearSegmentedColormap.from_list("low", [color_0, color_5])
+    cmap_high = mcolors.LinearSegmentedColormap.from_list("high", [color_5, color_10])
+    
+     
+    colors = []
+    for i in range(11):
+        if i <= 5:
+            colors.append(cmap_low(i / 5.0))       # Maps 0 -> 5
+        else:
+            colors.append(cmap_high((i - 5) / 5.0)) # Maps 5 -> 10
+    
+    #counts_filtered = counts[counts > 0]
+    colors_filtered = [colors[int(i)] for i in counts.index]
+    labels = [f"Score {int(i)}" for i in counts.index]
+    
+    #Plot the pie chart
+    fig, ax = plt.subplots(figsize=(8, 8))
+    
+    wedges, texts, autotexts = ax.pie(
+        counts,
+        labels=labels,
+        colors=colors_filtered,
+        autopct='%1.1f%%',
+        startangle=140,
+        counterclock=False,
+        textprops=dict(color='#4A5568', **afont),
+        wedgeprops=dict(edgecolor='white', linewidth=2)  # Sharp white borders between slices
+        )
+    
+    # 5. Dynamically adjust text color inside slices for contrast/readability
+    for i, autotext in enumerate(autotexts):
+        score_value = counts.index[i]
+    # Use white text for the very dark slices (0, 1, 10), dark text for pale slices
+        if score_value <= 1 or score_value == 10:
+            autotext.set_color('white')
+            autotext.set_fontweight('bold')
+        else:
+            autotext.set_color('#1E293B')
+    
+    # Title styling
+    ax.set_title("Well-being Scores \n Called a PERMA score, calculated from 5 of the experience responses \n ranking from 0 - lowest score to 10 - highest score", **tfont, pad=20)
+    
+    bg_color = '#00945C' 
+    
+    fig.patch.set_facecolor(bg_color)  # Changes the whole image background
+    ax.set_facecolor(bg_color)   # Changes the background behind the pie chart
+    
+    plt.tight_layout()
+    plt.savefig(folderout + 'well_being2.png', 
+                dpi=300, 
+                bbox_inches='tight', 
+                facecolor=fig.get_facecolor(), 
+                edgecolor='none'
+                )
+    
+    
+    
     
 
 

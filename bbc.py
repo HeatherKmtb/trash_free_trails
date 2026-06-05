@@ -336,7 +336,7 @@ def comparison_graphs(TFTin, TFTout):
     'Value Too small/dirty to ID','Value Other Miscellaneous']
        
     
-    bg_color = '#1A1A1A'
+    bg_color = '#312e30'
   
     for i, df in enumerate(dataframes):
         #Resolve nan issues
@@ -427,26 +427,47 @@ def comparison_graphs(TFTin, TFTout):
         values = []
         labels = []
         colors = []
-        death_wedge_idx = None # Keeps track of where the death wedge lands
-        
+
+
+        death_wedge_idx = None 
+        ai_remaining_wedge_idx = None
         
         for idx, (val, label, col) in enumerate(zip(raw_values, raw_labels, raw_colors)):
-            if idx == 2 and val == 0:
-                continue # Skip adding the 'Evidence of Death' slice completely
-            
+            # Skip 'no animal interaction' if its float value is 0.0
+            try:
+                numeric_val = float(val)
+            except (ValueError, TypeError):
+                numeric_val = 1.0 # Fallback if it's a non-numeric string, so it doesn't skip
+        
+    # 2. MATCH BY LABEL AND VALUE: 
+    # This skips 'no animal interaction' if it is 0, regardless of what index it's at.
+            if 'no observed animal interaction' in str(label).lower() and abs(numeric_val) < 1e-9:
+                continue # Skip adding this slice completely
+    
             values.append(val)
             labels.append(label)
             colors.append(col)
-            
-            if idx == 2:
-                # If we added the death slice, mark its new index position
+    
+    # Dynamically track the death slice position by its label string
+            if label == 'Evidence of Death':  # Adjust string to match your exact label if needed
                 death_wedge_idx = len(values) - 1
+                
+            # Track 'Animal Interaction' position
+            if label == 'Animal Interaction':
+                ai_remaining_wedge_idx = len(values) - 1
         
         afont = {'family' : 'sans-serif',
             'weight' : 'normal',
             'size'   : 4,
             'color'  : '#FFFFFF'
             }
+        
+        tfont = {'family' : 'sans-serif',
+            'weight' : 'bold',
+            'size'   : 10,
+            'color'  : '#FFFFFF'
+            }
+        
         ax = plt.subplot(2, 2, i + 1)
         ax.set_facecolor(bg_color)
         
@@ -461,18 +482,21 @@ def comparison_graphs(TFTin, TFTout):
             )
         
         if death_wedge_idx is not None:
-            wedges[2].set_hatch('////') 
-
+            wedges[death_wedge_idx].set_hatch('////') 
+            
+        if ai_remaining_wedge_idx is not None:
+            autotexts[ai_remaining_wedge_idx].set_text(f"{perc_AI:.1f}%")
+    
         
         for autotext in autotexts:
             autotext.set_color('white')           #text inside wedges     
             autotext.set_weight('bold')             
-
+    
         plt.title(f"{df_titles[i]}\nTotal Items: {tot_sum}", fontdict = tfont)
-
-
+    
+    
     plt.tight_layout()
     plt.gcf().set_facecolor(bg_color)
-
+    
     plt.savefig(TFTout + 'Animal Interaction.png', dpi=300, facecolor = bg_color, edgecolor='none')
-  
+      

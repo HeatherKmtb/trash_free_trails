@@ -678,7 +678,7 @@ def monster_stats_and_graphs(folderin, folderout):
     
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['no_people','distance_km','duration_hours', 
-                                      'total_items'
+                                      'total_items', 'items per km'
                                       ])
     
     lite_dt = pd.read_csv(folderin + 'other_averages_calc.csv',
@@ -798,8 +798,11 @@ def monster_stats_and_graphs(folderin, folderout):
       
     total_items = sum(rmv_items)
     
+    items_km = total_items / km if km > 0 else 0
+    
     new_row = pd.DataFrame([{'no_people':total_people, 'distance_km':km,
-                              'duration_hours':total_time, 'total_items':total_items
+                              'duration_hours':total_time, 'total_items':total_items,
+                              'items per km':items_km
                               }])
     
     results= pd.concat([results, new_row], ignore_index=True) 
@@ -821,29 +824,42 @@ def monster_stats_and_graphs(folderin, folderout):
 
     df_sorted = df.sort_values(by='TotItems', ascending=False)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    bg_color = '#312e30'
+    
+    fig, ax = plt.subplots(figsize=(10, 6), facecolor=bg_color)
+    
+    ax.set_facecolor(bg_color)
 
-    ax.bar(df_sorted['TrailName'], df_sorted['TotItems'], color='#80DCB5', label='Other Items')
-    ax.bar(df_sorted['TrailName'], df_sorted['DRS_sum'], color='#00945C', label='DRS Items')
+    ax.bar(df_sorted['TrailName'], df_sorted['TotItems'], color='#223B18', label='Other Items')
+    ax.bar(df_sorted['TrailName'], df_sorted['DRS_sum'], color='#3D6A2C', label='DRS Items')
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
-        'size'   : 12}
+        'size'   : 12,
+        'color' : 'white'
+        }
     
     tfont = {'family' : 'sans-serif',
         'weight' : 'bold',
-        'size'   : 18}
+        'size'   : 18,
+        'color' : 'white'
+        }
 
 
     ax.set_xlabel('Location', **afont)
     ax.set_ylabel('Total Items', **afont)
     ax.set_title('Items per Trail Breakdown', **tfont, pad=15)
-    ax.legend()
+    ax.legend(facecolor=bg_color, edgecolor='white', labelcolor='white')
 
     # Rotate x-axis labels to prevent overlapping
     plt.xticks(rotation=45, ha='right')
+    ax.tick_params(colors='white', which='both')
+    
+    for spine in ax.spines.values():
+        spine.set_color('white')
 
-    plt.savefig(folderout + '/total_items.png', bbox_inches='tight')
+    plt.savefig(folderout + '/total_items.png', bbox_inches='tight', 
+                facecolor = bg_color, edgecolor='none')
     plt.close
     
     #plot brands
@@ -858,17 +874,26 @@ def monster_stats_and_graphs(folderin, folderout):
     brand_totals = df[brands].apply(pd.to_numeric, errors='coerce').sum()
     brand_totals = brand_totals.sort_values(ascending=False)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    ax.bar(brand_totals.index, brand_totals.values, color='#00945C', edgecolor='black')
+    fig, ax = plt.subplots(figsize=(10, 6), facecolor=bg_color)
+    
+    ax.set_facecolor(bg_color)
+    
+    ax.bar(brand_totals.index, brand_totals.values, color='#3D6A2C')
 
     ax.set_xlabel('Brands', **afont)
     ax.set_ylabel('Total', **afont)
-    ax.set_title('Total Sum per Brand', **tfont, pad=15)
+    ax.set_title('Number of items recorded of different brands', **tfont, pad=15)
+    ax.legend(facecolor=bg_color, edgecolor='white', labelcolor='white')
 
+    # Rotate x-axis labels to prevent overlapping
     plt.xticks(rotation=45, ha='right')
-
-    plt.savefig(folderout + '/brands.png', bbox_inches='tight')
+    ax.tick_params(colors='white', which='both')
+    
+    for spine in ax.spines.values():
+        spine.set_color('white')
+        
+    plt.savefig(folderout + '/brands.png', bbox_inches='tight',
+                facecolor = bg_color, edgecolor='none')
     plt.close
     
     #plot animal interaction
@@ -914,14 +939,18 @@ def monster_stats_and_graphs(folderin, folderout):
     sizes = [not_AI, AI_remaining, AI_death]
     labels = ['No observed animal interaction', 'Animal Interaction', 'Evidence of Death']
 
-    colors = ['#80DCB5', '#00945C', '#00945C']
+    colors = ['#223B18', '#3D6A2C', '#3D6A2C']
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
-        'size'   : 10}
+        'size'   : 10,
+        'color' : 'white'
+        }
 
 
-    fig, ax = plt.subplots(figsize=(6, 6))
+    fig, ax = plt.subplots(figsize=(6, 6),  facecolor=bg_color)
+    
+    ax.set_facecolor(bg_color)
 
     wedges, texts, autotexts = ax.pie(
         sizes, 
@@ -930,25 +959,24 @@ def monster_stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%', 
         startangle=90, 
         counterclock=False,
-        textprops=dict(color='#80DCB5', **afont),
-        wedgeprops=dict(edgecolor='white', linewidth=2) 
+        textprops=dict(**afont)
         )
 
 
     wedges[2].set_hatch('////') 
 
     autotexts[1].set_text(f"{perc_AI:.1f}%")
-    autotexts[0].set_color('#1A202C') #paler
-    autotexts[1].set_color('black')    # Main AI total text
-    autotexts[1].set_fontweight('bold')
-    autotexts[2].set_color('black')    # Death subset text
-    autotexts[2].set_fontweight('bold')
+    #autotexts[0].set_color('#1A202C') #paler
+    autotexts[1].set_color('white')    # Main AI total text
+    autotexts[2].set_color('white')    # Death subset text
 
 
-    ax.set_title("Animal Interaction with Single-use Pollution", fontsize=15, fontweight='bold', color='#1A202C', pad=20)
+
+    ax.set_title("Animal Interaction with Single-use Pollution", fontsize=15, fontweight='bold', color='white', pad=20)
 
     plt.tight_layout()
-    plt.savefig(folderout + 'AI_pie_chart.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(folderout + 'AI_pie_chart.png', dpi=300, bbox_inches='tight', 
+                facecolor = bg_color, edgecolor='none')
     plt.close
     
     #plot nature connection and perma score
@@ -957,7 +985,7 @@ def monster_stats_and_graphs(folderin, folderout):
 
     color_0 = "#508591"    # A-Team blue (0 - All the other color)
     color_5 = "#F1F5F9"    # Pale Slate/Gray (5 - Neutral/Pale center)
-    color_10 = "#00945C"   # Emergence Green (10 - All Green)
+    color_10 = '#3D6A2C'   # Trail Clean Green (10 - All Green)
 
     # Create two smooth gradients meeting perfectly at 5
     cmap_low = mcolors.LinearSegmentedColormap.from_list("low", [color_0, color_5])
@@ -966,10 +994,14 @@ def monster_stats_and_graphs(folderin, folderout):
  
     colors = []
     for i in range(11):
-        if i <= 5:
-            colors.append(cmap_low(i / 5.0))       # Maps 0 -> 5
+        if i == 0:
+            colors.append(color_0)  
+        elif i == 10:
+            colors.append(color_10)  
+        elif i <= 5:
+            colors.append(cmap_low(i / 5.0))
         else:
-            colors.append(cmap_high((i - 5) / 5.0)) # Maps 5 -> 10
+            colors.append(cmap_high((i - 5) / 5.0))
 
     #counts_filtered = counts[counts > 0]
     colors_filtered = [colors[int(i)] for i in counts.index]
@@ -985,8 +1017,7 @@ def monster_stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%',
         startangle=140,
         counterclock=False,
-        textprops=dict(color='#4A5568', **afont),
-        wedgeprops=dict(edgecolor='white', linewidth=2)  # Sharp white borders between slices
+        textprops=dict(**afont)
         )
 
 # 5. Dynamically adjust text color inside slices for contrast/readability
@@ -995,15 +1026,15 @@ def monster_stats_and_graphs(folderin, folderout):
     # Use white text for the very dark slices (0, 1, 10), dark text for pale slices
         if score_value <= 1 or score_value == 10:
             autotext.set_color('white')
-            autotext.set_fontweight('bold')
         else:
-            autotext.set_color('#1E293B')
+            autotext.set_color('black')
 
 # Title styling
-    ax.set_title("Nature Connection Scores", **tfont, pad=20)
+    ax.set_title("Nature Connection Scores \n on scale from 0-11", **tfont, pad=20)
 
     plt.tight_layout()
-    plt.savefig(folderout + 'nature_connection.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(folderout + 'nature_connection.png', dpi=300, bbox_inches='tight', 
+                facecolor = bg_color, edgecolor='none')
     plt.close
     
     
@@ -1015,7 +1046,7 @@ def monster_stats_and_graphs(folderin, folderout):
 
     color_0 = "#508591"    # A-Team blue (0 - All the other color)
     color_5 = "#F1F5F9"    # Pale Slate/Gray (5 - Neutral/Pale center)
-    color_10 = "#00945C"   # Emergence Green (10 - All Green)
+    color_10 = '#3D6A2C'   # Trail Clean Green (10 - All Green)
 
     # Create two smooth gradients meeting perfectly at 5
     cmap_low = mcolors.LinearSegmentedColormap.from_list("low", [color_0, color_5])
@@ -1024,10 +1055,14 @@ def monster_stats_and_graphs(folderin, folderout):
  
     colors = []
     for i in range(11):
-        if i <= 5:
-            colors.append(cmap_low(i / 5.0))       # Maps 0 -> 5
+        if i == 0:
+            colors.append(color_0)   # Force EXACT solid color for 0
+        elif i == 10:
+            colors.append(color_10)  # Force EXACT solid color for 10
+        elif i <= 5:
+            colors.append(cmap_low(i / 5.0))
         else:
-            colors.append(cmap_high((i - 5) / 5.0)) # Maps 5 -> 10
+            colors.append(cmap_high((i - 5) / 5.0))
 
     #counts_filtered = counts[counts > 0]
     colors_filtered = [colors[int(i)] for i in counts.index]
@@ -1043,8 +1078,7 @@ def monster_stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%',
         startangle=140,
         counterclock=False,
-        textprops=dict(color='#4A5568', **afont),
-        wedgeprops=dict(edgecolor='white', linewidth=2)  # Sharp white borders between slices
+        textprops=dict(**afont)
         )
 
 # 5. Dynamically adjust text color inside slices for contrast/readability
@@ -1053,17 +1087,16 @@ def monster_stats_and_graphs(folderin, folderout):
     # Use white text for the very dark slices (0, 1, 10), dark text for pale slices
         if score_value <= 1 or score_value == 10:
             autotext.set_color('white')
-            autotext.set_fontweight('bold')
         else:
-            autotext.set_color('#1E293B')
+            autotext.set_color('black')
 
 # Title styling
     ax.set_title("Well-being Scores \n Called a PERMA score, calculated from 5 of the experience responses \n ranking from 0 - lowest score to 10 - highest score", **tfont, pad=20)
 
-    bg_color = '#00945C' 
+    bg_color = '#312e30' 
 
-    fig.patch.set_facecolor(bg_color)  # Changes the whole image background
-    ax.set_facecolor(bg_color)   # Changes the background behind the pie chart
+    fig.patch.set_facecolor(bg_color)  
+    ax.set_facecolor(bg_color)   
     
     plt.tight_layout()
     plt.savefig(folderout + 'well_being2.png', 
@@ -1072,6 +1105,66 @@ def monster_stats_and_graphs(folderin, folderout):
                 facecolor=fig.get_facecolor(), 
                 edgecolor='none'
                 )
+    
+
+    # Calculate your 4 metric values cleanly
+    metric_subs = count_lite + len(survey.index)
+    metric_items_km = items_km
+    metric_volunteers = total_people  
+    metric_km = km                    
+
+    # Setup the card styling colors
+    text_muted = '#A0AEC0'      #slate gray for labels
+    text_highlight = '#3D6A2C'  #Trail clean green
+
+    # Create a 6x6 figure with a completely hidden axis grid
+    fig, ax = plt.subplots(figsize=(8, 6), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+    ax.axis('off')
+
+    # Main Dashboard Title
+    ax.text(0.5, 0.92, "CAMPAIGN SUMMARY OVERVIEW", color='white', 
+            fontsize=14, fontweight='bold', ha='center')
+
+    # --- TOP ROW ---
+    # Top Left: Data Submissions
+    ax.text(0.25, 0.72, f"{int(metric_subs):,}", color='white', 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.25, 0.62, "Data Submissions", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # Top Right: Items Per KM
+    ax.text(0.75, 0.72, f"{metric_items_km:.1f}", color=text_highlight, 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.75, 0.62, "Items / km Cleaned", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # --- BOTTOM ROW ---
+    # Bottom Left: Number of Volunteers
+    ax.text(0.25, 0.37, f"{int(metric_volunteers):,}", color='white', 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.25, 0.27, "Total Volunteers", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # Bottom Right: KMs Cleaned
+    ax.text(0.75, 0.37, f"{metric_km:.1f}", color=text_highlight, 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.75, 0.27, "Kilometers Surveyed", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # --- GRID DIVIDER LINES ---
+    # Horizontal separator line
+    ax.plot([0.1, 0.9], [0.5, 0.5], color='#4A5568', lw=1, alpha=0.5)
+    # Vertical separator line
+    ax.plot([0.5, 0.5], [0.2, 0.8], color='#4A5568', lw=1, alpha=0.5)
+
+    # Save the modern KPI block out as an image card
+    plt.tight_layout()
+    plt.savefig(folderout + '/summary_kpi_card.png', dpi=300, bbox_inches='tight', 
+                facecolor=bg_color, edgecolor='none')
+    plt.close()
+    
+
     
 def TFT_stats_and_graphs(folderin, folderout):
     """
@@ -1090,7 +1183,7 @@ def TFT_stats_and_graphs(folderin, folderout):
     
     #create df for results - or could read in and append to overall stats sheet
     results = pd.DataFrame(columns = ['no_people','distance_km','duration_hours', 
-                                      'total_items'
+                                      'total_items', 'items per km'
                                       ])
     
     lite_dt = pd.read_csv(folderin + 'other_averages_calc.csv',
@@ -1210,8 +1303,11 @@ def TFT_stats_and_graphs(folderin, folderout):
       
     total_items = sum(rmv_items)
     
+    items_km = total_items / km if km > 0 else 0
+    
     new_row = pd.DataFrame([{'no_people':total_people, 'distance_km':km,
-                              'duration_hours':total_time, 'total_items':total_items
+                              'duration_hours':total_time, 'total_items':total_items,
+                              'items per km':items_km
                               }])
     
     results= pd.concat([results, new_row], ignore_index=True) 
@@ -1232,6 +1328,8 @@ def TFT_stats_and_graphs(folderin, folderout):
     df['DRS_sum'] = df[DRS].sum(axis=1)
 
     #df_sorted = df.sort_values(by='TotItems', ascending=False)
+    
+    bg_color = '#312e30'
 
     #fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -1241,11 +1339,15 @@ def TFT_stats_and_graphs(folderin, folderout):
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
-        'size'   : 12}
+        'size'   : 12,
+        'color' : 'white'
+        }
     
     tfont = {'family' : 'sans-serif',
         'weight' : 'bold',
-        'size'   : 18}
+        'size'   : 18,
+        'color' : 'white'
+        }
 
     #ax.set_ylabel('Total Items', **afont)
     #ax.set_xlabel('Location', **afont)
@@ -1253,10 +1355,10 @@ def TFT_stats_and_graphs(folderin, folderout):
     #ax.legend()
 
     # Rotate x-axis labels to prevent overlapping
-    plt.xticks(rotation=45, ha='right')
+    #plt.xticks(rotation=45, ha='right')
 
-    plt.savefig(folderout + '/total_items.png', bbox_inches='tight')
-    plt.close
+    #plt.savefig(folderout + '/total_items.png', bbox_inches='tight')
+    #plt.close
   
     #plot brands
     brands = ['Lucozade', 'Ribena','RedBull','Monster','High5','SIS','Danone',
@@ -1270,17 +1372,26 @@ def TFT_stats_and_graphs(folderin, folderout):
     brand_totals = df[brands].apply(pd.to_numeric, errors='coerce').sum()
     brand_totals = brand_totals.sort_values(ascending=False)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    ax.bar(brand_totals.index, brand_totals.values, color='#00945C', edgecolor='black')
+    fig, ax = plt.subplots(figsize=(10, 6), facecolor=bg_color)
+    
+    ax.set_facecolor(bg_color)
+    
+    ax.bar(brand_totals.index, brand_totals.values, color='#3D6A2C')
 
     ax.set_xlabel('Brands', **afont)
     ax.set_ylabel('Total', **afont)
-    ax.set_title('Total Sum per Brand', **tfont, pad=15)
+    ax.set_title('Number of items recorded of different brands \n from April and May 2026', **tfont, pad=15)
+    ax.legend(facecolor=bg_color, edgecolor='white', labelcolor='white')
 
+    # Rotate x-axis labels to prevent overlapping
     plt.xticks(rotation=45, ha='right')
-
-    plt.savefig(folderout + '/brands.png', bbox_inches='tight')
+    ax.tick_params(colors='white', which='both')
+    
+    for spine in ax.spines.values():
+        spine.set_color('white')
+        
+    plt.savefig(folderout + '/brands.png', bbox_inches='tight',
+                facecolor = bg_color, edgecolor='none')
     plt.close
     
     #plot animal interaction
@@ -1325,16 +1436,20 @@ def TFT_stats_and_graphs(folderin, folderout):
     
     sizes = [not_AI, AI_remaining, AI_death]
     labels = ['No observed animal interaction', 'Animal Interaction', 'Evidence of Death']
-    
-    colors = ['#80DCB5', '#00945C', '#00945C']
+
+    colors = ['#223B18', '#3D6A2C', '#3D6A2C']
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
-        'size'   : 10}
+        'size'   : 10,
+        'color' : 'white'
+        }
+
+
+    fig, ax = plt.subplots(figsize=(6, 6),  facecolor=bg_color)
     
-    
-    fig, ax = plt.subplots(figsize=(6, 6))
-    
+    ax.set_facecolor(bg_color)
+
     wedges, texts, autotexts = ax.pie(
         sizes, 
         labels=labels, 
@@ -1342,54 +1457,56 @@ def TFT_stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%', 
         startangle=90, 
         counterclock=False,
-        textprops=dict(color='#80DCB5', **afont),
-        wedgeprops=dict(edgecolor='white', linewidth=2) 
+        textprops=dict(**afont)
         )
-    
-    
+
+
     wedges[2].set_hatch('////') 
-    
+
     autotexts[1].set_text(f"{perc_AI:.1f}%")
-    autotexts[0].set_color('#1A202C') #paler
-    autotexts[1].set_color('black')    # Main AI total text
-    autotexts[1].set_fontweight('bold')
-    autotexts[2].set_color('black')    # Death subset text
-    autotexts[2].set_fontweight('bold')
-    
-    
-    ax.set_title("Animal Interaction with Single-use Pollution", fontsize=15, fontweight='bold', color='#1A202C', pad=20)
-    
+    #autotexts[0].set_color('#1A202C') #paler
+    autotexts[1].set_color('white')    # Main AI total text
+    autotexts[2].set_color('white')    # Death subset text
+
+
+
+    ax.set_title("Animal Interaction with Single-use Pollution", fontsize=15, fontweight='bold', color='white', pad=20)
+
     plt.tight_layout()
-    plt.savefig(folderout + 'AI_pie_chart.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(folderout + 'AI_pie_chart.png', dpi=300, bbox_inches='tight', 
+                facecolor = bg_color, edgecolor='none')
     plt.close
     
     #plot nature connection and perma score
     df = experience
-    counts = df['Experience_NatureConnect'].value_counts().sort_index()
-    
+    df2 = survey
+    counts1 = df['Experience_NatureConnect'].value_counts().sort_index()
+    counts2 = df2['Experience_NatureConnect'].value_counts().sort_index()
+    counts = counts1.add(counts2, fill_value=0).sort_index()
+
     color_0 = "#508591"    # A-Team blue (0 - All the other color)
     color_5 = "#F1F5F9"    # Pale Slate/Gray (5 - Neutral/Pale center)
-    color_10 = "#00945C"   # Emergence Green (10 - All Green)
-    
+    color_10 = '#3D6A2C'   # Trail Clean Green (10 - All Green)
+
     # Create two smooth gradients meeting perfectly at 5
     cmap_low = mcolors.LinearSegmentedColormap.from_list("low", [color_0, color_5])
     cmap_high = mcolors.LinearSegmentedColormap.from_list("high", [color_5, color_10])
-    
-     
+
+ 
     colors = []
     for i in range(11):
         if i <= 5:
             colors.append(cmap_low(i / 5.0))       # Maps 0 -> 5
         else:
             colors.append(cmap_high((i - 5) / 5.0)) # Maps 5 -> 10
-    
+
     #counts_filtered = counts[counts > 0]
     colors_filtered = [colors[int(i)] for i in counts.index]
     labels = [f"Score {int(i)}" for i in counts.index]
-    
+
     #Plot the pie chart
     fig, ax = plt.subplots(figsize=(8, 8))
-    
+
     wedges, texts, autotexts = ax.pie(
         counts,
         labels=labels,
@@ -1397,57 +1514,60 @@ def TFT_stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%',
         startangle=140,
         counterclock=False,
-        textprops=dict(color='#4A5568', **afont),
-        wedgeprops=dict(edgecolor='white', linewidth=2)  # Sharp white borders between slices
+        textprops=dict(**afont)
         )
-    
-    # 5. Dynamically adjust text color inside slices for contrast/readability
+
+# 5. Dynamically adjust text color inside slices for contrast/readability
     for i, autotext in enumerate(autotexts):
         score_value = counts.index[i]
     # Use white text for the very dark slices (0, 1, 10), dark text for pale slices
         if score_value <= 1 or score_value == 10:
             autotext.set_color('white')
-            autotext.set_fontweight('bold')
         else:
-            autotext.set_color('#1E293B')
-    
-    # Title styling
-    ax.set_title("Nature Connection Scores", **tfont, pad=20)
-    
+            autotext.set_color('black')
+
+# Title styling
+    ax.set_title("Nature Connection Scores \n on scale from 0-11", **tfont, pad=20)
+
     plt.tight_layout()
-    plt.savefig(folderout + 'nature_connection.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(folderout + 'nature_connection.png', dpi=300, bbox_inches='tight', 
+                facecolor = bg_color, edgecolor='none')
     plt.close
     
     
     
     #perma_score
     df = df.dropna(subset=['perma_score'])
-    df['perma_score2'] = df['perma_score'].round(0).astype(int)
-    counts = df['perma_score'].value_counts().sort_index()
-    
+    df['perma_score'] = df['perma_score'].round(0).astype('Int64')
+    df2['perma_score'] = df2['perma_score'].round(0).astype('Int64')
+
+    counts1 = df['perma_score'].value_counts().sort_index()
+    counts2 = df2['perma_score'].value_counts().sort_index()
+    counts = counts1.add(counts2, fill_value=0).sort_index()
+
     color_0 = "#508591"    # A-Team blue (0 - All the other color)
     color_5 = "#F1F5F9"    # Pale Slate/Gray (5 - Neutral/Pale center)
-    color_10 = "#00945C"   # Emergence Green (10 - All Green)
-    
+    color_10 = '#3D6A2C'   # Trail Clean Green (10 - All Green)
+
     # Create two smooth gradients meeting perfectly at 5
     cmap_low = mcolors.LinearSegmentedColormap.from_list("low", [color_0, color_5])
     cmap_high = mcolors.LinearSegmentedColormap.from_list("high", [color_5, color_10])
-    
-     
+
+ 
     colors = []
     for i in range(11):
         if i <= 5:
             colors.append(cmap_low(i / 5.0))       # Maps 0 -> 5
         else:
             colors.append(cmap_high((i - 5) / 5.0)) # Maps 5 -> 10
-    
+
     #counts_filtered = counts[counts > 0]
     colors_filtered = [colors[int(i)] for i in counts.index]
     labels = [f"Score {int(i)}" for i in counts.index]
-    
+
     #Plot the pie chart
     fig, ax = plt.subplots(figsize=(8, 8))
-    
+
     wedges, texts, autotexts = ax.pie(
         counts,
         labels=labels,
@@ -1455,25 +1575,23 @@ def TFT_stats_and_graphs(folderin, folderout):
         autopct='%1.1f%%',
         startangle=140,
         counterclock=False,
-        textprops=dict(color='#4A5568', **afont),
-        wedgeprops=dict(edgecolor='white', linewidth=2)  # Sharp white borders between slices
+        textprops=dict(**afont)
         )
-    
-    # 5. Dynamically adjust text color inside slices for contrast/readability
+
+# 5. Dynamically adjust text color inside slices for contrast/readability
     for i, autotext in enumerate(autotexts):
         score_value = counts.index[i]
     # Use white text for the very dark slices (0, 1, 10), dark text for pale slices
         if score_value <= 1 or score_value == 10:
             autotext.set_color('white')
-            autotext.set_fontweight('bold')
         else:
-            autotext.set_color('#1E293B')
-    
-    # Title styling
+            autotext.set_color('black')
+
+# Title styling
     ax.set_title("Well-being Scores \n Called a PERMA score, calculated from 5 of the experience responses \n ranking from 0 - lowest score to 10 - highest score", **tfont, pad=20)
-    
-    bg_color = '#00945C' 
-    
+
+    bg_color = '#312e30' 
+
     fig.patch.set_facecolor(bg_color)  # Changes the whole image background
     ax.set_facecolor(bg_color)   # Changes the background behind the pie chart
     
@@ -1484,8 +1602,7 @@ def TFT_stats_and_graphs(folderin, folderout):
                 facecolor=fig.get_facecolor(), 
                 edgecolor='none'
                 )
-    
-    
+
     
     
 

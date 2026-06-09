@@ -1376,7 +1376,7 @@ def TFT_stats_and_graphs(folderin, folderout):
     
     ax.set_facecolor(bg_color)
     
-    ax.bar(brand_totals.index, brand_totals.values, color='#3D6A2C')
+    ax.bar(brand_totals.index, brand_totals.values, color='#508591')
 
     ax.set_xlabel('Brands', **afont)
     ax.set_ylabel('Total', **afont)

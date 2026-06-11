@@ -134,38 +134,6 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
  
     bg_color = '#312e30' 
 
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True, facecolor=bg_color)
-    ax1.set_facecolor(bg_color)
-    ax2.set_facecolor(bg_color)
-    ax3.set_facecolor(bg_color)
-    
-    afont = {'family' : 'sans-serif',
-        'weight' : 'normal',
-        'size'   : 18}
-    
-    tfont = {'family' : 'sans-serif',
-        'weight' : 'bold',
-        'size'   : 18}
-
-    ax1.plot(df['Date_TrailClean'], df['TotItems'], color='black', marker='o', linestyle='-')
-    ax1.set_ylabel('Total Items', **afont)
-    ax1.grid(True, linestyle='--', alpha=0.5)
-    ax1.set_title('Number of items and volunteers per clean', **tfont, pad=15)
-
-    ax2.plot(df['Date_TrailClean'], df['People'], color='#3D6A2C', marker='s', linestyle='-')
-    ax2.set_ylabel('Number of People', **afont)
-    ax2.grid(True, linestyle='--', alpha=0.5)
-
-    ax3.plot(df['Date_TrailClean'], df['items_km'], color='#BCA25D', marker='^', linestyle='-')
-    ax3.set_ylabel('Items per km', **afont)
-    ax3.set_xlabel('Date', **afont)
-    ax3.grid(True, linestyle='--', alpha=0.5)
-    
-
-    plt.tight_layout()
-    plt.savefig(folderout + '/stats.png', bbox_inches='tight')
-    plt.close
-
 
     #plot DRS, EPR and poo items
     DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
@@ -212,10 +180,10 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     fig, ax = plt.subplots(figsize=(10, 6), facecolor=bg_color)
     ax.set_facecolor(bg_color)
 
-    ax.bar(df_sorted['Date_TrailClean'], df_sorted['TotItems'], color='#223B18', label='Other Items')
-    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'] + df_sorted['poo'], color='#3D6A2C', label='dog poo')
-    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'], color='#599B40', label='pEPR Items')
-    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'], color='#84C26C', label='DRS Items')
+    ax.bar(df_sorted['Date_TrailClean'], df_sorted['TotItems'], color='#84C26C', label='Other Items')
+    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'] + df_sorted['poo'], color='#599B40', label='dog poo')
+    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'], color='#3D6A2C', label='pEPR Items')
+    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'], color='#223B18', label='DRS Items')
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
@@ -226,6 +194,39 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
         'weight' : 'bold',
         'size'   : 18,
         'color' : 'white'}
+    
+    for idx, row in df_sorted.iterrows():
+        x = row['Date_TrailClean']
+        total = row['TotItems']
+        
+        # Skip calculations if total is 0 to avoid DivisionByZero errors
+        if total == 0:
+            continue
+            
+        # Define the top edge of each individual section
+        drs_top = row['DRS_sum']
+        epr_top = drs_top + row['EPR_sum']
+        poo_top = epr_top + row['poo']
+        
+        # Calculate percentages
+        drs_pct = (row['DRS_sum'] / total) * 100
+        epr_pct = (row['EPR_sum'] / total) * 100
+        poo_pct = (row['poo'] / total) * 100
+        
+        # --- Label Placement Logic ---
+        # We place the text at the midpoint of each segment: (bottom_edge + top_edge) / 2
+        
+        # DRS Items (Bottom segment)
+        if drs_pct > 2: # Only show label if the segment is large enough to fit text
+            ax.text(x, drs_top / 2, f'{drs_pct:.1f}%', ha='center', va='center', color='white', fontsize=9)
+            
+        # pEPR Items (Second segment)
+        if epr_pct > 2:
+            ax.text(x, (drs_top + epr_top) / 2, f'{epr_pct:.1f}%', ha='center', va='center', color='white', fontsize=9)
+            
+        # Dog Poo (Third segment)
+        if poo_pct > 2:
+            ax.text(x, (epr_top + poo_top) / 2, f'{poo_pct:.1f}%', ha='center', va='center', color='white', fontsize=9)
 
 
     ax.set_xlabel('Date', **afont)
@@ -264,8 +265,8 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     ax.axis('off')
 
     # Main Dashboard Title
-    ax.text(0.5, 0.92, "CAMPAIGN SUMMARY OVERVIEW", color='white', 
-            fontsize=14, fontweight='bold', ha='center')
+    ax.text(0.5, 0.85, f"Total Items Removed = {int(total_items):,}", color='white', 
+            fontsize=26, fontweight='bold', ha='center')
 
     # --- TOP ROW ---
     # Top Left: Data Submissions
@@ -467,6 +468,16 @@ def comparison_graphs(TFTin, TFTout):
        
     
     bg_color = '#312e30'
+    
+    fig = plt.figure(figsize=(8, 8))
+    fig.patch.set_facecolor(bg_color)
+    
+    fig.suptitle(
+        'Comparison of SUP composition across regions',
+        fontsize=16,
+        fontweight='bold',
+        color='white'
+    )
   
     for i, df in enumerate(dataframes):
         #Resolve nan issues
@@ -502,6 +513,8 @@ def comparison_graphs(TFTin, TFTout):
         
         colors = ['#223B18','#3D6A2C','#599B40','#84C26C']
         
+        
+        
         wedges, texts, autotexts = ax.pie(
             values,
             labels=labels,
@@ -516,9 +529,29 @@ def comparison_graphs(TFTin, TFTout):
             autotext.set_color('white')           #text inside wedges    
             autotext.set_weight('bold')             
 
-        plt.title(f"{df_titles[i]}\nTotal Items: {tot_sum}", fontdict = tfont)
+        plt.title(f"{df_titles[i]}\nTotal Items: {(tot_sum):,}", fontdict = tfont)
         
-    plt.tight_layout()
+      
+    #vertical line    
+    fig.add_artist(
+        plt.Line2D(
+            [0.5, 0.5], [0.05, 0.85],
+            transform=fig.transFigure,
+            color='#A0AEC0',
+            linewidth=1,
+            linestyle='-'))
+
+    #horizontal line
+    fig.add_artist(
+        plt.Line2D(
+            [0.05, 0.95], [0.45, 0.45],
+            transform=fig.transFigure,
+            color='#A0AEC0',
+            linewidth=1,
+            linestyle='-'))
+
+    # Leave room for suptitle
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.gcf().set_facecolor(bg_color)
 
     plt.savefig(TFTout + 'SUP_composition.png', dpi=300, facecolor = bg_color, edgecolor='none')

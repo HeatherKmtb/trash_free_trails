@@ -89,22 +89,17 @@ def add_extra_data(filein, loughrigg, fileout, items, bags):
     
     people = df['People'].sum()
     km = df['Distance_km'].sum()
-    mins = df['Time_min']
-    hours = []
-    for m in mins:
-        hour = m/60
-        hours.append(hour)
-        
-    df['Time_hours'] = hours 
+    df['Time_hours'] = df['Time_min'] / 60
     
     total_time = (df['People'] * df['Time_hours']).sum()
-    
+    date = '13/06/2026'
     
     results = pd.read_csv(loughrigg)
     
-    new_row = pd.DataFrame([{'People':people, 'Distance_km':km,
+    new_row = pd.DataFrame([{'Date_TrailClean':date, 'People':people, 'Distance_km':km,
                               'Time_hours':total_time, 'TotItems':new_items,
-                              'DRS':new_DRS, 'EPR':new_EPR, 'poo':new_poo
+                              'DRS':new_DRS.sum(), 'EPR':new_EPR.sum(), 
+                              'poo':new_poo.sum()
                               }])
     
     results= pd.concat([results, new_row], ignore_index=True) 
@@ -119,7 +114,7 @@ def add_extra_data(filein, loughrigg, fileout, items, bags):
 
 def loughrigg_stats_and_graphs(TFTin, folderout):
     """
-    A function which takes clean monthly TFT survey data and produces monthly stats
+    A function which takes prepared Loughrigg data and produces graphs
     
     Parameters
     ----------
@@ -131,140 +126,10 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
            path for folder to save results in
     """
 
-    
-    #create df for results - or could read in and append to overall stats sheet
-    results = pd.DataFrame(columns = ['no_people','distance_km','duration_hours', 
-                                      'total_items'
-                                      ])
         
-    survey = pd.read_csv(TFTin)
-        
-    #Overview - volunteers, distance, hours, items
-    mins = survey['Time_min']
-    hours = []
-    for m in mins:
-        hour = m/60
-        hours.append(hour)
-        
-    survey['Time_hours'] = hours    
-    
-    total_people = survey['People'].sum()
-    total_time = (survey['People'] * survey['Time_hours']).sum()
-    km = survey['Distance_km'].sum()
-
-    all_items = ['Value Full Dog Poo Bags',
-    'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
-    'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
-    'Value Aluminium soft drink cans',
-    'Value Glass soft drink bottles','Value Milkshake bottle or carton',
-    'Value Plastic energy drink bottles',
-    'Value Aluminium energy drink can','Value Plastic energy gel sachet',
-    'Value Plastic energy gel end',
-    'Value Protein drink bottle or carton', 'Value Aluminium alcoholic drink cans',
-    'Value Glass alcoholic bottles','Value Hot drinks cups',
-    'Value Hot drinks tops and stirrers',
-    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
-    'Value Paper straws',
-    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull', 
-    'Value Plastic bottle sleeve',
-    'Value Reusable drinks container','Value Other drink related',
-    'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
-    'Value Other confectionary (eg., Lollipop Sticks)',
-    'Value Crisps Packets','Value Used Chewing Gum','Value Homemade lunch (eg., aluminium foil, cling film)',
-    'Value BBQ related','Value Fruit peel & cores','Value Branded single-use carrier bags',
-    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
-    'Value Unbranded bag for life', 
-    'Value Branded plastic fast / takeaway food packaging / utensils',
-    'Value Unbranded plastic fast / takeaway food packaging / utensils',
-    'Value Branded card or wood fast / takeaway food packaging / utensils',
-    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
-    'Value Branded condiments packaging','Value Unbranded condiments packaging',
-    'Value Branded food on the go','Value Unbranded food on the go',
-    'Value Branded other food related','Value Unbranded other food related',
-    'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
-    'Value Glass milk bottles',
-    'Value Plastic food containers','Value Cardboard food containers',
-    'Value Cleaning products containers',
-    'Value Cosmetics / deodorants', 'Value Other household',
-    'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
-    'Value Nicotine related packaging','Value Other nicotine related',
-    'Value Unbagged dog poo',
-    'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
-    'Value Toilet tissue','Value Face/ baby wipes','Value Nappies','Value Period products',
-    'Value Covid Masks','Value First Aid & medcal waste','Value Batteries and electronics',
-    'Value Other hazardous', 'Value Camping','Value Fireworks','Value Seasonal (Christmas and/or Easter)',
-    'Value Rubber balloons','Value Foil balloons','Value Outdoor event related (e.g.race)',
-    'Value Biking specific','Value Hiking specific','Value Other outdoor related',
-    'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
-    'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
-    'Value Miscellaneous card or wood','Value Miscellaneous metal',
-    'Value Too small/dirty to ID','Value Other Miscellaneous']
-    
-    #Resolve nan issues
-    survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
-
-    total_items = survey['TotItems'].sum()   
-   
-    new_row = pd.DataFrame([{'no_people':total_people, 'distance_km':km,
-                              'duration_hours':total_time, 'total_items':total_items
-                              }])
-    
-    results= pd.concat([results, new_row], ignore_index=True) 
-                                        
-    
-    results.to_csv(folderout + '/overview.csv',index=False)  
-
-    df = survey 
-    
-    items = df['TotItems']
-    people = df['People']
-    df['items pp'] = items/people
-    df['items_km'] = items / km
-    #plot items, people, items per km
-    
- 
+    df = pd.read_csv(TFTin)
+         
     bg_color = '#312e30' 
-
-
-    #plot DRS, EPR and poo items
-    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
-    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
-    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
-    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles',
-    'Value Glass soft drink bottles','Value Glass alcoholic bottles'
-    ] 
-
-    EPR = ['Value Milkshake bottle or carton','Value Plastic energy gel sachet',
-    'Value Plastic energy gel end','Value Protein drink bottle or carton',
-    'Value Hot drinks cups','Value Hot drinks tops and stirrers',
-    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
-    'Value Paper straws',
-    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull', 
-    'Value Plastic bottle sleeve','Value Confectionary/sweet wrappers',
-    'Value Wrapper "corners" / tear-offs','Value Other confectionary (eg., Lollipop Sticks)',
-    'Value Crisps Packets','Value Branded single-use carrier bags',
-    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
-    'Value Unbranded bag for life', 
-    'Value Branded plastic fast / takeaway food packaging / utensils',
-    'Value Unbranded plastic fast / takeaway food packaging / utensils',
-    'Value Branded card or wood fast / takeaway food packaging / utensils',
-    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
-    'Value Branded condiments packaging','Value Unbranded condiments packaging',
-    'Value Branded food on the go','Value Unbranded food on the go',
-    'Value Plastic milk bottles','Value Glass milk bottles',
-    'Value Plastic food containers','Value Cardboard food containers',
-    'Value Cleaning products containers','Value Cosmetics / deodorants', 
-    'Value Nicotine related packaging'
-    ]
-    
-    poo = ['Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
-           'Value Unbagged dog poo'
-           ]
-    
-    
-    df['DRS_sum'] = df[DRS].sum(axis=1)
-    df['EPR_sum'] = df[EPR].sum(axis=1)
-    df['poo'] = df[poo].sum(axis=1)
 
     df_sorted = df
 
@@ -272,9 +137,9 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     ax.set_facecolor(bg_color)
 
     ax.bar(df_sorted['Date_TrailClean'], df_sorted['TotItems'], color='#84C26C', label='Other Items')
-    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'] + df_sorted['poo'], color='#599B40', label='dog poo')
-    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'], color='#3D6A2C', label='pEPR Items')
-    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'], color='#223B18', label='DRS Items')
+    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS'] + df_sorted['EPR'] + df_sorted['poo'], color='#599B40', label='dog poo')
+    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS'] + df_sorted['EPR'], color='#3D6A2C', label='pEPR Items')
+    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS'], color='#223B18', label='DRS Items')
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
@@ -295,13 +160,13 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
             continue
             
         # Define the top edge of each individual section
-        drs_top = row['DRS_sum']
-        epr_top = drs_top + row['EPR_sum']
+        drs_top = row['DRS']
+        epr_top = drs_top + row['EPR']
         poo_top = epr_top + row['poo']
         
         # Calculate percentages
-        drs_pct = (row['DRS_sum'] / total) * 100
-        epr_pct = (row['EPR_sum'] / total) * 100
+        drs_pct = (row['DRS'] / total) * 100
+        epr_pct = (row['EPR'] / total) * 100
         poo_pct = (row['poo'] / total) * 100
         
         # --- Label Placement Logic ---
@@ -338,12 +203,16 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     plt.close
     
     #section for overview statistics
+    total_items = df['TotItems'].sum()
+    total_people = df['People'].sum()
     metric_subs = len(df.index)
     survey_km = df['Distance_km'].sum()
     items_km = total_items/survey_km
     metric_items_km = items_km
     metric_volunteers = total_people  
     metric_km = survey_km 
+    
+    df['items_km'] = df['TotItems']/df['Distance_km']
     
     
     # Setup the card styling colors

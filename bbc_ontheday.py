@@ -318,3 +318,234 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     plt.savefig(folderout + '/stats.png', dpi=300, bbox_inches='tight', facecolor=bg_color)
     plt.close()
     
+    
+def lite_data(filein, averages, graphsout):
+    """
+    A function which takes lite data and produces graphs
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv of Loughrigg data
+             
+    averages: string
+            path for other_averages_calc file
+            
+    folderout: string
+           path for folder to save results in
+    """
+    
+    lite = pd.read_csv(filein)
+    
+    lite_dt = pd.read_csv(averages,
+                          index_col=0).iloc[:, 0]
+    lite_dict = lite_dt.to_dict()
+    
+    subs = len(lite.index)
+    minutes = lite_dict['Time_min']
+    time = minutes/60
+    lite_time = subs * time
+    lite_people = subs * lite_dict['People']
+    lite_km = subs * lite_dict['Distance_km']
+    total_items = lite['TotItems'].sum() 
+    items_km = total_items / lite_km
+    
+    # Setup the card styling colors
+    text_muted = '#A0AEC0'      #slate gray for labels
+    text_highlight = '#3D6A2C'  #Trail clean green
+    bg_color = '#312e30' 
+
+    # Create a 6x6 figure with a completely hidden axis grid
+    fig, ax = plt.subplots(figsize=(8, 6), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+    ax.axis('off')
+
+    # Main Dashboard Title
+    ax.text(0.5, 0.85, f"Total Items Removed = {int(total_items):,}", color='white', 
+            fontsize=26, fontweight='bold', ha='center')
+
+    # --- TOP ROW ---
+    # Top Left: Data Submissions
+    ax.text(0.25, 0.72, f"{int(subs):,}", color='white', 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.25, 0.62, "Data Submissions", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # Top Right: Items Per KM
+    ax.text(0.75, 0.72, f"{items_km:.1f}", color=text_highlight, 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.75, 0.62, "Items / km Cleaned", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # --- BOTTOM ROW ---
+    # Bottom Left: Number of Volunteers
+    ax.text(0.25, 0.37, f"{int(lite_people):,}", color='white', 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.25, 0.27, "Total Volunteers", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # Bottom Right: KMs Cleaned
+    ax.text(0.75, 0.37, f"{lite_km:.1f}", color=text_highlight, 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.75, 0.27, "Kilometers Surveyed", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # --- GRID DIVIDER LINES ---
+    # Horizontal separator line
+    ax.plot([0.1, 0.9], [0.5, 0.5], color='#4A5568', lw=1, alpha=0.5)
+    # Vertical separator line
+    ax.plot([0.5, 0.5], [0.2, 0.8], color='#4A5568', lw=1, alpha=0.5)
+
+    # Save the modern KPI block out as an image card
+    plt.tight_layout()
+    plt.savefig(graphsout + '/summary_kpi_card.png', dpi=300, bbox_inches='tight', 
+                facecolor=bg_color, edgecolor='none')
+    plt.close()
+    
+    lite_DRS = []
+    for index,i in lite.iterrows():
+        if i['Categories - Drinks Containers']==True:
+            lite_DRS.append(1)
+            
+    DRS_lite = sum(lite_DRS)
+    
+    lite_EPR = []
+    for index,i in lite.iterrows():
+        if i['Categories - Sweets / Snacks / Food']==True:
+            lite_EPR.append(1)
+            
+    EPR_lite = sum(lite_EPR)
+    
+    lite_pet = []
+    for index,i in lite.iterrows():
+        if i['Categories - Pet Stuff']==True:
+            lite_pet.append(1)
+            
+    pet_lite = sum(lite_pet)
+    
+    data = [DRS_lite, EPR_lite, pet_lite]
+    data_labels = ['DRS', 'pEPR', 'pet related']
+    
+    fig = plt.figure(figsize=(9, 4))
+    fig.patch.set_facecolor(bg_color)
+    
+    fig.suptitle(
+        'Presence of SUP categories in lite data submitted',
+        fontsize=16,
+        fontweight='bold',
+        color='white'
+    )
+    
+    for i, d in enumerate(data):
+        ax = plt.subplot(1, 3, i + 1)
+        ax.set_facecolor(bg_color)
+    
+        labels = [f'{data_labels[i]}','not present']
+        values = [d, subs]
+        
+        afont = {'family' : 'sans-serif',
+            'weight' : 'normal',
+            'size'   : 8,
+            'color'  : '#FFFFFF'
+            }
+        
+        tfont = {'family' : 'sans-serif',
+            'weight' : 'bold',
+            'size'   : 12,
+            'color'  : '#FFFFFF'
+            }
+        
+        colors = ['#223B18','#3D6A2C']
+        
+        wedges, texts, autotexts = ax.pie(
+            values,
+            labels=labels,
+            colors=colors,
+            autopct='%1.1f%%',
+            startangle=140,
+            counterclock=False,
+            textprops=dict(**afont)
+            )
+        
+        for autotext in autotexts:
+            autotext.set_color('white')           #text inside wedges    
+            autotext.set_weight('bold')             
+
+        plt.title(f"{data_labels[i]}", fontdict = tfont)
+        
+        
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.gcf().set_facecolor(bg_color)
+
+    plt.savefig(graphsout + 'lite_composition.png', dpi=300, facecolor = bg_color, edgecolor='none')
+    plt.close()
+    
+    
+    
+    lite_AIcols = ['Animal Interaction - No',
+               'Animal Interaction - Chew Marks','Animal Interaction - Death']
+    AI_subs = lite[lite_AIcols].any(axis=1).sum()
+    lite_AI = (lite['Animal Interaction - Chew Marks'] | lite['Animal Interaction - Death']).sum()
+    lite_death = lite['Animal Interaction - Death'].sum()
+    not_AI = lite['Animal Interaction - No'].sum()
+    
+    values = [not_AI, lite_AI, lite_death]
+    labels = ['No observed animal interaction', 'Animal Interaction', 'Evidence of Death']
+    colors = ['#223B18', '#3D6A2C', '#3D6A2C']
+    
+    afont = {'family' : 'sans-serif',
+        'weight' : 'normal',
+        'size'   : 10,
+        'color' : 'white'
+        }
+
+
+    fig, ax = plt.subplots(figsize=(6, 6),  facecolor=bg_color)
+    
+    ax.set_facecolor(bg_color)
+
+    wedges, texts, autotexts = ax.pie(
+        values, 
+        labels=labels, 
+        colors=colors, 
+        autopct='%1.1f%%', 
+        startangle=90, 
+        counterclock=False,
+        textprops=dict(**afont)
+        )
+
+
+    wedges[2].set_hatch('////') 
+
+    autotexts[1].set_text(f"{lite_AI:.1f}%")
+    #autotexts[0].set_color('#1A202C') #paler
+    autotexts[1].set_color('white')    # Main AI total text
+    autotexts[2].set_color('white')    # Death subset text
+
+
+
+    ax.set_title("Animal Interaction with Single-use Pollution", fontsize=15, fontweight='bold', color='white', pad=20)
+
+    plt.tight_layout()
+    plt.savefig(graphsout + 'AI_pie_chart.png', dpi=300, bbox_inches='tight', 
+                facecolor = bg_color, edgecolor='none')
+    plt.close
+    
+        
+        
+        
+            
+    
+    
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    

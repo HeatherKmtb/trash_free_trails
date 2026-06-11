@@ -35,16 +35,14 @@ def add_extra_data(filein, loughrigg, fileout, items, bags):
     
     df = pd.read_csv(filein)
     
-    total_items = df['TotItems'].sum()
-    
-    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    DRScols = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
     'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
     'Value Plastic energy drink bottles','Value Aluminium energy drink can',
     'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles',
     'Value Glass soft drink bottles','Value Glass alcoholic bottles'
     ] 
 
-    EPR = ['Value Milkshake bottle or carton','Value Plastic energy gel sachet',
+    EPRcols = ['Value Milkshake bottle or carton','Value Plastic energy gel sachet',
     'Value Plastic energy gel end','Value Protein drink bottle or carton',
     'Value Hot drinks cups','Value Hot drinks tops and stirrers',
     'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
@@ -67,14 +65,15 @@ def add_extra_data(filein, loughrigg, fileout, items, bags):
     'Value Nicotine related packaging'
     ]
     
-    poo = ['Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
+    poocols = ['Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
            'Value Unbagged dog poo'
            ]
     
-    
-    DRS = df[DRS].sum(axis=1)
-    EPR = df[EPR].sum(axis=1)
-    poo = df[poo].sum(axis=1)
+    total_items = df['TotItems'].sum()
+
+    DRS = df[DRScols].sum().sum()
+    EPR = df[EPRcols].sum().sum()
+    poo = df[poocols].sum().sum()
     
     perc_DRS = DRS/total_items
     perc_EPR = EPR/total_items
@@ -98,8 +97,8 @@ def add_extra_data(filein, loughrigg, fileout, items, bags):
     
     new_row = pd.DataFrame([{'Date_TrailClean':date, 'People':people, 'Distance_km':km,
                               'Time_hours':total_time, 'TotItems':new_items,
-                              'DRS':new_DRS.sum(), 'EPR':new_EPR.sum(), 
-                              'poo':new_poo.sum()
+                              'DRS':new_DRS, 'EPR':new_EPR, 
+                              'poo':new_poo
                               }])
     
     results= pd.concat([results, new_row], ignore_index=True) 

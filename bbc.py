@@ -559,6 +559,17 @@ def comparison_graphs(TFTin, TFTout):
  
     
     #Animal interaction comparison
+    
+    fig = plt.figure(figsize=(8, 8))
+    fig.patch.set_facecolor(bg_color)
+    
+    fig.suptitle(
+        'Comparison of animal interaction with SUP across regions',
+        fontsize=16,
+        fontweight='bold',
+        color='white'
+        )
+    
     for i,df in enumerate(dataframes):
         survey_AIcols = ['AnimalsY','AnimalsN']
 
@@ -655,11 +666,123 @@ def comparison_graphs(TFTin, TFTout):
             autotext.set_color('white')           #text inside wedges     
             autotext.set_weight('bold')             
     
-        plt.title(f"{df_titles[i]}\nTotal Items: {tot_sum}", fontdict = tfont)
+        plt.title(f"{df_titles[i]}", fontdict = tfont)
     
     
-    plt.tight_layout()
+    #vertical line    
+    fig.add_artist(
+        plt.Line2D(
+            [0.5, 0.5], [0.05, 0.85],
+            transform=fig.transFigure,
+            color='#A0AEC0',
+            linewidth=1,
+            linestyle='-'))
+
+    #horizontal line
+    fig.add_artist(
+        plt.Line2D(
+            [0.05, 0.95], [0.45, 0.45],
+            transform=fig.transFigure,
+            color='#A0AEC0',
+            linewidth=1,
+            linestyle='-'))
+
+    # Leave room for suptitle
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.gcf().set_facecolor(bg_color)
     
     plt.savefig(TFTout + 'Animal Interaction.png', dpi=300, facecolor = bg_color, edgecolor='none')
+    
+    
+    #Place connection comparison
+    
+    fig = plt.figure(figsize=(8, 8))
+    fig.patch.set_facecolor(bg_color)
+    
+    fig.suptitle(
+        'Comparison of feelings of connection across regions',
+        fontsize=16,
+        fontweight='bold',
+        color='white'
+        )
+    
+    for i,df in enumerate(dataframes):
+        survey_place = df['Experience_Place'] >= 6
+        s_place = (survey_place == True).sum()
+        
+        equal_place = df['Experience_Place'] == 5
+        e_place = (equal_place == True).sum()
+        
+        less_place = df['Experience_Place'] <= 4
+        l_place = (less_place == True).sum()
+        
+        sp_rows = df['Experience_Place'].notna().sum()
+        
+        perc_more_pconnected = (s_place/sp_rows) *100
+        
+        raw_labels = ['% feeling more connected', '% not feeling equally connected',
+                  '% feeling less connected']
+        raw_values = [s_place, e_place, l_place]
+        
+        raw_colors = ['#223B18','#3D6A2C','#599B40']
+        
+        labels = []
+        values = []
+        colors = []
+        
+        for label, val, color in zip(raw_labels, raw_values, raw_colors):
+            if val > 0 and pd.notna(val):  # Ensures it's greater than 0 and not empty
+                labels.append(label)
+                values.append(val)
+                colors.append(color)
+        
+        ax = plt.subplot(2, 2, i + 1)
+        ax.set_facecolor(bg_color)
+        
+        wedges, texts, autotexts = ax.pie(
+            values,
+            labels=labels,
+            colors=colors,
+            autopct='%1.1f%%',
+            startangle=140,
+            counterclock=False,
+            textprops=dict(**afont)
+            )
+        
+        for autotext in autotexts:
+            autotext.set_color('white')           #text inside wedges    
+            autotext.set_weight('bold')             
+
+        plt.title(f"{df_titles[i]}\nNumber of submissions: {(sp_rows):,}", fontdict = tfont)
+        
+      
+    #vertical line    
+    fig.add_artist(
+        plt.Line2D(
+            [0.5, 0.5], [0.05, 0.85],
+            transform=fig.transFigure,
+            color='#A0AEC0',
+            linewidth=1,
+            linestyle='-'))
+
+    #horizontal line
+    fig.add_artist(
+        plt.Line2D(
+            [0.05, 0.95], [0.45, 0.45],
+            transform=fig.transFigure,
+            color='#A0AEC0',
+            linewidth=1,
+            linestyle='-'))
+
+    # Leave room for suptitle
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.gcf().set_facecolor(bg_color)
+
+    plt.savefig(TFTout + 'Place_connection.png', dpi=300, facecolor = bg_color, edgecolor='none')
+    plt.close()
+        
+        
+        
+        
+    
       

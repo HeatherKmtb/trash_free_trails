@@ -8,6 +8,7 @@ Created on Tue Jun  2 12:03:57 2026
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 '''
 colour codes:
@@ -127,9 +128,16 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     items = df['TotItems']
     people = df['People']
     df['items pp'] = items/people
-    #plot items, people, items per person
+    df['items_km'] = items / km
+    #plot items, people, items per km
+    
+ 
+    bg_color = '#312e30' 
 
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True, facecolor=bg_color)
+    ax1.set_facecolor(bg_color)
+    ax2.set_facecolor(bg_color)
+    ax3.set_facecolor(bg_color)
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
@@ -148,8 +156,8 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     ax2.set_ylabel('Number of People', **afont)
     ax2.grid(True, linestyle='--', alpha=0.5)
 
-    ax3.plot(df['Date_TrailClean'], df['items pp'], color='#BCA25D', marker='^', linestyle='-')
-    ax3.set_ylabel('Items per person', **afont)
+    ax3.plot(df['Date_TrailClean'], df['items_km'], color='#BCA25D', marker='^', linestyle='-')
+    ax3.set_ylabel('Items per km', **afont)
     ax3.set_xlabel('Date', **afont)
     ax3.grid(True, linestyle='--', alpha=0.5)
     
@@ -201,7 +209,8 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
 
     df_sorted = df
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 6), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
 
     ax.bar(df_sorted['Date_TrailClean'], df_sorted['TotItems'], color='#223B18', label='Other Items')
     ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'] + df_sorted['poo'], color='#3D6A2C', label='dog poo')
@@ -210,23 +219,144 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     
     afont = {'family' : 'sans-serif',
         'weight' : 'normal',
-        'size'   : 12}
+        'size'   : 12,
+        'color' : 'white'}
     
     tfont = {'family' : 'sans-serif',
         'weight' : 'bold',
-        'size'   : 18}
+        'size'   : 18,
+        'color' : 'white'}
 
 
     ax.set_xlabel('Date', **afont)
     ax.set_ylabel('Total Items', **afont)
     ax.set_title('Items per Trail Clean Breakdown', **tfont, pad=15)
-    ax.legend()
+    ax.legend(facecolor=bg_color, edgecolor='white', labelcolor='white')
 
     # Rotate x-axis labels to prevent overlapping
     plt.xticks(rotation=45, ha='right')
+    ax.tick_params(colors='white', which='both')
+    
+    for spine in ax.spines.values():
+        spine.set_color('white')
 
-    plt.savefig(folderout + '/total_items.png', bbox_inches='tight')
+
+    plt.savefig(folderout + '/total_items.png', bbox_inches='tight',
+                facecolor = bg_color, edgecolor='none')
     plt.close
+    
+    #section for overview statistics
+    metric_subs = len(df.index)
+    survey_km = df['Distance_km'].sum()
+    items_km = total_items/survey_km
+    metric_items_km = items_km
+    metric_volunteers = total_people  
+    metric_km = survey_km 
+    
+    
+    # Setup the card styling colors
+    text_muted = '#A0AEC0'      #slate gray for labels
+    text_highlight = '#3D6A2C'  #Trail clean green
+
+    # Create a 6x6 figure with a completely hidden axis grid
+    fig, ax = plt.subplots(figsize=(8, 6), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+    ax.axis('off')
+
+    # Main Dashboard Title
+    ax.text(0.5, 0.92, "CAMPAIGN SUMMARY OVERVIEW", color='white', 
+            fontsize=14, fontweight='bold', ha='center')
+
+    # --- TOP ROW ---
+    # Top Left: Data Submissions
+    ax.text(0.25, 0.72, f"{int(metric_subs):,}", color='white', 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.25, 0.62, "Data Submissions", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # Top Right: Items Per KM
+    ax.text(0.75, 0.72, f"{metric_items_km:.1f}", color=text_highlight, 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.75, 0.62, "Items / km Cleaned", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # --- BOTTOM ROW ---
+    # Bottom Left: Number of Volunteers
+    ax.text(0.25, 0.37, f"{int(metric_volunteers):,}", color='white', 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.25, 0.27, "Total Volunteers", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # Bottom Right: KMs Cleaned
+    ax.text(0.75, 0.37, f"{metric_km:.1f}", color=text_highlight, 
+            fontsize=32, fontweight='bold', ha='center')
+    ax.text(0.75, 0.27, "Kilometers Surveyed", color=text_muted, 
+            fontsize=11, ha='center')
+
+    # --- GRID DIVIDER LINES ---
+    # Horizontal separator line
+    ax.plot([0.1, 0.9], [0.5, 0.5], color='#4A5568', lw=1, alpha=0.5)
+    # Vertical separator line
+    ax.plot([0.5, 0.5], [0.2, 0.8], color='#4A5568', lw=1, alpha=0.5)
+
+    # Save the modern KPI block out as an image card
+    plt.tight_layout()
+    plt.savefig(folderout + '/summary_kpi_card.png', dpi=300, bbox_inches='tight', 
+                facecolor=bg_color, edgecolor='none')
+    plt.close()
+    
+
+    text_color = 'white'
+    
+    # Normalized values (0–100%)
+    totitems_norm = df['TotItems'] / df['TotItems'].max() * 100
+    people_norm = df['People'] / df['People'].max() * 100
+    items_km_norm = df['items_km'] / df['items_km'].max() * 100
+    
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+    
+    x = np.arange(len(df))
+    width = 0.25
+    
+    # Plot normalized bars
+    bars1 = ax.bar(x - width, totitems_norm, width, label='Total Items', color='#3D6A2C')
+    bars2 = ax.bar(x, people_norm, width, label='Volunteers', color='#648856')
+    bars3 = ax.bar(x + width, items_km_norm, width, label='Items / km', color='#8BA680')
+    
+    # Styling
+    ax.grid(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(text_color)
+    ax.spines['bottom'].set_color(text_color)
+    ax.tick_params(colors=text_color)
+    
+    ax.set_title('Trail Clean Statistics (Normalized)', color=text_color, fontsize=18, fontweight='bold', pad=15)
+    ax.set_ylabel('Normalized (%)', color=text_color)
+    ax.set_xticks(x)
+    ax.set_xticklabels(df['Date_TrailClean'], rotation=45, ha='right', color=text_color)
+    
+    # Legend
+    legend = ax.legend(frameon=False, loc='upper left', bbox_to_anchor=(1,1))
+    for text in legend.get_texts():
+        text.set_color(text_color)
+    
+    # Value labels: show original numbers on top
+    for bar, vals in zip([bars1, bars2, bars3],
+                         [df['TotItems'], df['People'], df['items_km']]):
+        for rect, val in zip(bar, vals):
+            ax.text(rect.get_x() + rect.get_width()/2,
+                    rect.get_height() + 2,
+                    f'{int(val)}',
+                    ha='center',
+                    va='bottom',
+                    color=text_color,
+                    fontsize=9)
+    
+    plt.tight_layout()
+    plt.savefig(folderout + '/stats.png', dpi=300, bbox_inches='tight', facecolor=bg_color)
+    plt.close()
     
 
 def comparison_graphs(TFTin, TFTout):

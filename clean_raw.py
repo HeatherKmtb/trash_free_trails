@@ -212,7 +212,8 @@ def survey_clean_data(TFTin, TFTout):
     #Save file to add to raw dataset
     #df_clean.to_csv(rawout)
     
-    #need distance = 0 changed to ? here - use an average here!!!!
+    #need distance = 0 changed to 4.83 here - use an average here!!!!
+    df_clean['Distance_km'] = pd.to_numeric(df_clean['Distance_km'], errors='coerce')
     df_clean.loc[df_clean['Distance_km'] == 0, 'Distance_km'] = 4.83
 
     #calculate AdjTotItems
@@ -280,12 +281,19 @@ def survey_clean_data(TFTin, TFTout):
     
     for i in range(0, len(exp_cols), 11):
         group = exp_cols[i : i + 11]
-        
-        
         new_col_name = group[0][:-1] 
-        max_col = df_clean[group].idxmax(axis=1) 
-        df_clean[new_col_name] = max_col.str.extract(r'(\d+)').astype(float)
+        
+        valid_rows = df_clean[group].dropna(how='all')
+        
+        if not valid_rows.empty:
+            max_col = valid_rows.idxmax(axis=1) 
+            df_clean[new_col_name] = max_col.str.extract(r'(\d+)').astype(float)
+        else:
+        # If the entire column group across ALL rows was empty, create an empty column
+            df_clean[new_col_name] = pd.NA
+        
         df_clean.drop(columns=group, inplace=True)
+
     
     perma_cols = ['Experience_+veFeeling','Experience_Engagement',
         'Experience_Relationships','Experience_Meaning','Experience_Accomplishment',

@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-df = pd.read_csv('/Users/heatherfriendship/Documents/TrashFreeTrails/Data/Data_requests/Citizen_Science/Leighs_school/input/survey.csv')
+df = pd.read_csv('/Users/heatherfriendship/Documents/TrashFreeTrails/Data/Monthly_stats/2026/2026_06/input/survey.csv')
+folderout = '/Users/heatherfriendship/Documents/TrashFreeTrails/Data/Monthly_stats/2026/2026_06/graphs/'
 
 
 #SUP composition comparison

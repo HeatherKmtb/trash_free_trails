@@ -35,7 +35,7 @@ def overview_stats_per_year(folderin, folderout, year):
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
-    lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
+    lite_dt = pd.read_csv('/Users/heatherfriendship/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
                           index_col=0).iloc[:, 0]
     lite_dict = lite_dt.to_dict() 
     
@@ -1216,7 +1216,7 @@ def overview_stats_overall(folderin, folderout):
                                       'items_removed','items_surveyed', 'total_items',
                                       'total_kg','total_cokecans','Adjusted Total Items'])
     
-    lite_dt = pd.read_csv('/Users/heatherkay/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
+    lite_dt = pd.read_csv('/Users/heatherfriendship/Documents/TrashFreeTrails/Data/Data_per_year/other_averages_calc.csv',
                           index_col=0).iloc[:, 0]
     lite_dict = lite_dt.to_dict() 
       

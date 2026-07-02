@@ -62,19 +62,19 @@ def get_country_data(postcodesin, TFTin, folderout):
 
     df = pd.read_csv(TFTin)
 
-    df['postcode'] = df['postcode'].astype(str)
+    df['postcode'] = df['postcode'].astype(str).replace(['nan', 'None'], None)
 
-    postcodes = []
-    for index,i in df.iterrows():
-         postcode = i['postcode']
- 
-         first = postcode.upper()
-         new = first.replace(" ","")
-         start = new[:4]
-         letters = ''.join(x for x in start if x.isalpha())
-         postcodes.append(letters)
-         
-    df['postcode_start'] = postcodes  
+
+    df['postcode_start'] = (
+        df['postcode']
+        .str.upper()                        
+        .str.replace(" ", "", regex=False)   
+        .str[:4]                             
+        .str.replace(r'[^A-Z]', '', regex=True) 
+        )
+    
+    df = df[df['postcode_start'] != '']
+
 
     Scotland = []   
     Wales = []
@@ -122,19 +122,17 @@ def get_country_data_lite(postcodesin, TFTin, folderout):
     
     df = df.rename({'Trail Postcode':'postcode'}, axis=1)
 
-    df['postcode'] = df['postcode'].astype(str)
+    df['postcode'] = df['postcode'].astype(str).replace(['nan', 'None'], None)
 
-    postcodes = []
-    for index,i in df.iterrows():
-         postcode = i['postcode']
- 
-         first = postcode.upper()
-         new = first.replace(" ","")
-         start = new[:4]
-         letters = ''.join(x for x in start if x.isalpha())
-         postcodes.append(letters)
-         
-    df['postcode_start'] = postcodes  
+    df['postcode_start'] = (
+        df['postcode']
+        .str.upper()                        
+        .str.replace(" ", "", regex=False)   
+        .str[:4]                             
+        .str.replace(r'[^A-Z]', '', regex=True) 
+        )
+    
+    df = df[df['postcode_start'] != ''] 
 
     Scotland = []   
     Wales = []

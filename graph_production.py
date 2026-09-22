@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def create_single_composition_pie_DRS_EPR_poo_cigs(filein, folderout):
+def create_single_composition_pie_DRS_EPR_poo_cigs(filein, folderout, title):
     df = pd.read_csv(filein)
 
     DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
@@ -157,7 +157,7 @@ def create_single_composition_pie_DRS_EPR_poo_cigs(filein, folderout):
         autotext.set_color('white')           #text inside wedges    
         autotext.set_weight('bold')             
     
-    plt.title("Overview of the compostion of SUP", fontdict = tfont)
+    plt.title(title, fontdict = tfont)
     plt.savefig(folderout + '/composition.png', bbox_inches='tight',
                 facecolor = bg_color, edgecolor='none')
     plt.close
@@ -220,6 +220,9 @@ def four_comparison_composition_pies_one_df(TFTin, toptitle, TFTout):
     poo = ['Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
            'Value Unbagged dog poo'
            ]
+    
+    #poo = ['Value Outdoor event related (e.g.race)',
+    #'Value Biking specific','Value Hiking specific','Value Other outdoor related','Value Cable ties']
     
     all_items = ['Value Full Dog Poo Bags',
     'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
@@ -291,7 +294,7 @@ def four_comparison_composition_pies_one_df(TFTin, toptitle, TFTout):
     for i in range(4):
         #Resolve nan issues
         row = df.iloc[i]
-        row_title = row['TrailName']
+        row_title = row['postcode']
 
         # Select the current subplot position (1 to 4)
         ax = plt.subplot(2, 2, i + 1)
@@ -339,7 +342,7 @@ def four_comparison_composition_pies_one_df(TFTin, toptitle, TFTout):
             autotext.set_color('white')           #text inside wedges    
             autotext.set_weight('bold')             
 
-        plt.title(f"{row_title}\nTotal Items: {(tot_sum):,}", fontdict = tfont)
+        plt.title(f"{row_title}\nTotal Surveyed Items: {(tot_sum):,}", fontdict = tfont)
         
       
     #vertical line    

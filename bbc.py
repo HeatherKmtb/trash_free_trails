@@ -166,8 +166,9 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     'Value Nicotine related packaging'
     ]
     
-    poo = ['Value Full Dog Poo Bags','Value Unused Dog Poo Bags',
-           'Value Unbagged dog poo'
+    poo = ['Value Outdoor event related (e.g.race)',
+    'Value Biking specific','Value Hiking specific','Value Other outdoor related',
+    'Value Clothes & Footwear','Value Textiles'
            ]
     
     
@@ -181,7 +182,7 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     ax.set_facecolor(bg_color)
 
     ax.bar(df_sorted['Date_TrailClean'], df_sorted['TotItems'], color='#84C26C', label='Other Items')
-    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'] + df_sorted['poo'], color='#599B40', label='dog poo')
+    ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'] + df_sorted['poo'], color='#599B40', label='outdoors & textiles')
     ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'] + df_sorted['EPR_sum'], color='#3D6A2C', label='pEPR Items')
     ax.bar(df_sorted['Date_TrailClean'], df_sorted['DRS_sum'], color='#223B18', label='DRS Items')
     
@@ -196,7 +197,7 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
         'color' : 'white'}
     
     for idx, row in df_sorted.iterrows():
-        x = row['Date_TrailClean']
+        x = row['postcode']
         total = row['TotItems']
         
         # Skip calculations if total is 0 to avoid DivisionByZero errors
@@ -229,7 +230,7 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
             ax.text(x, (epr_top + poo_top) / 2, f'{poo_pct:.1f}%', ha='center', va='center', color='white', fontsize=9)
 
 
-    ax.set_xlabel('Date', **afont)
+    ax.set_xlabel('Location', **afont)
     ax.set_ylabel('Total Items', **afont)
     ax.set_title('Items per Trail Clean Breakdown', **tfont, pad=15)
     ax.legend(facecolor=bg_color, edgecolor='white', labelcolor='white')
@@ -336,7 +337,7 @@ def loughrigg_stats_and_graphs(TFTin, folderout):
     ax.set_title('Trail Clean Statistics (Normalized)', color=text_color, fontsize=18, fontweight='bold', pad=15)
     ax.set_ylabel('Normalized (%)', color=text_color)
     ax.set_xticks(x)
-    ax.set_xticklabels(df['Date_TrailClean'], rotation=45, ha='right', color=text_color)
+    ax.set_xticklabels(df['postcode'], rotation=45, ha='right', color=text_color)
     
     # Legend
     legend = ax.legend(frameon=False, loc='upper left', bbox_to_anchor=(1,1))

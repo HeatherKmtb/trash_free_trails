@@ -39,6 +39,7 @@ def survey_clean_data(TFTin, TFTout):
     df = df.drop('Last Name', axis=1)
     df = df.drop('Custom Data 1', axis=1)
     df = df.drop('Unnamed: 295', axis=1)
+    df = df.drop('rq_flag', axis=1)
 
 
     #provide correct column names - could read from existing once wierd columns are sorted
@@ -527,7 +528,7 @@ def count_clean_data(TFTin, TFTout):
             
     df3.to_csv(TFTout + 'count.csv', index=False)
     
-def update_lite_averages(year_folder, TFTin, TFTout):
+def update_lite_average(TFTin, TFTout, year_folder):
     """
     A function which takes the bag averages data and the survey data, it uses the 
     survey data to update the averages (whilst ignoring outliers) and then writes out 
@@ -712,6 +713,7 @@ def lite_clean_data(TFTin, TFTout, year_folder):
     
     email_ref_df = pd.read_csv(TFTin + 'email_reference.csv')  
     
+    df['Email'] = df['Email'].astype(str)
     df['Email'] = (df['Email'].str.strip().str.lower())
     new_emails = df[~df['Email'].isin(email_ref_df['email'])]['Email'].dropna().unique()
     
@@ -1063,6 +1065,7 @@ def experience_clean_data(TFTin, TFTout):
     df = df.drop('First Name', axis=1)
     df = df.drop('Last Name', axis=1)
     df = df.drop('Custom Data 1', axis=1)
+    df = df.drop('rq_flag', axis=1)
 
 
     #provide correct column names - could read from existing once wierd columns are sorted

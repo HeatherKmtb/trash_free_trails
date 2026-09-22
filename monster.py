@@ -2068,23 +2068,600 @@ def before_and_after(TFTin, folderout):
 
     plt.savefig(folderout + 'SUP_composition.png', dpi=300, facecolor = bg_color, edgecolor='none')
     plt.close()
+    
+
+def WC_normalized_overview(TFTin, folderout):
+    """
+    A function which takes prepared Loughrigg data and produces graphs
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv of Loughrigg data
+            
+    folderout: string
+           path for folder to save results in
+    """
+
+        
+    df = pd.read_csv(TFTin)
+         
+    bg_color = '#312e30'     
+    df['items_km'] = df['TotItems']/df['Distance_km']
+    
+    text_color = 'white'
+    
+    # Normalized values (0–100%)
+    totitems_norm = df['TotItems'] / df['TotItems'].max() * 100
+    people_norm = df['People'] / df['People'].max() * 100
+    items_km_norm = df['items_km'] / df['items_km'].max() * 100
+    monster_norm = df['Monster'] / df['Monster'].max() * 100
+    
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+    
+    x = np.arange(len(df))
+    width = 0.20
+    
+    # Plot normalized bars
+    bars1 = ax.bar(x - width, totitems_norm, width, label='Total Items', color='#3D6A2C')
+    bars2 = ax.bar(x, people_norm, width, label='Volunteers', color='#648856')
+    bars3 = ax.bar(x + width, items_km_norm, width, label='Items / km', color='#8BA680')
+    bars4 = ax.bar(x + width + width, monster_norm, width, label ='Monster cans removed', color ='#6ACD0C')
+    
+    #'#223B18','#3D6A2C','#599B40','#84C26C', '#A7E191' - Monsterneon - '#6ACD0C'
+    #orig colours - '#3D6A2C', '#648856', '#8BA680'
+    #blue colours - '#406e74','#508591','#679aa3','#7aa5ad'
+    
+    # Styling
+    ax.grid(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(text_color)
+    ax.spines['bottom'].set_color(text_color)
+    ax.tick_params(colors=text_color)
+    
+    ax.set_title('Trail Clean Statistics (Normalized)', color=text_color, fontsize=18, fontweight='bold', pad=15)
+    ax.set_ylabel('Normalized (%)', color=text_color)
+    ax.set_xticks(x)
+    ax.set_xticklabels(df['postcode'], rotation=45, ha='right', color=text_color)
+    
+    # Legend
+    legend = ax.legend(frameon=False, loc='upper left', bbox_to_anchor=(1,1))
+    for text in legend.get_texts():
+        text.set_color(text_color)
+    
+    # Value labels: show original numbers on top
+    for bar, vals in zip([bars1, bars2, bars3, bars4],
+                         [df['TotItems'], df['People'], df['items_km'], df['Monster']]):
+        for rect, val in zip(bar, vals):
+            ax.text(rect.get_x() + rect.get_width()/2,
+                    rect.get_height() + 2,
+                    f'{int(val)}',
+                    ha='center',
+                    va='bottom',
+                    color=text_color,
+                    fontsize=9)
+    
+    plt.tight_layout()
+    plt.savefig(folderout + '/stats_new.png', dpi=300, bbox_inches='tight', facecolor=bg_color)
+    plt.close()
  
     
-        
+def WC_hito_bda(TFTin, folderout):
+    """
+    A function which takes prepared Loughrigg data and produces graphs
     
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv of Loughrigg data
+            
+    folderout: string
+           path for folder to save results in
+    """
+
+        
+    df = pd.read_csv(TFTin)
+         
+    bg_color = '#312e30'         
+    text_color = 'white'
+    
+    # Normalized values (0–100%)
+    totitems_norm = df['TotItems'] / df['TotItems'].max() * 100
+    people_norm = df['People'] / df['People'].max() * 100
+    monster_norm = df['Monster'] / df['Monster'].max() * 100
+    
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+    
+    x = np.arange(len(df))
+    width = 0.25
+    
+    # Plot normalized bars
+    bars1 = ax.bar(x - width, totitems_norm, width, label='Total Items', color='#406e74')
+    bars2 = ax.bar(x, people_norm, width, label='Volunteers', color='#508591')
+    #bars3 = ax.bar(x + width, items_km_norm, width, label='Items / km', color='#679aa3')
+    bars3 = ax.bar(x + width, monster_norm, width, label ='Monster cans removed', color ='#6ACD0C')
+    
+    #'#223B18','#3D6A2C','#599B40','#84C26C', '#A7E191' - Monsterneon - '#6ACD0C'
+    #orig colours - '#3D6A2C', '#648856', '#8BA680'
+    #blue colours - '#406e74','#508591','#679aa3','#7aa5ad'
+    
+    # Styling
+    ax.grid(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(text_color)
+    ax.spines['bottom'].set_color(text_color)
+    ax.tick_params(colors=text_color)
+    
+    ax.set_title('Before, During and After Statistics (Normalized)', color=text_color, fontsize=18, fontweight='bold', pad=15)
+    ax.set_ylabel('Normalized (%)', color=text_color)
+    ax.set_xticks(x)
+    ax.set_xticklabels(df['postcode'], rotation=45, ha='right', color=text_color)
+    
+    # Legend
+    legend = ax.legend(frameon=False, loc='upper left', bbox_to_anchor=(1,1))
+    for text in legend.get_texts():
+        text.set_color(text_color)
+    
+    # Value labels: show original numbers on top
+    for bar, vals in zip([bars1, bars2, bars3],
+                         [df['TotItems'], df['People'], df['Monster']]):
+        for rect, val in zip(bar, vals):
+            ax.text(rect.get_x() + rect.get_width()/2,
+                    rect.get_height() + 2,
+                    f'{int(val)}',
+                    ha='center',
+                    va='bottom',
+                    color=text_color,
+                    fontsize=9)
+    
+    plt.tight_layout()
+    plt.savefig(folderout + '/impact.png', dpi=300, bbox_inches='tight', facecolor=bg_color)
+    plt.close()
+    
+def WC_hito_bda_itemsONLY(TFTin, folderout):
+    """
+    A function which takes prepared Loughrigg data and produces graphs
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv of Loughrigg data
+            
+    folderout: string
+           path for folder to save results in
+    """
+
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    df = pd.read_csv(TFTin)
+
+    bg_color = '#312e30'
+    text_color = 'white'
+
+    # Pivot so each postcode has Pre / During / Post TotItems columns
+    pivot = df.pivot_table(
+        index='postcode',
+        columns='TrailName',
+        values='TotItems',
+        aggfunc='sum'
+    )
+
+    # Ensure consistent ordering of the three phases
+    phases = ['Before', 'During', 'After']
+    pivot = pivot.reindex(columns=phases)
+
+    locations = pivot.index.tolist()
+    x = np.arange(len(locations))
+    width = 0.25
+
+    # Colour palette matching existing styling
+    phase_colors = {
+        'Before':    '#3D6A2C',
+        'During': '#648856',
+        'After':   '#8BA680',
+    }
+
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+
+    bars = []
+    for i, phase in enumerate(phases):
+        offset = (i - 1) * width  # -width, 0, +width
+        b = ax.bar(
+            x + offset,
+            pivot[phase].values,
+            width,
+            label=phase,
+            color=phase_colors[phase]
+        )
+        bars.append(b)
+
+    # Styling
+    ax.grid(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(text_color)
+    ax.spines['bottom'].set_color(text_color)
+    ax.tick_params(colors=text_color)
+
+    ax.set_title('Total Items: Before, During and After', color=text_color, fontsize=18, fontweight='bold', pad=15)
+    ax.set_ylabel('Total Items', color=text_color)
+    ax.set_xticks(x)
+    ax.set_xticklabels(locations, rotation=45, ha='right', color=text_color)
+
+    # Legend
+    legend = ax.legend(frameon=False, loc='upper left', bbox_to_anchor=(1, 1))
+    for text in legend.get_texts():
+        text.set_color(text_color)
+
+    # Value labels: original TotItems numbers on top of each bar
+    for bar_group in bars:
+        for rect in bar_group:
+            height = rect.get_height()
+            if not np.isnan(height):
+                ax.text(
+                    rect.get_x() + rect.get_width() / 2,
+                    height + (pivot.values.max() * 0.02),
+                    f'{int(height)}',
+                    ha='center',
+                    va='bottom',
+                    color=text_color,
+                    fontsize=9
+                )
+
+    plt.tight_layout()
+    plt.savefig(folderout + '/impact.png', dpi=300, bbox_inches='tight', facecolor=bg_color)
+    plt.close()
+    
+def WC_hito_bda_Monster(TFTin, folderout):
+    """
+    A function which takes prepared Loughrigg data and produces graphs
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv of Loughrigg data
+            
+    folderout: string
+           path for folder to save results in
+    """
+
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    df = pd.read_csv(TFTin)
+
+    bg_color = '#312e30'
+    text_color = 'white'
+
+    # Pivot so each postcode has Pre / During / Post TotItems columns
+    pivot = df.pivot_table(
+        index='postcode',
+        columns='TrailName',
+        values='Monster',
+        aggfunc='sum'
+    )
+
+    # Ensure consistent ordering of the three phases
+    phases = ['Before', 'During', 'After']
+    pivot = pivot.reindex(columns=phases)
+
+    locations = pivot.index.tolist()
+    x = np.arange(len(locations))
+    width = 0.25
+
+    # Colour palette matching existing styling
+    phase_colors = {
+        'Before':    '#2D5C04',
+        'During': '#4B9407',
+        'After':   '#6ACD0C',
+    }
+
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+
+    bars = []
+    for i, phase in enumerate(phases):
+        offset = (i - 1) * width  # -width, 0, +width
+        b = ax.bar(
+            x + offset,
+            pivot[phase].values,
+            width,
+            label=phase,
+            color=phase_colors[phase]
+        )
+        bars.append(b)
+
+    # Styling
+    ax.grid(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(text_color)
+    ax.spines['bottom'].set_color(text_color)
+    ax.tick_params(colors=text_color)
+
+    ax.set_title('Monster cans: Before, During and After', color=text_color, fontsize=18, fontweight='bold', pad=15)
+    ax.set_ylabel('Monster cans', color=text_color)
+    ax.set_xticks(x)
+    ax.set_xticklabels(locations, rotation=45, ha='right', color=text_color)
+
+    # Legend
+    legend = ax.legend(frameon=False, loc='upper left', bbox_to_anchor=(1, 1))
+    for text in legend.get_texts():
+        text.set_color(text_color)
+
+    # Value labels: original TotItems numbers on top of each bar
+    for bar_group in bars:
+        for rect in bar_group:
+            height = rect.get_height()
+            if not np.isnan(height):
+                ax.text(
+                    rect.get_x() + rect.get_width() / 2,
+                    height + (pivot.values.max() * 0.02),
+                    f'{int(height)}',
+                    ha='center',
+                    va='bottom',
+                    color=text_color,
+                    fontsize=9
+                )
+
+    plt.tight_layout()
+    plt.savefig(folderout + '/impact2.png', dpi=300, bbox_inches='tight', facecolor=bg_color)
+    plt.close()
+    
+def WC_hito_bda_LG(TFTin, folderout):
+    """
+    A function which takes prepared Loughrigg data and produces graphs
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv of Loughrigg data
+            
+    folderout: string
+           path for folder to save results in
+    """
+
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    df = pd.read_csv(TFTin)
+
+    # Filter to only the 'Les Gets' postcode location
+    df = df[df['postcode'] == 'Les Gets']
+
+    bg_color = '#312e30'
+    text_color = 'white'
+
+    # Pivot so we have Pre / During / Post TotItems for this one location
+    pivot = df.pivot_table(
+        index='postcode',
+        columns='TrailName',
+        values='TotItems',
+        aggfunc='sum'
+    )
+
+    # Ensure consistent ordering of the three phases
+    phases = ['Before', 'During', 'After']
+    pivot = pivot.reindex(columns=phases)
+
+    x = np.arange(len(phases))
+    width = 0.5  # wider bars since we only have three
+
+    # Colour palette matching existing styling
+    phase_colors = {
+        'Before':    '#3D6A2C',
+        'During': '#648856',
+        'After':   '#8BA680',
+    }
+
+    fig, ax = plt.subplots(figsize=(8, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+
+    bars = []
+    for i, phase in enumerate(phases):
+        b = ax.bar(
+            x[i],
+            pivot[phase].values[0],
+            width,
+            label=phase,
+            color=phase_colors[phase]
+        )
+        bars.append(b)
+
+    # Styling
+    ax.grid(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(text_color)
+    ax.spines['bottom'].set_color(text_color)
+    ax.tick_params(colors=text_color)
+
+    ax.set_title('Total Items: Before, During and After — Les Gets',
+                 color=text_color, fontsize=18, fontweight='bold', pad=15)
+    ax.set_ylabel('Total Items', color=text_color)
+    ax.set_xticks(x)
+    ax.set_xticklabels(phases, color=text_color)
+
+    # Legend
+    legend = ax.legend(frameon=False, loc='upper left', bbox_to_anchor=(1, 1))
+    for text in legend.get_texts():
+        text.set_color(text_color)
+
+    # Value labels: original TotItems numbers on top of each bar
+    for bar_group in bars:
+        for rect in bar_group:
+            height = rect.get_height()
+            if not np.isnan(height):
+                ax.text(
+                    rect.get_x() + rect.get_width() / 2,
+                    height + (pivot.values.max() * 0.02),
+                    f'{int(height)}',
+                    ha='center',
+                    va='bottom',
+                    color=text_color,
+                    fontsize=9
+                )
+
+    plt.tight_layout()
+    plt.savefig(folderout + '/impactLG.png', dpi=300, bbox_inches='tight', facecolor=bg_color)
+    plt.close()
 
 
+def WC_hito_LGplusMonster(TFTin, folderout):
+    """
+    A function which takes prepared Loughrigg data and produces graphs
+    
+    Parameters
+    ----------
+    
+    TFTin: string
+             path to input csv of Loughrigg data
+            
+    folderout: string
+           path for folder to save results in
+    """
 
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
 
+    df = pd.read_csv(TFTin)
 
+    # Filter to only the 'Les Gets' postcode location
+    df = df[df['postcode'] == 'Les Gets']
 
+    bg_color = '#312e30'
+    text_color = 'white'
 
+    # Pivot so we have Before / During / After for both TotItems and Monster
+    pivot_tot = df.pivot_table(index='postcode', columns='TrailName',
+                               values='TotItems', aggfunc='sum')
+    pivot_mon = df.pivot_table(index='postcode', columns='TrailName',
+                               values='Monster', aggfunc='sum')
 
+    phases = ['Before', 'During', 'After']
+    pivot_tot = pivot_tot.reindex(columns=phases)
+    pivot_mon = pivot_mon.reindex(columns=phases)
 
+    x = np.arange(len(phases))
+    width = 0.35
 
+    # TotItems colours (green palette — 3 shades)
+    tot_colors = {
+        'Before':  '#3D6A2C',
+        'During':  '#648856',
+        'After':   '#8BA680',
+    }
 
+    # Monster colours (darker shades — 3 shades)
+    mon_colors = {
+        'Before':  '#2D5C04',
+        'During':  '#4B9407',
+        'After':   '#6ACD0C',
+    }
 
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
 
+    bars_tot = []
+    bars_mon = []
+
+    for i, phase in enumerate(phases):
+        # TotItems bar (left of centre)
+        b1 = ax.bar(
+            x[i] - width / 2,
+            pivot_tot[phase].values[0],
+            width,
+            color=tot_colors[phase]
+        )
+        bars_tot.append(b1)
+
+        # Monster bar (right of centre)
+        b2 = ax.bar(
+            x[i] + width / 2,
+            pivot_mon[phase].values[0],
+            width,
+            color=mon_colors[phase]
+        )
+        bars_mon.append(b2)
+
+    # --- Custom 6-entry legend: grouped by category, showing all 3 phase colours ---
+    legend_handles = [
+        # Total Items — three swatches
+        Patch(facecolor=tot_colors['Before'],  label='Total Items — Before'),
+        Patch(facecolor=tot_colors['During'],  label='Total Items — During'),
+        Patch(facecolor=tot_colors['After'],   label='Total Items — After'),
+        # Monster cans — three swatches
+        Patch(facecolor=mon_colors['Before'],  label='Monster cans — Before'),
+        Patch(facecolor=mon_colors['During'],  label='Monster cans — During'),
+        Patch(facecolor=mon_colors['After'],   label='Monster cans — After'),
+    ]
+    legend = ax.legend(handles=legend_handles, frameon=False,
+                       loc='upper left', bbox_to_anchor=(1, 1),
+                       title='Category & Phase', labelspacing=0.7)
+    legend.get_title().set_color(text_color)
+    for text in legend.get_texts():
+        text.set_color(text_color)
+
+    # Styling
+    ax.grid(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(text_color)
+    ax.spines['bottom'].set_color(text_color)
+    ax.tick_params(colors=text_color)
+
+    ax.set_title('Total Items & Monster Cans: Before, During and After — Les Gets',
+                 color=text_color, fontsize=18, fontweight='bold', pad=15)
+    ax.set_ylabel('Count', color=text_color)
+    ax.set_xticks(x)
+    ax.set_xticklabels(phases, color=text_color)
+
+    # Value labels: original numbers on top of each bar
+    all_max = max(pivot_tot.values.max(), pivot_mon.values.max())
+
+    for bar_group in bars_tot:
+        for rect in bar_group:
+            height = rect.get_height()
+            if not np.isnan(height):
+                ax.text(
+                    rect.get_x() + rect.get_width() / 2,
+                    height + (all_max * 0.02),
+                    f'{int(height)}',
+                    ha='center', va='bottom',
+                    color=text_color, fontsize=9
+                )
+
+    for bar_group in bars_mon:
+        for rect in bar_group:
+            height = rect.get_height()
+            if not np.isnan(height):
+                ax.text(
+                    rect.get_x() + rect.get_width() / 2,
+                    height + (all_max * 0.02),
+                    f'{int(height)}',
+                    ha='center', va='bottom',
+                    color=text_color, fontsize=9
+                )
+
+    plt.tight_layout()
+    plt.savefig(folderout + '/impact.png', dpi=300, bbox_inches='tight', facecolor=bg_color)
+    plt.close()
 
 
 

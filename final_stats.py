@@ -841,16 +841,18 @@ def overview_stats(folderin, folderout):
                 'poo bags % of total items':bags_proportion,
                 'outdoor gear reported':outs_reported,'outdoor gear total items':outs_total,
                 'outdoor gear % of total items':outs_proportion,
-                'brand 1':brand1,'brand 2':brand2,'brand 3':brand3}])
+                'brand 1':brand1,'brand 2':brand2,'brand 3':brand3
+                }])
     survey_results = pd.concat([survey_results, new_row], ignore_index=True) 
 
     survey_results.to_csv(folderout + '/survey.csv', index=False)  
     
     impacts_results = pd.DataFrame(columns = ['Fauna Interaction', 
-                    'Fauna Death','First Time', 'Repeat volunteers',
-                    'Felt more connected to nature','Felt more connected to place',
-                    'Percent with positive well-being','Would do again',
-                     'provided contact info'])
+                    'Fauna Death','First Time', 'Repeat volunteers','Proud',
+                    'Felt more connected to place','Felt more connected to nature',
+                    'Percent with positive well-being','Someone inspiring',
+                    'Rewarded themselves','Would do again','provided contact info'
+                    ])
     
     #animal interaction - how many (%) answered the question and checked
     survey_AIcols = ['AnimalsY','AnimalsN']
@@ -987,6 +989,11 @@ def overview_stats(folderin, folderout):
     
     perc_inc_wb = (no_perma_wb/perma_count) *100
     
+    reward = survey['Connection_RewardY'].value_counts().get('Yes', 0)
+    reward_cols = ['Connection_RewardY','Connection_RewardN','Connection_RewardUnsure']
+    answered_reward = survey[reward_cols].notnull().any(axis=1).sum()
+    perc_reward = (reward/answered_reward)*100
+    
     again = survey['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
     again_cols = ['Connection_TakePartAgainY', 'Connection_TakePartAgainN', 'Connection_TakePartAgainUnsure']
     answered_again = survey[again_cols].notnull().any(axis=1).sum()
@@ -1011,11 +1018,13 @@ def overview_stats(folderin, folderout):
     new_row = pd.DataFrame([{'Fauna Interaction':perc_AI, 
                     'Fauna Death':perc_death,'First Time':no_1st, 
                     'Repeat volunteers':beforers,#'Felt proud':perc_proud,
-                       'Felt more connected to nature':perc_more_nconnected,
-                       'Felt more connected to place':perc_more_pconnected,
-                       'Percent with positive well-being':perc_inc_wb,
-                       'Would do again':perc_participate_again,
-                       'provided contact info':perc_contacts}])
+                    'Felt more connected to place':perc_more_pconnected,
+                    'Felt more connected to nature':perc_more_nconnected,
+                    'Percent with positive well-being':perc_inc_wb,
+                    'Rewarded themselves':perc_reward,
+                    'Would do again':perc_participate_again,
+                    'provided contact info':perc_contacts
+                    }])
     
     impacts_results = pd.concat([impacts_results, new_row], ignore_index=True)    
     

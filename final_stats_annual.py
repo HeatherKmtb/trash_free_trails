@@ -1160,7 +1160,7 @@ def overview_stats_per_year(folderin, folderout, year):
     no_perma_wb = (perma_wb == True).sum()
     
     perc_inc_wb = (no_perma_wb/perma_count) *100
-    
+    """
     dfs = [survey, CSsurvey] 
     activity = []
     answered_a = []
@@ -1171,16 +1171,16 @@ def overview_stats_per_year(folderin, folderout, year):
             answered_activity = df[activity_cols].notnull().any(axis=1).sum()
             activity.append(activity_after)
             answered_a.append(answered_activity)
-        
+    """    
     reward = survey['Connection_RewardY'].value_counts().get('Yes', 0)
     reward_cols = ['Connection_RewardY','Connection_RewardN','Connection_RewardUnsure']
     answered_reward = survey[reward_cols].notnull().any(axis=1).sum()
         
-    active_after = sum(activity)
-    ans_act = sum(answered_a)
+    #active_after = sum(activity)
+    #ans_act = sum(answered_a)
     
-    perc_reward = ((reward + active_after)/(answered_reward + ans_act))*100
-    
+    #perc_reward = ((reward + active_after)/(answered_reward + ans_act))*100
+    perc_reward = (reward/answered_reward)*100
     
     again = survey['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
     again_cols = ['Connection_TakePartAgainY', 'Connection_TakePartAgainN', 'Connection_TakePartAgainUnsure']
@@ -2349,7 +2349,7 @@ def overview_stats_overall(folderin, folderout):
     no_perma_wb = (perma_wb == True).sum()
     
     perc_inc_wb = (no_perma_wb/perma_count) *100
-    
+    """
     dfs = [survey, CSsurvey] 
     activity = []
     answered_a = []
@@ -2360,16 +2360,16 @@ def overview_stats_overall(folderin, folderout):
             answered_activity = df[activity_cols].notnull().any(axis=1).sum()
             activity.append(activity_after)
             answered_a.append(answered_activity)
-        
+    """    
     reward = survey['Connection_RewardY'].value_counts().get('Yes', 0)
     reward_cols = ['Connection_RewardY','Connection_RewardN','Connection_RewardUnsure']
     answered_reward = survey[reward_cols].notnull().any(axis=1).sum()
         
-    active_after = sum(activity)
-    ans_act = sum(answered_a)
+    #active_after = sum(activity)
+    #ans_act = sum(answered_a)
     
-    perc_reward = ((reward + active_after)/(answered_reward + ans_act))*100
-    
+    #perc_reward = ((reward + active_after)/(answered_reward + ans_act))*100
+    perc_reward = (reward/answered_reward)*100
     
     again = survey['Connection_TakePartAgainY'].value_counts().get('Yes', 0)
     again_cols = ['Connection_TakePartAgainY', 'Connection_TakePartAgainN', 'Connection_TakePartAgainUnsure']

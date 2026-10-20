@@ -529,7 +529,6 @@ def create_various_items_per(filein, folderout):
         
         records.append({
             'year':int(year),
-            'per km': total_reported_items/km,
             '% DRS': total_reported_items/km * perc_DRS,
             '% pet stuff': total_reported_items/km * perc_pet,
             '% food related': total_reported_items/km * perc_snack,
@@ -559,9 +558,9 @@ def create_various_items_per(filein, folderout):
         'color'  : '#FFFFFF'
         }
     
-    colors = ['#BCA25D','#3D6A2C','#00945C', '#859150', '#70ADA3', '#BA3F0F', 
+    colors = ['#3D6A2C','#00945C', '#859150', '#70ADA3', '#BA3F0F', 
               '#508591', '#E3761C', '#F7F6EC', '#84C26C']
-    labels = ['per km','% DRS', '% pet stuff','% food related','% household',
+    labels = ['% DRS', '% pet stuff','% food related','% household',
               '% nicotine related','% hygiene','% recreation','% agro-industrial',
               '% miscellaneous']
     
@@ -580,7 +579,7 @@ def create_various_items_per(filein, folderout):
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
 
-    fig.savefig(f'{folderout}/item_split.png', dpi=300)
+    fig.savefig(f'{folderout}/item_split_no_totitems.png', dpi=300)
     plt.show()
 
     return results    
@@ -661,6 +660,7 @@ def create_clean_type_viz(filein, folderout):
         for ct in clean_types:
             df_ct = df[df['CleanType'] == ct]
             items_ct = df_ct[all_items].sum().sum()
+            km = df_ct['Distance_km'].sum()
             row[f'{ct} per km'] = items_ct / km if km else 0
 
         records.append(row)
@@ -693,6 +693,7 @@ def create_clean_type_viz(filein, folderout):
     for spine in ax.spines.values():
         spine.set_color('white')
 
+    #ax.set_ylim(0,100)
     ax.set_xlabel('Year', **afont)
     ax.set_ylabel('Number of items', **afont)
     ax.set_title('Total items recorded per km by CleanType', **tfont)
@@ -708,6 +709,134 @@ def create_clean_type_viz(filein, folderout):
 
     fig.savefig(f'{folderout}/clean_types.png', dpi=300)
     plt.show()
+    
+    return results
+
+def create_clean_type_pp_viz(filein, folderout):
+    survey = pd.read_csv(filein)
+
+    all_items = ['Value Full Dog Poo Bags',
+    'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
+    'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans',
+    'Value Glass soft drink bottles','Value Milkshake bottle or carton',
+    'Value Plastic energy drink bottles',
+    'Value Aluminium energy drink can','Value Plastic energy gel sachet',
+    'Value Plastic energy gel end',
+    'Value Protein drink bottle or carton', 'Value Aluminium alcoholic drink cans',
+    'Value Glass alcoholic bottles','Value Hot drinks cups',
+    'Value Hot drinks tops and stirrers',
+    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
+    'Value Paper straws',
+    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull',
+    'Value Plastic bottle sleeve',
+    'Value Reusable drinks container','Value Other drink related',
+    'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
+    'Value Other confectionary (eg., Lollipop Sticks)',
+    'Value Crisps Packets','Value Used Chewing Gum','Value Homemade lunch (eg., aluminium foil, cling film)',
+    'Value BBQ related','Value Fruit peel & cores','Value Branded single-use carrier bags',
+    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
+    'Value Unbranded bag for life',
+    'Value Branded plastic fast / takeaway food packaging / utensils',
+    'Value Unbranded plastic fast / takeaway food packaging / utensils',
+    'Value Branded card or wood fast / takeaway food packaging / utensils',
+    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Branded condiments packaging','Value Unbranded condiments packaging',
+    'Value Branded food on the go','Value Unbranded food on the go',
+    'Value Branded other food related','Value Unbranded other food related',
+    'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
+    'Value Glass milk bottles',
+    'Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers',
+    'Value Cosmetics / deodorants', 'Value Other household',
+    'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
+    'Value Nicotine related packaging','Value Other nicotine related',
+    'Value Unbagged dog poo',
+    'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
+    'Value Toilet tissue','Value Face/ baby wipes','Value Nappies','Value Period products',
+    'Value Covid Masks','Value First Aid & medcal waste','Value Batteries and electronics',
+    'Value Other hazardous', 'Value Camping','Value Fireworks','Value Seasonal (Christmas and/or Easter)',
+    'Value Rubber balloons','Value Foil balloons','Value Outdoor event related (e.g.race)',
+    'Value Biking specific','Value Hiking specific','Value Other outdoor related',
+    'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
+    'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
+    'Value Miscellaneous card or wood','Value Miscellaneous metal',
+    'Value Too small/dirty to ID','Value Other Miscellaneous']
+
+    # Resolve nan issues
+    survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+    years = sorted(survey['year'].unique())
+    clean_types = sorted(survey['CleanType'].dropna().unique())
+
+    records = []
+
+    for year in years:
+        df = survey[survey['year'] == year]
+
+        total_reported_items = df[all_items].sum().sum()
+        km = df['People'].sum()
+
+        row = {'year': int(year)}
+
+        # Overall total per km
+        row['Total per person'] = total_reported_items / km
+
+        # Per CleanType per km
+        for ct in clean_types:
+            df_ct = df[df['CleanType'] == ct]
+            items_ct = df_ct[all_items].sum().sum()
+            km = df_ct['People'].sum()
+            row[f'{ct} per person'] = items_ct / km if km else 0
+
+        records.append(row)
+
+    results = pd.DataFrame(records).set_index('year')
+
+    # ---- Plotting ----
+    bg_color = '#312e30'
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+
+    afont = {'family': 'sans-serif', 'weight': 'normal', 'size': 8, 'color': '#FFFFFF'}
+    tfont = {'family': 'sans-serif', 'weight': 'bold', 'size': 12, 'color': '#FFFFFF'}
+
+    # Generate a distinct color for each line
+    n_lines = 1 + len(clean_types)  # 1 overall + 1 per CleanType
+    cmap = plt.cm.get_cmap('tab20')
+    colors = [cmap(i / n_lines) for i in range(n_lines)]
+
+    # First line: overall total
+    ax.plot(results.index, results['Total per person'],
+            marker='o', color=colors[0], linewidth=2, label='Total per person')
+
+    # Then each CleanType line
+    for i, ct in enumerate(clean_types):
+        ax.plot(results.index, results[f'{ct} per person'],
+                marker='o', color=colors[i + 1], linewidth=1.5, label=f'{ct} per person')
+
+    ax.tick_params(colors='white', which='both')
+    for spine in ax.spines.values():
+        spine.set_color('white')
+
+    ax.set_ylim(0,100)
+    ax.set_xlabel('Year', **afont)
+    ax.set_ylabel('Number of items', **afont)
+    ax.set_title('Total items recorded per person by CleanType', **tfont)
+    ax.set_xticks(results.index)
+
+    # Legend: total first, then CleanTypes
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, facecolor=bg_color, edgecolor='white', labelcolor='white',
+              fontsize=7, loc='upper left')
+
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+
+    fig.savefig(f'{folderout}/clean_types_pp_lim100.png', dpi=300)
+    plt.show()
+    
+    return results
     
 def create_trail_type_viz(filein, folderout):
     survey = pd.read_csv(filein)
@@ -1333,6 +1462,514 @@ def create_DRS_per_hour_only(filein, folderout):
     fig.tight_layout()
 
     fig.savefig(f'{folderout}/DRS_per_hour.png', dpi=300)
+    plt.show()
+
+    return results
+
+def create_country_viz(filein, folderout):
+    survey = pd.read_csv(filein)
+
+    all_items = ['Value Full Dog Poo Bags',
+    'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
+    'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans',
+    'Value Glass soft drink bottles','Value Milkshake bottle or carton',
+    'Value Plastic energy drink bottles',
+    'Value Aluminium energy drink can','Value Plastic energy gel sachet',
+    'Value Plastic energy gel end',
+    'Value Protein drink bottle or carton', 'Value Aluminium alcoholic drink cans',
+    'Value Glass alcoholic bottles','Value Hot drinks cups',
+    'Value Hot drinks tops and stirrers',
+    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
+    'Value Paper straws',
+    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull',
+    'Value Plastic bottle sleeve',
+    'Value Reusable drinks container','Value Other drink related',
+    'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
+    'Value Other confectionary (eg., Lollipop Sticks)',
+    'Value Crisps Packets','Value Used Chewing Gum','Value Homemade lunch (eg., aluminium foil, cling film)',
+    'Value BBQ related','Value Fruit peel & cores','Value Branded single-use carrier bags',
+    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
+    'Value Unbranded bag for life',
+    'Value Branded plastic fast / takeaway food packaging / utensils',
+    'Value Unbranded plastic fast / takeaway food packaging / utensils',
+    'Value Branded card or wood fast / takeaway food packaging / utensils',
+    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Branded condiments packaging','Value Unbranded condiments packaging',
+    'Value Branded food on the go','Value Unbranded food on the go',
+    'Value Branded other food related','Value Unbranded other food related',
+    'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
+    'Value Glass milk bottles',
+    'Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers',
+    'Value Cosmetics / deodorants', 'Value Other household',
+    'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
+    'Value Nicotine related packaging','Value Other nicotine related',
+    'Value Unbagged dog poo',
+    'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
+    'Value Toilet tissue','Value Face/ baby wipes','Value Nappies','Value Period products',
+    'Value Covid Masks','Value First Aid & medcal waste','Value Batteries and electronics',
+    'Value Other hazardous', 'Value Camping','Value Fireworks','Value Seasonal (Christmas and/or Easter)',
+    'Value Rubber balloons','Value Foil balloons','Value Outdoor event related (e.g.race)',
+    'Value Biking specific','Value Hiking specific','Value Other outdoor related',
+    'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
+    'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
+    'Value Miscellaneous card or wood','Value Miscellaneous metal',
+    'Value Too small/dirty to ID','Value Other Miscellaneous']
+    
+    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
+    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles']
+
+    # Resolve nan issues
+    survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+    countries = sorted(survey['Country'].dropna().unique())
+
+    perc_drs_by_country = []
+    country_names = []
+
+    for c in countries:
+        df = survey[survey['Country'] == c]
+    
+        total_reported_items = df[all_items].sum().sum()
+        total_DRS = df[DRS].sum().sum()
+    
+        if total_reported_items > 0:
+            perc_DRS = total_DRS / total_reported_items
+            perc_drs_by_country.append(perc_DRS)
+            country_names.append(c)
+
+    # ---- Plotting ----
+    bg_color = '#312e30'
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=bg_color)
+    ax.set_facecolor(bg_color)
+
+    afont = {'family': 'sans-serif', 'weight': 'normal', 'size': 8, 'color': '#FFFFFF'}
+    tfont = {'family': 'sans-serif', 'weight': 'bold', 'size': 12, 'color': '#FFFFFF'}
+
+    ax.bar(country_names, perc_drs_by_country)
+
+    ax.tick_params(colors='white', which='both')
+    for spine in ax.spines.values():
+        spine.set_color('white')
+
+    ax.set_xlabel('Country', **afont)
+    ax.set_ylabel('% DRS', **afont)
+    ax.set_title('% DRS per country', **tfont)
+    ax.tick_params(axis='x', rotation=45)
+
+    fig.tight_layout()
+
+    fig.savefig(f'{folderout}/countries_DRS.png', dpi=300)
+    plt.show()
+    
+
+def create_annual_TotItems_DRS_viz(filein, folderout):
+    survey = pd.read_csv(filein)
+    
+    all_items = ['Value Full Dog Poo Bags',
+    'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
+    'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans',
+    'Value Glass soft drink bottles','Value Milkshake bottle or carton',
+    'Value Plastic energy drink bottles',
+    'Value Aluminium energy drink can','Value Plastic energy gel sachet',
+    'Value Plastic energy gel end',
+    'Value Protein drink bottle or carton', 'Value Aluminium alcoholic drink cans',
+    'Value Glass alcoholic bottles','Value Hot drinks cups',
+    'Value Hot drinks tops and stirrers',
+    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
+    'Value Paper straws',
+    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull', 
+    'Value Plastic bottle sleeve',
+    'Value Reusable drinks container','Value Other drink related',
+    'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
+    'Value Other confectionary (eg., Lollipop Sticks)',
+    'Value Crisps Packets','Value Used Chewing Gum','Value Homemade lunch (eg., aluminium foil, cling film)',
+    'Value BBQ related','Value Fruit peel & cores','Value Branded single-use carrier bags',
+    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
+    'Value Unbranded bag for life', 
+    'Value Branded plastic fast / takeaway food packaging / utensils',
+    'Value Unbranded plastic fast / takeaway food packaging / utensils',
+    'Value Branded card or wood fast / takeaway food packaging / utensils',
+    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Branded condiments packaging','Value Unbranded condiments packaging',
+    'Value Branded food on the go','Value Unbranded food on the go',
+    'Value Branded other food related','Value Unbranded other food related',
+    'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
+    'Value Glass milk bottles',
+    'Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers',
+    'Value Cosmetics / deodorants', 'Value Other household',
+    'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
+    'Value Nicotine related packaging','Value Other nicotine related',
+    'Value Unbagged dog poo',
+    'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
+    'Value Toilet tissue','Value Face/ baby wipes','Value Nappies','Value Period products',
+    'Value Covid Masks','Value First Aid & medcal waste','Value Batteries and electronics',
+    'Value Other hazardous', 'Value Camping','Value Fireworks','Value Seasonal (Christmas and/or Easter)',
+    'Value Rubber balloons','Value Foil balloons','Value Outdoor event related (e.g.race)',
+    'Value Biking specific','Value Hiking specific','Value Other outdoor related',
+    'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
+    'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
+    'Value Miscellaneous card or wood','Value Miscellaneous metal',
+    'Value Too small/dirty to ID','Value Other Miscellaneous']
+    
+    #Resolve nan issues
+    survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+    
+    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
+    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles']
+    
+    
+    years = sorted(survey['year'].unique())
+
+    records = []
+    
+    for year in years:
+        df = survey[survey['year'] == year]
+
+        total_reported_items = df[all_items].sum().sum()
+ 
+        sum_DRS = df[DRS].sum().sum()
+        
+        records.append({
+            'year':int(year),
+            'Total Items': total_reported_items,
+            'DRS_total': sum_DRS
+            })
+        
+    results = pd.DataFrame(records).set_index('year')
+
+    # Line graph
+    bg_color = '#312e30'
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor = bg_color)
+    ax.set_facecolor(bg_color)
+    
+    afont = {'family' : 'sans-serif',
+        'weight' : 'normal',
+        'size'   : 8,
+        'color'  : '#FFFFFF'
+        }
+    
+    tfont = {'family' : 'sans-serif',
+        'weight' : 'bold',
+        'size'   : 12,
+        'color'  : '#FFFFFF'
+        }
+    
+    colors = ['#5C9E4E','#3D6A2C']
+    labels = ['Total Items','DRS_total']
+    
+    for col, c in zip(labels, colors):
+        ax.plot(results.index, results[col], marker='o', color=c, label=col)
+        
+    ax.tick_params(colors='white', which='both')
+    for spine in ax.spines.values():
+        spine.set_color('white')
+
+    ax.set_xlabel('Year', **afont)
+    ax.set_ylabel('Number of items', **afont)
+    ax.set_title('Number of surveyed items through time', **tfont)
+    ax.set_xticks(results.index)
+    ax.legend(facecolor=bg_color, edgecolor='white', labelcolor='white')
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+
+    fig.savefig(f'{folderout}/annual_totals.png', dpi=300)
+    plt.show()
+
+    return results
+    
+def create_trail_only_TotItemsPP_DRS_viz(filein, folderout):
+    survey = pd.read_csv(filein)
+    
+    all_items = ['Value Full Dog Poo Bags',
+    'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
+    'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans',
+    'Value Glass soft drink bottles','Value Milkshake bottle or carton',
+    'Value Plastic energy drink bottles',
+    'Value Aluminium energy drink can','Value Plastic energy gel sachet',
+    'Value Plastic energy gel end',
+    'Value Protein drink bottle or carton', 'Value Aluminium alcoholic drink cans',
+    'Value Glass alcoholic bottles','Value Hot drinks cups',
+    'Value Hot drinks tops and stirrers',
+    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
+    'Value Paper straws',
+    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull', 
+    'Value Plastic bottle sleeve',
+    'Value Reusable drinks container','Value Other drink related',
+    'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
+    'Value Other confectionary (eg., Lollipop Sticks)',
+    'Value Crisps Packets','Value Used Chewing Gum','Value Homemade lunch (eg., aluminium foil, cling film)',
+    'Value BBQ related','Value Fruit peel & cores','Value Branded single-use carrier bags',
+    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
+    'Value Unbranded bag for life', 
+    'Value Branded plastic fast / takeaway food packaging / utensils',
+    'Value Unbranded plastic fast / takeaway food packaging / utensils',
+    'Value Branded card or wood fast / takeaway food packaging / utensils',
+    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Branded condiments packaging','Value Unbranded condiments packaging',
+    'Value Branded food on the go','Value Unbranded food on the go',
+    'Value Branded other food related','Value Unbranded other food related',
+    'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
+    'Value Glass milk bottles',
+    'Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers',
+    'Value Cosmetics / deodorants', 'Value Other household',
+    'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
+    'Value Nicotine related packaging','Value Other nicotine related',
+    'Value Unbagged dog poo',
+    'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
+    'Value Toilet tissue','Value Face/ baby wipes','Value Nappies','Value Period products',
+    'Value Covid Masks','Value First Aid & medcal waste','Value Batteries and electronics',
+    'Value Other hazardous', 'Value Camping','Value Fireworks','Value Seasonal (Christmas and/or Easter)',
+    'Value Rubber balloons','Value Foil balloons','Value Outdoor event related (e.g.race)',
+    'Value Biking specific','Value Hiking specific','Value Other outdoor related',
+    'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
+    'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
+    'Value Miscellaneous card or wood','Value Miscellaneous metal',
+    'Value Too small/dirty to ID','Value Other Miscellaneous']
+    
+    #Resolve nan issues
+    survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+    
+    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
+    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles']
+    
+    
+    years = sorted(survey['year'].unique())
+
+    records = []
+    
+    survey2 = survey[survey['CleanType'] == 'Trail']
+    for year in years:
+        df = survey2[survey2['year'] == year]
+
+        total_reported_items = df[all_items].sum().sum()
+        sum_DRS = df[DRS].sum().sum()
+        people = df['People'].sum()
+        
+        records.append({
+            'year':int(year),
+            'Total Items': total_reported_items/people,
+            'DRS_total': sum_DRS/people
+            })
+        
+    results = pd.DataFrame(records).set_index('year')
+
+    # Line graph
+    bg_color = '#312e30'
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor = bg_color)
+    ax.set_facecolor(bg_color)
+    
+    afont = {'family' : 'sans-serif',
+        'weight' : 'normal',
+        'size'   : 8,
+        'color'  : '#FFFFFF'
+        }
+    
+    tfont = {'family' : 'sans-serif',
+        'weight' : 'bold',
+        'size'   : 12,
+        'color'  : '#FFFFFF'
+        }
+    
+    colors = ['#5C9E4E','#3D6A2C']
+    labels = ['Total Items','DRS_total']
+    
+    for col, c in zip(labels, colors):
+        ax.plot(results.index, results[col], marker='o', color=c, label=col)
+        
+    ax.tick_params(colors='white', which='both')
+    for spine in ax.spines.values():
+        spine.set_color('white')
+
+    ax.set_ylim(0,40)
+    ax.set_xlabel('Year', **afont)
+    ax.set_ylabel('Number of items', **afont)
+    ax.set_title('Number of surveyed items per person through time', **tfont)
+    ax.set_xticks(results.index)
+    ax.legend(facecolor=bg_color, edgecolor='white', labelcolor='white')
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+
+    fig.savefig(f'{folderout}/annual_totals_trails_pp.png', dpi=300)
+    plt.show()
+
+    return results
+
+def create_trail_only_TotItemsPP_DRS_futures_viz(filein, folderout):
+    survey = pd.read_csv(filein)
+    
+    all_items = ['Value Full Dog Poo Bags',
+    'Value Unused Dog Poo Bags','Value Other Pet Related Stuff',
+    'Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans',
+    'Value Glass soft drink bottles','Value Milkshake bottle or carton',
+    'Value Plastic energy drink bottles',
+    'Value Aluminium energy drink can','Value Plastic energy gel sachet',
+    'Value Plastic energy gel end',
+    'Value Protein drink bottle or carton', 'Value Aluminium alcoholic drink cans',
+    'Value Glass alcoholic bottles','Value Hot drinks cups',
+    'Value Hot drinks tops and stirrers',
+    'Value Cold drinks cups and tops','Value Cartons','Value Plastic straws',
+    'Value Paper straws',
+    'Value Plastic bottle, top', 'Value Glass bottle tops', 'Value Ring pull', 
+    'Value Plastic bottle sleeve',
+    'Value Reusable drinks container','Value Other drink related',
+    'Value Confectionary/sweet wrappers','Value Wrapper "corners" / tear-offs',
+    'Value Other confectionary (eg., Lollipop Sticks)',
+    'Value Crisps Packets','Value Used Chewing Gum','Value Homemade lunch (eg., aluminium foil, cling film)',
+    'Value BBQ related','Value Fruit peel & cores','Value Branded single-use carrier bags',
+    'Value Unbranded single-use carrier bags', 'Value Branded bag for life',
+    'Value Unbranded bag for life', 
+    'Value Branded plastic fast / takeaway food packaging / utensils',
+    'Value Unbranded plastic fast / takeaway food packaging / utensils',
+    'Value Branded card or wood fast / takeaway food packaging / utensils',
+    'Value Unbranded card or wood fast / takeaway food packaging / utensils',
+    'Value Branded condiments packaging','Value Unbranded condiments packaging',
+    'Value Branded food on the go','Value Unbranded food on the go',
+    'Value Branded other food related','Value Unbranded other food related',
+    'Value Clothes & Footwear','Value Textiles','Value Plastic milk bottles',
+    'Value Glass milk bottles',
+    'Value Plastic food containers','Value Cardboard food containers',
+    'Value Cleaning products containers',
+    'Value Cosmetics / deodorants', 'Value Other household',
+    'Value Cigarette Butts','Value Nicotine pouches','Value Disposable vapes',
+    'Value Nicotine related packaging','Value Other nicotine related',
+    'Value Unbagged dog poo',
+    'Value Needles / syringes','Value Other drug related','Value Broken glass or pottery',
+    'Value Toilet tissue','Value Face/ baby wipes','Value Nappies','Value Period products',
+    'Value Covid Masks','Value First Aid & medcal waste','Value Batteries and electronics',
+    'Value Other hazardous', 'Value Camping','Value Fireworks','Value Seasonal (Christmas and/or Easter)',
+    'Value Rubber balloons','Value Foil balloons','Value Outdoor event related (e.g.race)',
+    'Value Biking specific','Value Hiking specific','Value Other outdoor related',
+    'Value Farming','Value Forestry','Value Industrial','Value Cable ties',
+    'Value Miscellaneous hard plastic','Value Miscellaneous soft plastic',
+    'Value Miscellaneous card or wood','Value Miscellaneous metal',
+    'Value Too small/dirty to ID','Value Other Miscellaneous']
+    
+    #Resolve nan issues
+    survey[all_items] = survey[all_items].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+    
+    DRS = ['Value Plastic Water Bottles','Value Plastic Soft Drink Bottles',
+    'Value Aluminium soft drink cans', 'Value Glass soft drink bottles',
+    'Value Plastic energy drink bottles','Value Aluminium energy drink can',
+    'Value Aluminium alcoholic drink cans','Value Glass alcoholic bottles']
+    
+    
+    years = sorted(survey['year'].unique())
+
+    records = []
+    
+    survey2 = survey[survey['CleanType'] == 'Trail']
+    for year in years:
+        df = survey2[survey2['year'] == year]
+
+        total_reported_items = df[all_items].sum().sum()
+        sum_DRS = df[DRS].sum().sum()
+        people = df['People'].sum()
+        
+        records.append({
+            'year':int(year),
+            'Total Items': total_reported_items/people,
+            'DRS_total': sum_DRS/people
+            })
+        
+    results = pd.DataFrame(records).set_index('year')
+
+    # Calculate averages across all historical years
+    avg_total_items = results['Total Items'].mean()
+    avg_drs_total = results['DRS_total'].mean()
+
+    # Get the last historical year
+    last_year = results.index[-1]
+    last_total_items = results['Total Items'].iloc[-1]
+    last_drs_total = results['DRS_total'].iloc[-1]
+
+    # Calculate the non-DRS portion (items outside of DRS categories)
+    non_drs_items = avg_total_items - avg_drs_total
+
+    # Define projection years and values
+    # 2027: average values
+    # 2028: DRS decreases by 40%, non-DRS stays same
+    # 2029: DRS decreases by 70%, non-DRS stays same
+    # 2030: DRS stays at 2029 level (70% decrease), total items decreases by additional 40% from average
+    
+    projection_years = [2027, 2028, 2029, 2030]
+    
+    # 2027: averages
+    total_items_2027 = avg_total_items
+    drs_2027 = avg_drs_total
+    
+    # 2028: 40% decrease in DRS, non-DRS unchanged
+    drs_2028 = avg_drs_total * (1 - 0.40)
+    total_items_2028 = non_drs_items + drs_2028
+    
+    # 2029: 70% decrease in DRS, non-DRS unchanged
+    drs_2029 = avg_drs_total * (1 - 0.70)
+    total_items_2029 = non_drs_items + drs_2029
+    
+    # 2030: DRS stays same as 2029, total items decreases by 40% from average
+    drs_2030 = drs_2029
+    total_items_2030 = avg_total_items * (1 - 0.40)
+
+    # Line graph
+    bg_color = '#312e30'
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor = bg_color)
+    ax.set_facecolor(bg_color)
+    
+    afont = {'family' : 'sans-serif',
+        'weight' : 'normal',
+        'size'   : 8,
+        'color'  : '#FFFFFF'
+        }
+    
+    tfont = {'family' : 'sans-serif',
+        'weight' : 'bold',
+        'size'   : 12,
+        'color'  : '#FFFFFF'
+        }
+    
+    colors = ['#5C9E4E','#3D6A2C']
+    labels = ['Total Items','DRS_total']
+    
+    for col, c in zip(labels, colors):
+        ax.plot(results.index, results[col], marker='o', color=c, label=col)
+        
+    # Add projection lines connecting from last historical year
+    ax.plot([last_year, 2027, 2028, 2029, 2030], 
+            [last_total_items, total_items_2027, total_items_2028, total_items_2029, total_items_2030], 
+            marker='o', color=colors[0], linestyle='dotted', label='Total Items (Projected)')
+    ax.plot([last_year, 2027, 2028, 2029, 2030], 
+            [last_drs_total, drs_2027, drs_2028, drs_2029, drs_2030], 
+            marker='o', color=colors[1], linestyle='dotted', label='DRS_total (Projected)')
+        
+    ax.tick_params(colors='white', which='both')
+    for spine in ax.spines.values():
+        spine.set_color('white')
+
+    ax.set_ylim(0,40)
+    ax.set_xlabel('Year', **afont)
+    ax.set_ylabel('Number of items', **afont)
+    ax.set_title('Number of surveyed items per person through time', **tfont)
+    ax.set_xticks(list(results.index) + projection_years)
+    ax.legend(facecolor=bg_color, edgecolor='white', labelcolor='white')
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+
+    fig.savefig(f'{folderout}/annual_totals_trails_pp_future.png', dpi=300)
     plt.show()
 
     return results
